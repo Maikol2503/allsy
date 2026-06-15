@@ -1,0 +1,29 @@
+<div class="dropdown-container">
+  
+  <button class="filter-pill" (click)="toggleDropdown()" [class.active]="seleccionados.length > 0">
+     Proveedores 
+    <span class="badge" *ngIf="seleccionados.length > 0">{{ seleccionados.length }}</span>
+    <span class="chevron" [class.rotated]="isOpen">▼</span>
+  </button>
+
+  <div class="dropdown-menu" *ngIf="isOpen">
+    <div class="dropdown-header">Filtrar por proveedor</div>
+    
+    <div class="dropdown-list">
+      <label class="dropdown-item" *ngFor="let prov of proveedores">
+        <input 
+          type="checkbox" 
+          class="filter-checkbox"
+          [checked]="seleccionados.includes(prov.id)"
+          (change)="toggleProveedor(prov.id)"
+        >
+        <span class="prov-name">{{ prov.nombre_proveedor }}</span>
+      </label>
+
+      <div class="empty-msg" *ngIf="proveedores.length === 0">
+        No hay proveedores cargados.
+      </div>
+    </div>
+  </div>
+
+</div>

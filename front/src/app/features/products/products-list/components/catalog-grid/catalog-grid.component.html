@@ -1,0 +1,42 @@
+<div class="catalog-grid">
+  <div class="vinted-card" *ngFor="let prod of productos">
+      
+      <div class="card-image-wrapper">
+        <img [src]="prod.imagen || 'assets/img/default-product.png'" alt="Producto">
+        <span class="stock-badge" [ngClass]="{'low-stock': prod.stock_total === 0}">
+          📦 {{ prod.stock_total }} en stock
+        </span>
+      </div>
+
+      <div class="card-content">
+        <div class="card-header">
+          <span class="brand-name" *ngIf="prod.marca">{{ prod.marca.nombre }}</span>
+          <span class="category-name" *ngIf="prod.categoria">{{ prod.categoria.nombre }}</span>
+        </div>
+        
+        <h3 class="product-title">{{ prod.nombre | titlecase }}</h3>
+        <span class="product-sku">SKU Base: {{ prod.sku }}</span>
+
+        <div class="card-variants">
+          <div class="color-dots" *ngIf="prod.colores?.length > 0">
+            <span class="color-dot" *ngFor="let color of prod.colores" [style.background]="color" [title]="color"></span>
+          </div>
+          <div class="size-pills" *ngIf="prod.tallas?.length > 0">
+             <span class="badge-size" *ngFor="let talla of prod.tallas">{{ talla }}</span>
+          </div>
+          <div *ngIf="!prod.tallas?.length" class="size-pills">
+             <span class="badge-size">Talla Única</span>
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <button class="vinted-btn-primary" [routerLink]="['/detail-product', prod.id]">
+              Ver 👁️
+            </button>
+          <span class="price-sale">${{ prod.precio_venta | number:'1.2-2' }}</span>
+          <button class="vinted-btn-outline" [routerLink]="['/edit', prod.id]">Editar ✏️</button>
+        </div>
+      </div>
+
+    </div>
+  </div>

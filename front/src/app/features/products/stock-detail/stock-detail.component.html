@@ -1,0 +1,175 @@
+<div class="page-container" *ngIf="!cargando && stock; else loadingTemplate">
+  
+  <!-- --- HEADER --- -->
+  <header class="page-header">
+    <div class="header-group">
+      <button class="btn-back" (click)="volver()">← Volver al producto</button>
+      <div class="title-group">
+        <h1>{{ stock.producto_nombre | titlecase }}</h1>
+        <p class="subtitle">
+          Estilo: <strong>{{ stock.identidad_variante }}</strong> | 
+          Talla: <strong>{{ stock.talla || stock.etiqueta }}</strong>
+        </p>
+      </div>
+    </div>
+    <div class="actions-group">
+      <button class="btn-outline" (click)="editarLote()">✏️ Editar Configuración</button>
+    </div>
+  </header>
+
+  <div class="main-grid">
+    
+    <!-- --- COLUMNA IZQUIERDA: RESUMEN --- -->
+    <aside class="left-col">
+      
+      <!-- Preview de Imagen -->
+      <div class="card" style="padding: 0; overflow: hidden;">
+        <img [src]="stock.imagen_cover || 'assets/img/default-product.png'" class="image-preview" alt="Preview">
+      </div>
+
+      <!-- Stats Rápidas -->
+      <div class="card">
+        <h3 class="card-title">📦 Inventario</h3>
+        <div class="stats-bar">
+          <div class="stat-item bg-total">
+            <span class="label">Total</span>
+            <span class="value">{{ stats.total }}</span>
+          </div>
+          <div class="stat-item bg-stock">
+            <span class="label">En Stock</span>
+            <span class="value">{{ stats.disponibles }}</span>
+          </div>
+          <div class="stat-item bg-sold">
+            <span class="label">Vendidos</span>
+            <span class="value">{{ stats.vendidos }}</span>
+          </div>
+          <div class="stat-item bg-total">
+            <span class="label">Otros</span>
+            <span class="value">{{ stats.otros }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detalles Técnicos -->
+      <div class="card">
+        <h3 class="card-title">📝 Datos del Lote</h3>
+        <ul class="info-list">
+          <li class="info-item">
+            <span class="info-label">ID Lote</span>
+            <span class="info-value">#{{ stock.stock_config_id }}</span>
+          </li>
+          <li class="info-item">
+            <span class="info-label">Precio Venta</span>
+            <span class="info-value" style="color: var(--ap-color-primary);">€{{ stock.precio_venta | number:'1.2-2' }}</span>
+          </li>
+          <li class="info-item">
+            <span class="info-label">Precio Compra</span>
+            <span class="info-value">€{{ stock.precio_compra | number:'1.2-2' }}</span>
+          </li>
+          <li class="info-item">
+            <span class="info-label">Localización</span>
+            <span class="info-value badge-location">📍 {{ fullLocationPath }}</span>
+          </li>
+          <li class="info-item" *ngIf="stock.propietario">
+            <span class="info-label">Dueño / Consignatario</span>
+            <span class="info-value">
+              <a [routerLink]="['/clientes', stock.propietario.id]">{{ stock.propietario.nombre }}</a>
+            </span>
+          </li>
+          <li class="info-item" *ngIf="!stock.propietario">
+            <span class="info-label">Dueño</span>
+            <span class="info-value text-muted">Stock Propio (Allsys)</span>
+          </li>
+          <li class="info-item" *ngIf="stock.donar_ganancias">
+            <span class="info-label" style="color: #27ae60;">Beneficio a Tienda</span>
+            <span class="info-value" style="color: #27ae60;">🎁 100%</span>
+          </li>
+        </ul>
+
+        <!-- Atributos Extra -->
+        <div class="attr-pills" *ngIf="stock.atributos_extra">
+          <span class="attr-pill" *ngFor="let attr of stock.atributos_extra | keyvalue">
+            {{ attr.key }}: <strong>{{ attr.value }}</strong>
+          </span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- --- COLUMNA DERECHA: GESTIÓN DE UNIDADES --- -->
+    <main class="right-col">
+      <div class="card">
+        <div class="card-title" style="justify-content: space-between;">
+          <span>🧵 Prendas Físicas Individuales</span>
+          <span class="text-muted" style="font-size: 0.8rem; font-weight: normal;">
+            Mostrando {{ unidadesFiltradas.length }} de {{ stock.stock_units.length }}
+          </span>
+        </div>
+
+        <!-- Buscador y Filtros -->
+        <div class="search-filter-bar">
+          <input type="text" 
+                 class="input-search" 
+                 [(ngModel)]="filtroSku" 
+                 placeholder="🔍 Buscar por SKU o ID físico..." />
+          <select class="select-filter" [(ngModel)]="filtroEstado">
+            <option value="todos">Todos los estados</option>
+            <option value="en_stock">✅ En Almacén</option>
+            <option value="vendido">💰 Vendido</option>
+            <option value="en_camino_devolucion">📦 En Tránsito (Dev.)</option>
+            <option value="extraviado">⚠️ Extraviado</option>
+            <option value="devuelto_dueno">🔙 Devuelto</option>
+          </select>
+          </div>
+
+          <!-- Tabla de Unidades -->
+          <div class="table-container">
+          <table class="units-table">
+            <thead>
+              <tr>
+                <th>ID Prenda</th>
+                <th>SKU</th>
+                <th>Fecha Ingreso</th>
+                <th>Estado de Gestión</th>
+                <th style="text-align: right;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let u of unidadesFiltradas; let i = index">
+                <td><span class="unit-id">#{{ u.id }}</span></td>
+                <td><span class="unit-sku">{{ u.sku }}</span></td>
+                <td><span class="unit-date">{{ u.fecha_compra | date:'dd/MM/yyyy' }}</span></td>
+                <td>
+                  <p class="unit-status" [ngClass]="'st-' + u.estado_gestion">
+                    {{ getLabelEstadoGestion(u.estado_gestion) }}
+                  </p>
+                </td>
+                <td style="text-align: right;">
+                  <button class="btn-danger" 
+                          *ngIf="u.estado_gestion !== 'vendido'" 
+                          (click)="eliminarUnidad(u, i)" 
+                          title="Mover a papelera">
+                    🗑️
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="unidadesFiltradas.length === 0">
+                <td colspan="4" style="text-align: center; padding: 40px; color: #94a3b8;">
+                  No se encontraron prendas con esos criterios.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+
+  </div>
+</div>
+
+<!-- Template de Carga -->
+<ng-template #loadingTemplate>
+  <div class="loading-state">
+    <div class="spinner"></div>
+    <p>Obteniendo detalles del lote...</p>
+  </div>
+</ng-template>

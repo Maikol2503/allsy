@@ -1,0 +1,101 @@
+/* =========================================
+   CONTENEDOR DEL SIDEBAR
+   ========================================= */
+.side-navbar {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  padding: 1.5rem 1rem;
+  background-color: var(--ap-bg-main);
+}
+
+.nav-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem; /* Espacio sutil entre los botones */
+}
+
+/* =========================================
+   ETIQUETAS Y TÍTULOS
+   ========================================= */
+.menu-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--ap-text-muted);
+  font-weight: 700;
+  margin: 0 0 1rem 0.8rem;
+}
+
+/* =========================================
+   ENLACES E ÍTEMS DEL MENÚ
+   ========================================= */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--ap-radius-md); /* Bordes redondeados modernos */
+  color: var(--ap-text-muted);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  transition: all 0.2s ease-in-out;
+}
+
+.icon {
+  font-size: 1.2rem;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+/* --- Efecto Hover (Cuando pasas el ratón y NO está activo) --- */
+.nav-item:hover:not(.active-link) {
+  background-color: var(--ap-bg-variant);
+  color: var(--ap-text-main);
+  transform: translateX(4px); /* Pequeño desplazamiento a la derecha muy premium */
+}
+
+.nav-item:hover:not(.active-link) .icon {
+  opacity: 1;
+}
+
+/* --- Estado Activo (La página actual) --- */
+.active-link {
+  background-color: var(--ap-color-primary);
+  color: var(--ap-text-on-primary); /* Texto blanco */
+  box-shadow: 0 4px 12px rgba(0, 119, 130, 0.25); /* Sombra color teal */
+}
+
+.active-link .icon {
+  opacity: 1;
+}
+
+/* =========================================
+   FOOTER (Cerrar Sesión)
+   ========================================= */
+.nav-footer {
+  border-top: 1px solid var(--ap-border-base);
+  padding-top: 1rem;
+  margin-top: 2rem;
+}
+
+.logout-item {
+  color: var(--ap-text-muted);
+}
+
+.logout-item:hover {
+  background-color: var(--ap-color-danger-bg);
+  color: var(--ap-color-danger);
+  transform: translateX(0); /* Anulamos el movimiento lateral para este botón */
+}
+
+.logout-item:hover .icon {
+  opacity: 1;
+}

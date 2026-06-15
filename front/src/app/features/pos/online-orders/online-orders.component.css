@@ -1,0 +1,206 @@
+.online-orders-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  font-family: 'Inter', system-ui, sans-serif;
+  color: #2c3e50;
+}
+
+.header h2 {
+  font-size: 1.8rem;
+  color: #007782;
+  margin: 0 0 5px 0;
+}
+.header p {
+  color: #7f8c8d;
+  margin: 0 0 20px 0;
+  font-size: 0.95rem;
+}
+
+.filters-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 25px;
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  border: 1px solid #e0e6ed;
+  align-items: center;
+}
+
+.search-box {
+  display: flex;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  overflow: hidden;
+  flex: 1;
+  min-width: 300px;
+}
+
+.search-box select {
+  background: #f1f5f9;
+  border: none;
+  border-right: 1px solid #cbd5e1;
+  padding: 10px;
+  font-weight: 600;
+  color: #475569;
+  outline: none;
+}
+
+.search-box input {
+  flex: 1;
+  border: none;
+  padding: 10px 15px;
+  outline: none;
+}
+
+.filter-select {
+  padding: 10px 15px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  outline: none;
+  background: white;
+  color: #334155;
+  font-weight: 500;
+}
+
+.table-responsive {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  border: 1px solid #e0e6ed;
+  overflow-x: auto;
+}
+
+.ap-table {
+  width: 100%;
+  border-collapse: collapse;
+  white-space: normal;
+  font-size: 0.9rem;
+}
+
+.ap-table th {
+  background: #f8fafc;
+  color: #64748b;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  padding: 15px;
+  text-align: left;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.ap-table td {
+  padding: 15px;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: middle;
+}
+
+.ap-table tr:hover {
+  background: #fcfdfe;
+}
+
+/* Prod Info */
+.prod-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.prod-img {
+  width: 50px;
+  height: 50px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1px solid #e2e8f0;
+}
+.prod-title {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+/* Estatus */
+.status-pill {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: inline-block;
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+.status-pill.finalizado { background: #eafaf1; color: #27ae60; border-color: #27ae60; }
+.status-pill.cancelado { background: #fceceb; color: #e74c3c; border-color: #e74c3c; }
+.status-pill.devolucion { background: #fef3c7; color: #b91c1c; border-color: #ef4444; }
+.status-pill.en_curso { background: #eff6ff; color: #1d4ed8; border-color: #3b82f6; }
+.status-pill.pendiente { background: #fff8e1; color: #d97706; border-color: #f59e0b; }
+.status-pill.empaquetado { background: #f3e8ff; color: #6d28d9; border-color: #a855f7; }
+.status-pill.listo_envio { background: #e0e7ff; color: #4338ca; border-color: #6366f1; }
+
+/* Loader */
+.spinner-small {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(0, 119, 130, 0.2);
+  border-top-color: #007782;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Active Filters Pills */
+.active-filters-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+.filter-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #e0f2f1;
+  color: #00796b;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: 1px solid #b2dfdb;
+}
+
+.filter-pill .remove-btn {
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: #004d40;
+}
+
+.filter-pill .remove-btn:hover {
+  color: #d32f2f;
+}
+
+.clear-all-btn {
+  background: none;
+  border: none;
+  color: #ef4444;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 5px 10px;
+  text-decoration: underline;
+}
+
+.clear-all-btn:hover {
+  color: #b91c1c;
+}
+
+.loading-state, .empty-state {
+  text-align: center;
+  padding: 50px;
+  color: #64748b;
+}

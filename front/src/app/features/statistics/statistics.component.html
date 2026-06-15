@@ -1,0 +1,245 @@
+<div class="stats-wrapper">
+  
+  <div class="stats-header shadow-sm">
+    <div class="title-area">
+      <h1>📊 Inteligencia de Negocio</h1>
+      <p>Analiza el rendimiento real y la rentabilidad de tu empresa</p>
+    </div>
+    
+    <div class="filter-area">
+      <div class="date-inputs">
+        <div class="input-field">
+          <label>Desde</label>
+          <input type="date" [(ngModel)]="fechaInicio" (change)="cargarDatos()">
+        </div>
+        <div class="input-field">
+          <label>Hasta</label>
+          <input type="date" [(ngModel)]="fechaFin" (change)="cargarDatos()">
+        </div>
+      </div>
+      <button class="btn-refresh" (click)="cargarDatos()" title="Actualizar datos">
+        <span>🔄</span> Actualizar
+      </button>
+    </div>
+  </div>
+
+  <div class="tabs-container">
+    <button class="tab-btn" [class.active]="activeTab === 'propias'" (click)="cambiarPestana('propias')">
+      🛍️ Ventas Propias
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'consignacion'" (click)="cambiarPestana('consignacion')">
+      🤝 Consignaciones
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'inversion'" (click)="cambiarPestana('inversion')">
+      📦 Inversión Propia
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'proveedores'" (click)="cambiarPestana('proveedores')">
+      🏢 Ranking B2B
+    </button>
+  </div>
+
+  <div *ngIf="cargando" class="ap-loader-container">
+    <div class="ap-spinner"></div>
+    <p class="ap-loader-text">Procesando datos financieros...</p>
+  </div>
+
+  <div *ngIf="(activeTab === 'propias' || activeTab === 'consignacion') && stats && !cargando" class="stats-content">
+    
+    <div *ngIf="activeTab === 'propias'" class="kpi-grid" style="margin-bottom: 2rem;">
+      <div class="kpi-card border-profit">
+        <div class="kpi-top"><span class="label">Ingresos Propios Brutos</span></div>
+        <strong class="value text-success">{{ stats.propias.ingresos | currency:'EUR' }}</strong>
+        <p class="explanation">Lo que cobraste por la ropa de la tienda.</p>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-top"><span class="label">Costo de lo Vendido</span></div>
+        <strong class="value">{{ stats.propias.costo | currency:'EUR' }}</strong>
+        <p class="explanation">Lo que te costó a ti esa ropa cuando la compraste.</p>
+      </div>
+
+      <div class="kpi-card border-roi">
+        <div class="kpi-top"><span class="label">Margen Bruto Propio (ROI: {{stats.propias.roi}})</span></div>
+        <strong class="value text-success">{{ stats.propias.beneficio | currency:'EUR' }}</strong>
+        <p class="explanation">Ingresos brutos menos el costo de la ropa.</p>
+      </div>
+
+      <div class="kpi-card border-warning">
+        <div class="kpi-top"><span class="label">Stock Remanente del Mes</span></div>
+        <div class="dual-value">
+          <strong class="value">{{ stats.propias.stock_remanente_mes | currency:'EUR' }}</strong>
+          <span class="sub-value">{{ stats.propias.articulos_remanentes }} <small>prendas</small></span>
+        </div>
+        <p class="explanation">Ropa propia que entró este mes y sigue sin venderse.</p>
+      </div>
+    </div>
+
+    <div *ngIf="activeTab === 'consignacion'" class="kpi-grid" style="margin-bottom: 2rem;">
+      <div class="kpi-card border-profit">
+        <div class="kpi-top"><span class="label">Ventas Consignación (Ingreso)</span></div>
+        <strong class="value text-success">{{ stats.consignacion.ingresos | currency:'EUR' }}</strong>
+        <p class="explanation">Dinero total generado vendiendo ropa de terceros.</p>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-top"><span class="label">Pago a Clientes (Deuda)</span></div>
+        <strong class="value text-danger">{{ stats.consignacion.pago_clientes | currency:'EUR' }}</strong>
+        <p class="explanation">La porción de las ventas que pertenece a los dueños.</p>
+      </div>
+
+      <div class="kpi-card border-roi">
+        <div class="kpi-top"><span class="label">Comisiones Netas (Margen: {{stats.consignacion.margen_porcentual}})</span></div>
+        <strong class="value text-success">{{ stats.consignacion.comisiones | currency:'EUR' }}</strong>
+        <p class="explanation">Tu ganancia real tras restar el pago a los dueños.</p>
+      </div>
+
+      <div class="kpi-card border-warning">
+        <div class="kpi-top"><span class="label">Prendas en Consignación</span></div>
+        <div class="dual-value">
+          <strong class="value">{{ stats.consignacion.articulos_remanentes }}</strong>
+          <span class="sub-value"> <small>prendas activas</small></span>
+        </div>
+        <p class="explanation">Prendas de terceros que entraron este mes y siguen a la venta.</p>
+      </div>
+    </div>
+
+    <div class="charts-layout">
+      <div class="chart-box shadow-sm">
+        <div class="chart-header">
+          <h3>🏆 Rendimiento por Vendedor ({{ activeTab === 'propias' ? 'Propias' : 'Consignación' }})</h3>
+        </div>
+        <div class="canvas-container">
+          <canvas #vendedoresCanvas></canvas>
+        </div>
+      </div>
+      
+      <div class="chart-box shadow-sm">
+        <div class="chart-header">
+          <h3>🌍 Distribución por Canal ({{ activeTab === 'propias' ? 'Propias' : 'Consignación' }})</h3>
+        </div>
+        <div class="canvas-container">
+          <canvas #canalesCanvas></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-section shadow-sm">
+      <div class="table-header">
+        <h3>⭐ Categorías más Rentables ({{ activeTab === 'propias' ? 'Propias' : 'Consignación' }})</h3>
+        <p style="margin:0; font-size:0.85rem; color:#7f8c8d;">Ticket Medio Global: <strong>{{ stats.global.ticket_medio | currency:'EUR' }}</strong></p>
+      </div>
+      <table class="minimal-table">
+        <thead>
+          <tr>
+            <th>Posición</th>
+            <th>Tipo de Prenda / Estilo</th>
+            <th class="text-center">Total Vendido</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let cat of stats[activeTab].top_categorias; let i = index">
+            <td class="rank-col"><span class="rank-badge">#{{ i + 1 }}</span></td>
+            <td><strong>{{ cat.nombre }}</strong></td>
+            <td class="text-center">{{ cat.cantidad }} unidades</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <div *ngIf="activeTab === 'inversion' && statsInversion && !cargando" class="stats-content">
+    
+    <div class="info-banner mb-4">
+      💡 <b>Análisis de Stock Propio:</b> Aquí evaluamos solo la ropa por la que pagaste de tu bolsillo (Excluye Consignación). 
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card border-roi">
+        <div class="kpi-top"><span class="label">Inversión Realizada</span></div>
+        <div class="dual-value">
+          <strong class="value">{{ statsInversion.inversion_total | currency:'EUR' }}</strong>
+          <span class="sub-value">{{ statsInversion.prendas_compradas }} <small>prendas propias</small></span>
+        </div>
+        <p class="explanation">Lo que pagaste a mayoristas por la ropa registrada en este periodo.</p>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-top"><span class="label">Ingresos Brutos Generados</span></div>
+        <strong class="value">{{ statsInversion.ingresos_generados | currency:'EUR' }}</strong>
+        <p class="explanation">Dinero total que ha entrado por la venta de este lote.</p>
+      </div>
+
+      <div class="kpi-card border-profit">
+        <div class="kpi-top"><span class="label">Beneficio de Inversión</span></div>
+        <strong class="value" [class.text-success]="statsInversion.beneficio_inversion > 0" [class.text-danger]="statsInversion.beneficio_inversion <= 0">
+          {{ statsInversion.beneficio_inversion | currency:'EUR' }}
+        </strong>
+        <p class="explanation">Ganancia libre. Si es negativo, aún no recuperas lo invertido.</p>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-top"><span class="label">Tasa de Venta (Éxito)</span></div>
+        <div class="dual-value">
+          <strong class="value">{{ statsInversion.tasa_venta }}</strong>
+          <span class="sub-value">{{ statsInversion.prendas_vendidas }} <small>vendidas</small></span>
+        </div>
+        <p class="explanation">Porcentaje de este lote propio que ya salió de la tienda.</p>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="activeTab === 'proveedores' && statsProveedores && !cargando" class="stats-content">
+    <div class="info-banner mb-4">
+      🤝 <b>Ranking de Proveedores B2B:</b> Evalúa qué mayorista te da mejores márgenes. <i>Nota: Este panel ignora a los clientes de consignación.</i>
+    </div>
+
+    <div class="table-section shadow-sm">
+      <div class="table-header">
+        <h3>🏆 Top Proveedores por Rentabilidad</h3>
+      </div>
+      
+      <div style="overflow-x: auto;">
+        <table class="minimal-table">
+          <thead>
+            <tr>
+              <th>Pos.</th>
+              <th>Proveedor</th>
+              <th class="text-right">Inversión</th>
+              <th class="text-right">Ingresos Brutos</th>
+              <th class="text-right">Beneficio Limpio</th>
+              <th class="text-center">ROI</th>
+              <th class="text-center">Tasa Venta</th>
+              <th class="text-center" title="Prendas que aún no se venden">Stock Atrapado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let prov of statsProveedores; let i = index">
+              <td class="rank-col"><span class="rank-badge">#{{ i + 1 }}</span></td>
+              <td><strong>{{ prov.nombre }}</strong></td>
+              <td class="text-right" style="color: #64748b;">{{ prov.inversion_total | currency:'EUR' }}</td>
+              <td class="text-right">{{ prov.ingresos_generados | currency:'EUR' }}</td>
+              <td class="text-right">
+                <strong [class.text-success]="prov.beneficio > 0" [class.text-danger]="prov.beneficio <= 0">
+                  {{ prov.beneficio | currency:'EUR' }}
+                </strong>
+              </td>
+              <td class="text-center"><strong>{{ prov.roi_pct }}%</strong></td>
+              <td class="text-center"><span class="trend-badge">{{ prov.tasa_venta_pct }}%</span></td>
+              <td class="text-center">
+                <span [class.text-danger]="prov.prendas_atrapadas > 0" style="font-weight: 600;">
+                  {{ prov.prendas_atrapadas }} unds.
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="(!stats && (activeTab === 'propias' || activeTab === 'consignacion') && !cargando) || (!statsInversion && activeTab === 'inversion' && !cargando) || (!statsProveedores && activeTab === 'proveedores' && !cargando)" class="empty-state">
+    <p>No hay datos suficientes para generar el análisis en este rango de fechas.</p>
+  </div>
+
+</div>

@@ -1,0 +1,97 @@
+.page-container {
+  padding: 24px;
+  background-color: var(--ap-bg-main);
+  border-radius: var(--ap-radius-lg);
+  box-shadow: var(--ap-shadow-sm);
+}
+
+.header-section {
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--ap-border-light);
+  padding-bottom: 16px;
+}
+
+.header-section h2 { color: var(--ap-text-main); margin-bottom: 4px; }
+.header-section p { color: var(--ap-text-muted); font-size: 0.9rem; }
+
+/* ESTILOS DE LA TABLA */
+.table-container { overflow-x: auto; }
+.ap-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.ap-table th {
+  padding: 12px 16px;
+  background-color: var(--ap-bg-variant);
+  color: var(--ap-text-muted);
+  font-weight: 600;
+  border-bottom: 2px solid var(--ap-border-base);
+}
+
+.ap-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--ap-border-light);
+  vertical-align: middle;
+}
+
+/* NIVELES DE JERARQUÍA */
+.row-product { background-color: #ffffff; transition: var(--transition); }
+.row-product:hover { background-color: var(--ap-bg-variant); }
+
+.row-variant { background-color: #fafbfc; }
+.row-stock { background-color: #fdfdfe; }
+
+.expand-icon {
+  display: inline-block;
+  width: 20px;
+  color: var(--ap-color-primary);
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.indent-1 { display: inline-block; width: 30px; }
+.indent-2 { display: inline-block; width: 60px; }
+
+/* ELEMENTOS VISUALES */
+.main-cell { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+.mini-thumb { width: 40px; height: 40px; border-radius: var(--ap-radius-md); object-fit: cover; }
+.product-info { display: flex; flex-direction: column; gap: 4px; }
+.name { font-weight: 600; color: var(--ap-text-main); }
+
+.color-dot {
+  display: inline-block;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  margin-right: 8px;
+  border: 1px solid var(--ap-border-base);
+}
+
+.badge {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+.danger-badge { background-color: var(--ap-color-danger-bg); color: var(--ap-color-danger); }
+.size-badge { background-color: var(--vinted-teal-light); color: var(--vinted-teal); padding: 4px 8px; border-radius: 4px; font-weight: bold;}
+.location { margin-left: 12px; color: var(--ap-text-muted); }
+
+/* BOTONES */
+.actions-cell { display: flex; gap: 8px; justify-content: flex-start; align-items: center; }
+
+.btn-icon {
+  background: none; border: none; font-size: 1.2rem; cursor: pointer;
+  padding: 6px; border-radius: var(--ap-radius-md); transition: var(--transition);
+}
+.btn-icon:hover { background-color: var(--ap-bg-variant); }
+
+.btn-text {
+  background: none; border: none; font-weight: 600; cursor: pointer; font-size: 0.85rem;
+}
+.btn-text.success { color: var(--ap-color-success); }
+.btn-text.danger { color: var(--ap-color-danger); }
+
+/* ESTADOS */
+.empty-state, .loading-state { text-align: center; padding: 48px; color: var(--ap-text-muted); }

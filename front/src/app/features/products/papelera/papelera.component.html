@@ -1,0 +1,105 @@
+<div class="page-container">
+  <div class="header-section">
+    <h2>🗑️ Papelera de Reciclaje</h2>
+    <p>Los artículos aquí ocultos no son visibles en la web ni en inventario activo.</p>
+  </div>
+
+  <div *ngIf="cargando" class="loading-state">
+    <p>⏳ Cargando papelera...</p>
+  </div>
+
+  <div *ngIf="!cargando && productos.length === 0" class="empty-state">
+    <h3>La papelera está vacía</h3>
+    <p>Tu inventario está impecable.</p>
+  </div>
+
+  <div class="table-container" *ngIf="!cargando && productos.length > 0">
+    <table class="ap-table">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>SKU / Info</th>
+          <th>Stock Oculto</th>
+          <th class="actions-col">Acciones</th>
+        </tr>
+      </thead>
+      
+      <ng-container *ngFor="let p of productos">
+        
+        <tr class="row-product" [class.expanded]="expandedProducts.has(p.id)">
+          <td class="main-cell" (click)="toggleProduct(p.id)">
+            <span class="expand-icon">{{ expandedProducts.has(p.id) ? '▼' : '▶' }}</span>
+            <img *ngIf="p.imagen" [src]="p.imagen" class="mini-thumb" alt="thumb">
+            <div class="product-info">
+              <span class="name">{{ p.nombre }}</span>
+              <span class="badge danger-badge" *ngIf="!p.activo">Borrador</span>
+            </div>
+          </td>
+          <td>{{ p.sku }} <br> <small>{{ p.categoria?.nombre }}</small></td>
+          <td>{{ p.stock_total }} uds.</td>
+          <td class="actions-cell">
+            <ng-container *ngIf="!p.activo">
+              <button class="btn-icon success" (click)="restaurar('producto', p.id)" title="Restaurar Producto Completo">♻️</button>
+              <button class="btn-icon danger" (click)="destruir('producto', p.id)" title="Destruir Permanentemente">💥</button>
+            </ng-container>
+            <span *ngIf="p.activo" class="badge-active" style="font-size: 0.75rem; color: #7f8c8d; font-weight: 600;">
+              Contenedor Activo
+            </span>
+          </td>
+        </tr>
+
+        <ng-container *ngIf="expandedProducts.has(p.id)">
+          <ng-container *ngFor="let v of p.variantes">
+            
+            <tr class="row-variant" [class.expanded]="expandedVariants.has(v.id)">
+              <td class="variant-cell" (click)="toggleVariant(v.id)" colspan="3">
+                <span class="indent-1"></span>
+                <span class="expand-icon">{{ expandedVariants.has(v.id) ? '▼' : '▶' }}</span>
+                <span class="color-dot" [style.background]="v.hex_identidad"></span>
+                <strong>Estilo: {{ v.identidad_variante }}</strong>
+              </td>
+              <td class="actions-cell">
+                <ng-container *ngIf="!v.activo">
+                  <button class="btn-icon success outline" (click)="restaurar('variante', v.id)" title="Restaurar Variante">♻️</button>
+                  <button class="btn-icon danger outline" (click)="destruir('variante', v.id)" title="Destruir Variante">💥</button>
+                </ng-container>
+                <span *ngIf="v.activo" class="badge-active" style="font-size: 0.75rem; color: #7f8c8d; font-weight: 600;">
+                  Activa
+                </span>
+              </td>
+            </tr>
+
+            <ng-container *ngIf="expandedVariants.has(v.id)">
+              
+              <!-- Mostrar Configs/Lotes Borrados -->
+              <tr class="row-stock" *ngFor="let c of v.stock_configs_borradas">
+                <td colspan="2" class="stock-cell">
+                  <span class="indent-2"></span>
+                  <span class="size-badge">{{ c.etiqueta }}</span>
+                  <small class="location">Ubic: {{ c.ubicacion || 'Sin asignar' }}</small>
+                </td>
+                <td>{{ c.cantidad }} uds. dentro</td>
+                <td class="actions-cell">
+                  <button class="btn-text success" (click)="restaurar('stock-config', c.id)">♻️ Restaurar Lote</button>
+                  <small class="text-muted" style="margin-left: 5px;">(Restaura el lote y sus prendas)</small>
+                </td>
+              </tr>
+
+              <!-- Mostrar Unidades Físicas Borradas Individualmente -->
+              <tr class="row-stock" *ngFor="let u of v.stock_units_borradas">
+                <td colspan="2" class="stock-cell">
+                  <span class="indent-2"></span>
+                  <span style="font-family: monospace; font-size: 0.85em; color: #7f8c8d;">{{ u.sku }}</span>
+                  <small class="location">Estado: {{ getLabelEstadoGestion(u.estado_gestion) }}</small>
+                </td>
+                <td>1 ud. (Física)</td>
+                <td class="actions-cell">
+                  <button class="btn-text success" (click)="restaurar('stock-unit', u.id)">♻️ Restaurar Prenda</button>
+                  <button class="btn-text danger" (click)="destruir('stock-unit', u.id)">💥 Destruir</button>
+                </td>
+              </tr>
+              
+            </ng-container> </ng-container>
+        </ng-container> </ng-container> </table>
+  </div>
+</div>

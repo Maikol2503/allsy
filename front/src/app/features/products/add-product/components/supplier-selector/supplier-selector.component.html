@@ -1,0 +1,31 @@
+<div class="field proveedor-autocomplete">
+  <input 
+    type="text" 
+    [(ngModel)]="proveedorInput" 
+    placeholder="Buscar o añadir..." 
+    autocomplete="off" 
+    (focus)="onFocus()" 
+    (blur)="onBlur()" 
+    (input)="onInputChange()" 
+  />
+  
+  <div class="dropdown-list" *ngIf="dropdownOpen">
+    <div 
+      class="dropdown-item" 
+      *ngFor="let p of listaFiltrada" 
+      (mousedown)="selectProveedor(p)" 
+      [class.selected]="proveedorSeleccionado?.nombre === p.nombre"
+    >
+      <div class="item-content">
+        <span class="item-name">{{ p.nombre }}</span>
+        <small class="badge-new" *ngIf="p.isNew">(Nuevo)</small>
+      </div>
+
+      <input type="radio" [checked]="proveedorSeleccionado?.nombre === p.nombre" class="item-radio" />
+    </div>
+    
+    <div class="dropdown-item empty-state" *ngIf="listaFiltrada.length === 0">
+      Escribe para añadir "{{proveedorInput}}"
+    </div>
+  </div>
+</div>

@@ -1,0 +1,252 @@
+<div class="page-container" *ngIf="!cargandoDatos; else loadingTemplate">
+  
+  <header class="form-header header-top">
+    <div class="header-info-wrapper">
+      <div class="variant-thumbnail" *ngIf="contexto.imagen_cover">
+        <img [src]="contexto.imagen_cover" alt="Foto de la variante" />
+      </div>
+
+      <div class="title-group">
+        <span class="text-muted" (click)="volver()" style="cursor: pointer;">← Volver al detalle</span>
+        <h2 class="title mt-1">Editar Configuración de Lote</h2>
+        <p class="subtitle">
+          <strong>{{ contexto.producto_nombre }}</strong> | Lote Ref: #{{ contexto.sku }}
+        </p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button type="button" class="btn-outline-primary" (click)="verProductoPadre()">
+        👁️ Ver Producto Padre
+      </button>
+    </div>
+  </header>
+
+  <div class="alert-box-info mb-4">
+    <div class="alert-content">
+      <span class="icon">🛠️</span>
+      <div class="text">
+        <h4>Gestión de Variante</h4>
+        <p>Las fotos, descripciones y nuevas medidas/tallas se gestionan en el formulario maestro.</p>
+      </div>
+    </div>
+    <button type="button" class="vinted-btn-primary" (click)="irAGestionarVariante()">
+      Ir a Gestionar Variante
+    </button>
+  </div>
+
+  <form class="product-form" (ngSubmit)="onSubmit()">
+    
+    <section class="card-section identity-bg">
+      <div class="section-header">
+        <h3>Identificación del Artículo</h3>
+      </div>
+      <div class="grid-4">
+
+        <div class="field full-width mt-3" *ngIf="stockData.propietario_id" style="background: #eafaf1; padding: 12px; border-radius: 8px; border: 1px solid #27ae60;">
+          <label class="toggle-switch" style="margin: 0;">
+            <input type="checkbox" [(ngModel)]="stockData.donar_ganancias" name="donar_ganancias" />
+            <span class="slider"></span>
+            <span class="toggle-label" style="color: #27ae60; font-weight: bold;">🎁 El cliente dona el 100% de la venta a Allsys</span>
+          </label>
+        </div>
+
+        <div class="field">
+          <label>Color / Estilo</label>
+          <div class="display-pill readonly-field">
+            <span class="color-circle" [style.background]="contexto.hex_identidad"></span>
+            <span class="value-text">{{ contexto.identidad_variante }}</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Talla / Medida Base</label>
+          <div class="display-pill readonly-field highlight-talla">
+            <span class="value-text">{{ contexto.talla || contexto.etiqueta }}</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Tipo</label>
+          <div class="display-pill readonly-field">
+            <span class="value-text">{{ tipoProducto | titlecase }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card-section info-card" style="border: 2px solid #e0e6ed; margin-bottom: 25px;">
+      <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <h3>🚦 Prendas Físicas en este Lote ({{ unidadesLote.length }})</h3>
+        <button type="button" class="btn-outline-primary btn-sm" (click)="mostrarUnidades = !mostrarUnidades">
+          {{ mostrarUnidades ? '▲ Ocultar' : '▼ Gestionar Individualmente' }}
+        </button>
+      </div>
+
+      <div class="units-table-container mt-3" *ngIf="mostrarUnidades" style="background: #f8fafc; padding: 15px; border-radius: 8px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+          <span>Página {{ paginaInterna }} de {{ Math.ceil(unidadesLote.length / 10) || 1 }}</span>
+          <div style="display: flex; gap: 5px;">
+            <button type="button" class="btn-sm" [disabled]="paginaInterna === 1" (click)="paginaInterna = paginaInterna - 1">Ant</button>
+            <button type="button" class="btn-sm" [disabled]="paginaInterna * 10 >= unidadesLote.length" (click)="paginaInterna = paginaInterna + 1">Sig</button>
+          </div>
+        </div>
+        
+        <table class="ap-table" style="width: 100%; border-collapse: collapse; min-width: 600px;">
+          <thead>
+            <tr> 
+              <th style="padding-bottom: 8px; border-bottom: 2px solid #cbd5e1;">ID Físico (SKU)</th> 
+              <th style="padding-bottom: 8px; border-bottom: 2px solid #cbd5e1;">Fecha de Ingreso</th> 
+              <th style="padding-bottom: 8px; border-bottom: 2px solid #cbd5e1; text-align: center;">Venta Online</th>
+              <th style="padding-bottom: 8px; border-bottom: 2px solid #cbd5e1;">Estado Físico</th> 
+              <th style="padding-bottom: 8px; border-bottom: 2px solid #cbd5e1;">Acciones</th> 
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let u of unidadesLote | slice:(paginaInterna-1)*10 : paginaInterna*10; let idx = index" style="border-bottom: 1px solid #e2e8f0;">
+              <td style="padding: 10px 0;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <strong>#</strong>
+                  
+                  <!-- Modo Lectura -->
+                  <span *ngIf="!u.editandoId" style="font-weight: bold; font-size: 1.1em;">{{ u.id }}</span>
+                  <button type="button" *ngIf="!u.editandoId && u.estado_gestion !== 'vendido'" (click)="intentarEditarId(u)" 
+                          style="border: none; background: none; cursor: pointer; padding: 2px; font-size: 0.8rem; color: #64748b;" 
+                          title="Editar ID manual">✏️</button>
+
+                  <!-- Modo Edición -->
+                  <div *ngIf="u.editandoId" style="display: flex; align-items: center; gap: 4px;">
+                    <input type="number" [(ngModel)]="u.id" [name]="'id_u_' + u.id_original" 
+                           style="padding: 4px; font-weight: bold; font-size: 1em; width: 75px; border: 1px solid #007782; border-radius: 4px; background: #fff; outline: none;" />
+                    <button type="button" (click)="u.editandoId = false; u.id = u.id_original!" 
+                            style="border: none; background: none; cursor: pointer; color: #ef4444; font-size: 0.9rem; padding: 0;" 
+                            title="Cancelar">❌</button>
+                  </div>
+                </div>
+                
+                <small class="text-muted" style="font-size: 0.85em; display: block; margin-top: 2px;">{{ u.sku }}</small>
+              </td>
+              <td style="padding: 10px 5px;">
+                  <input type="date" [(ngModel)]="$any(u).fecha_compra" [name]="'fecha_u_' + u.id_original" style="padding: 4px; font-size: 0.9em; max-width: 140px;" />
+              </td>
+              <td style="padding: 10px 5px; text-align: center;">
+                <div style="display: flex; gap: 8px; justify-content: center;">
+                  <label style="cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Visible en Web">
+                    <input type="checkbox" [(ngModel)]="$any(u).publicar_web" [name]="'w_u_' + u.id_original" />
+                    🌐
+                  </label>
+                  <label style="cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Anunciado en Vinted">
+                    <input type="checkbox" [(ngModel)]="$any(u).publicar_vinted" [name]="'v_u_' + u.id_original" />
+                    👗
+                  </label>
+                  <label style="cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Anunciado en Wallapop">
+                    <input type="checkbox" [(ngModel)]="$any(u).publicar_wallapop" [name]="'wa_u_' + u.id_original" />
+                    📦
+                  </label>
+                </div>
+              </td>
+              <td style="padding: 10px 5px;">
+                <div class="custom-select" style="max-width: 200px;">
+                  <select [(ngModel)]="u.estado_gestion" [name]="'estado_' + u.id" class="custom-select" [disabled]="u.estado_gestion === 'vendido'">
+                    <option value="en_stock">✅ En Almacén</option>
+                    <option value="devuelto_dueno">🔙 Devuelto al dueño</option>
+                    <option value="donado_a_ong">💖 Donado a ONG</option>
+                    <option value="extraviado">⚠️ Extraviado</option>
+                    <option value="en_camino_devolucion">📦 En Tránsito (Devolución)</option>
+                  </select>
+                </div>
+              </td>
+              <td style="padding: 10px 0; display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                <button type="button" class="btn-text-primary" (click)="guardarEstadoUnidad(((paginaInterna-1)*10) + idx)" style="font-weight: 600; color: #007782; cursor: pointer; border: none; background: none;">💾 Guardar</button>
+                <button type="button" class="btn-text-danger" *ngIf="u.estado_gestion !== 'vendido'" (click)="eliminarUnidadFisica(((paginaInterna-1)*10) + idx, u.id)" style="font-weight: 600;">🗑️ Borrar</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <div class="field mt-3" style="background: #fff8e1; padding: 15px; border-radius: 8px; border: 1px solid #f1c40f; display: flex; flex-direction: column; gap: 10px;">
+          <label style="font-weight: bold; color: #7f8c8d;">📥 Añadir prendas nuevas a esta configuración:</label>
+          
+          <div style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 150px;">
+              <label style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 4px; display: block;">Cantidad</label>
+              <input type="number" [(ngModel)]="unidades_a_agregar" name="unidades_a_agregar" min="0" placeholder="Ej: 5" style="width: 100%; margin-bottom: 0;" />
+            </div>
+
+            <div style="flex: 1; min-width: 180px;">
+              <label style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 4px; display: block;">Fecha de Ingreso</label>
+              <input type="date" [(ngModel)]="fecha_a_agregar" name="fecha_a_agregar" style="width: 100%; margin-bottom: 0;" />
+            </div>
+            
+            <button type="button" 
+                    class="btn-primary" 
+                    (click)="agregarUnidadesAlLote()" 
+                    [disabled]="isAddingUnits || unidades_a_agregar <= 0"
+                    style="padding: 10px 20px; height: 42px;">
+              {{ isAddingUnits ? '⏳ Generando...' : '➕ Generar y Añadir' }}
+            </button>
+          </div>
+          <small class="text-muted">El sistema creará identificadores (SKUs) únicos para cada prenda nueva.</small>
+        </div>
+      </div>
+    </section>
+
+    <section class="card-section">
+      <div class="section-header">
+        <h3>Finanzas y Logística (Aplica a todas las prendas)</h3>
+      </div>
+      <div class="grid-4">
+        <div class="field">
+          <label>Precio Compra (€) <span class="required-asterisk">*</span></label>
+          <input type="number" step="0.01" [(ngModel)]="stockData.precio_compra" name="precio_compra" />
+        </div>
+        <div class="field">
+          <label>Precio Venta (€)</label>
+          <input type="number" step="0.01" [(ngModel)]="stockData.precio_venta" name="precio_venta" />
+        </div>
+        <div class="field">
+          <label>Descuento (%)</label>
+          <input type="number" step="1" [(ngModel)]="stockData.descuento" name="descuento" />
+        </div>
+        <div class="field" style="grid-column: span 2;">
+          <label>📍 Lugar de almacenamiento <span class="required-asterisk" title="Requerido para facilitar la búsqueda">*</span></label>
+          <app-location-selector 
+            [localizacionId]="stockData.localizacion_id" 
+            (localizacionChange)="stockData.localizacion_id = $event">
+          </app-location-selector>
+        </div>
+        <div class="field" *ngIf="!stockData.propietario_id">
+          <label>Proveedor <span class="required-asterisk">*</span></label>
+          <app-supplier-selector [proveedorInicialId]="stockData.proveedor_id" (supplierChanged)="onSupplierChanged($event)"></app-supplier-selector>
+        </div>
+      </div>
+    </section>
+
+    <section class="card-section" *ngIf="stockData.atributos.length > 0">
+      <div class="section-header"><h3>Medidas y Proporciones Extras</h3></div>
+      <div class="grid-4">
+        <div class="field" *ngFor="let attr of stockData.atributos; let k=index">
+          <label>{{ formatLabel(attr.nombre) }}</label>
+          <input *ngIf="attr.tipo !== 'select'" [type]="attr.tipo || 'text'" [(ngModel)]="attr.valor" [name]="'attr_' + k" />
+          <select *ngIf="attr.tipo === 'select'" [(ngModel)]="attr.valor" [name]="'attr_' + k" class="custom-select">
+            <option *ngFor="let opt of attr.opciones" [value]="opt">{{ opt }}</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <div class="form-actions">
+      <button type="button" class="btn-outline-primary" (click)="volver()">Cancelar</button>
+      <button type="submit" class="btn-primary main-submit" [disabled]="isSubmitting">
+        {{ isSubmitting ? '⏳ Guardando Configuración...' : '💾 Guardar Cambios del Lote' }}
+      </button>
+    </div>
+  </form>
+</div>
+
+<ng-template #loadingTemplate>
+  <div class="page-container loading-container">
+    <div class="spinner"></div>
+    <p>Cargando información del inventario...</p>
+  </div>
+</ng-template>

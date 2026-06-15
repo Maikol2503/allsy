@@ -1,0 +1,102 @@
+/* category-selector.component.css */
+
+/* El contenedor principal debe ser relativo para que el dropdown flote justo debajo de él */
+:host {
+  display: block;
+  position: relative; 
+  width: 100%;
+}
+
+/* La "caja" principal que simula ser un input/select */
+.category-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background-color: #ffffff;
+  border: 1px solid #d1d5db; /* Un gris suave */
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #374151;
+  transition: all 0.2s ease;
+}
+
+.category-box:hover {
+  border-color: #9ca3af;
+}
+
+/* La flechita de la derecha */
+.arrow {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* El menú desplegable flotante */
+.category-dropdown {
+  position: absolute;
+  top: calc(100% + 4px); /* Justo debajo de la caja con un pequeño margen */
+  left: 0;
+  right: 0;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  z-index: 1000; /* Super importante: asegura que flote por encima de TODO */
+  max-height: 250px; /* Si hay muchas categorías, aparecerá un scroll */
+  overflow-y: auto;
+}
+
+/* El botón de "⬅ Volver" */
+.category-back {
+  padding: 10px 14px;
+  background-color: #f3f4f6;
+  border-bottom: 1px solid #e5e7eb;
+  font-weight: 600;
+  color: #4f46e5; /* Un tono azul/índigo para destacar que es un enlace */
+  cursor: pointer;
+  position: sticky; /* Hace que el botón de volver se quede fijo arriba si haces scroll */
+  top: 0;
+  z-index: 2;
+  transition: background-color 0.2s;
+}
+
+.category-back:hover {
+  background-color: #e5e7eb;
+}
+
+/* Cada opción de la lista */
+.category-item {
+  display: flex;
+  justify-content: space-between; /* Esto empuja la flecha a la derecha */
+  align-items: center;
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.category-item:hover {
+  background-color: #f3f4f6;
+}
+
+.sub-arrow {
+  font-size: 0.7rem;
+  color: #9ca3af; /* Un gris suave */
+}
+
+/* Opcional: Rotar la flecha principal cuando el dropdown está abierto */
+.arrow {
+  transition: transform 0.3s;
+}
+.arrow.open {
+  transform: rotate(180deg);
+}
+
+.category-item:last-child {
+  border-bottom: none;
+}
+
+.category-item:hover {
+  background-color: #f8fafc; /* Un azul MUY clarito al pasar el ratón */
+  color: #111827;
+}

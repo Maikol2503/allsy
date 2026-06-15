@@ -1,0 +1,221 @@
+/* =========================================================
+   CONTENEDOR PRINCIPAL
+   ========================================================= */
+.page-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px;
+  background-color: var(--bg-app);
+  min-height: calc(100vh - 80px);
+  font-family: inherit;
+}
+
+/* =========================================================
+   CABECERA DEL FORMULARIO
+   ========================================================= */
+.form-header {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--ap-border-base);
+}
+
+.title-group .text-muted {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: var(--transition);
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
+.title-group .text-muted:hover {
+  color: var(--primary);
+  transform: translateX(-4px);
+}
+
+.title {
+  margin: 0 0 4px 0;
+  font-size: 1.8rem;
+  color: var(--text-main);
+  font-weight: 700;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
+
+/* =========================================================
+   SECCIONES TIPO TARJETA
+   ========================================================= */
+.product-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.card-section {
+  background: var(--card-bg);
+  border: 1px solid var(--ap-border-light);
+  border-radius: var(--ap-radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+}
+
+.card-section:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--ap-border-base);
+}
+
+.section-header {
+  margin-bottom: 20px;
+  border-bottom: 1px dashed var(--ap-border-base);
+  padding-bottom: 12px;
+}
+
+.section-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+/* =========================================================
+   CAMPOS DE FORMULARIO (Inputs, Selects, Textareas)
+   ========================================================= */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.field input, 
+.field select, 
+.field textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--ap-border-base);
+  border-radius: var(--ap-radius-md);
+  font-size: 0.95rem;
+  color: var(--text-main);
+  background-color: var(--ap-bg-main);
+  transition: var(--transition);
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.field input:focus, 
+.field select:focus, 
+.field textarea:focus {
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--vinted-teal-light);
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Estado de Peligro / Cancelación */
+.border-danger {
+  border-color: var(--danger) !important;
+  background-color: var(--danger-light) !important;
+  color: var(--danger) !important;
+  font-weight: 600;
+}
+
+.border-danger:focus {
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2) !important;
+}
+
+/* =========================================================
+   BOTONES DE ACCIÓN
+   ========================================================= */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+  padding-top: 20px;
+  border-top: 1px solid var(--ap-border-base);
+}
+
+.btn-outline-primary {
+  padding: 12px 24px;
+  background: transparent;
+  color: var(--primary);
+  border: 2px solid var(--primary);
+  border-radius: var(--ap-radius-md);
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-outline-primary:hover {
+  background: var(--vinted-teal-light);
+}
+
+.btn-primary {
+  padding: 12px 32px;
+  background: var(--primary);
+  color: var(--ap-text-on-primary);
+  border: none;
+  border-radius: var(--ap-radius-md);
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 119, 130, 0.2);
+  transition: var(--transition);
+}
+
+.btn-primary:hover:not([disabled]) {
+  background: var(--vinted-teal-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 119, 130, 0.3);
+}
+
+.btn-primary:active:not([disabled]) {
+  transform: translateY(0);
+}
+
+.btn-primary[disabled] {
+  background: var(--text-muted);
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.7;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media (max-width: 768px) {
+  /* Si los grids que pusiste en línea se aprietan mucho, 
+     puedes sobreescribir sus columnas aquí */
+  div[style*="grid-template-columns: repeat(3, 1fr)"],
+  div[style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .form-actions {
+    flex-direction: column-reverse;
+    width: 100%;
+  }
+  
+  .btn-outline-primary, .btn-primary {
+    width: 100%;
+    text-align: center;
+  }
+}

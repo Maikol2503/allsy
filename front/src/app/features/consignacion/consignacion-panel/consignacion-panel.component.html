@@ -1,0 +1,407 @@
+<div class="consignacion-container" *ngIf="!cargando && stats">
+  
+  <div class="vip-badge" *ngIf="stats.exento_gastos_gestion" style="background-color: var(--ap-color-success-bg); color: var(--ap-color-success); padding: 8px 12px; border-radius: var(--ap-radius-md); margin-bottom: 16px; display: inline-block; font-weight: bold;">
+    ⭐ Cliente VIP (Exento de tarifas fijas de gestión)
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card highlight">
+      <h4>Saldo Disponible</h4>
+      <div class="amount highlight-text">{{ stats.saldo_pendiente | currency:'EUR' }}</div>
+      <p>Dinero liberado y listo para pagar</p>
+      
+      <div style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,0.3); font-size: 0.85em; display: flex; flex-direction: column; gap: 4px;">
+        
+        <div style="display: flex; justify-content: space-between;" *ngIf="stats.saldo_en_transito > 0">
+          <span>⏳ Retenido (En tránsito):</span>
+          <strong>+{{ stats.saldo_en_transito | currency:'EUR' }}</strong>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; color: #ffcccc;" *ngIf="stats.deuda_por_devoluciones > 0">
+          <span>🔙 Devoluciones (Descuento):</span>
+          <strong>-{{ stats.deuda_por_devoluciones | currency:'EUR' }}</strong>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <h4>Dinero Generado (PVP)</h4>
+      <div class="amount">{{ stats.dinero_generado_ventas | currency:'EUR' }}</div>
+      <p>Ventas brutas liquidadas</p>
+
+      <div style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,0.3); font-size: 0.85em;">
+        <div style="display: flex; justify-content: space-between;" *ngIf="stats.ingresos_en_transito > 0">
+          <span>⏳ PVP en tránsito:</span>
+          <strong style="color: #f39c12;">+{{ stats.ingresos_en_transito | currency:'EUR' }}</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; color: #94a3b8;" *ngIf="stats.ingresos_en_transito === 0">
+          <span>⏳ Sin PVP en tránsito</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <h4>Beneficio Plataforma</h4>
+      <div class="amount success-text">{{ stats.beneficio_plataforma | currency:'EUR' }}</div>
+      <p>Tu ganancia neta realizada</p>
+
+      <div style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,0.3); font-size: 0.85em;">
+        <div style="display: flex; justify-content: space-between;" *ngIf="stats.beneficio_en_transito > 0">
+          <span>⏳ Comisión esperada:</span>
+          <strong style="color: #f39c12;">+{{ stats.beneficio_en_transito | currency:'EUR' }}</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; color: #94a3b8;" *ngIf="stats.beneficio_en_transito === 0">
+          <span>⏳ Sin comisiones en tránsito</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <h4>Inventario del Dueño</h4>
+      <div class="amount" style="font-size: 1.5em;">
+        {{ stats.total_prendas_entregadas }} 
+        <span style="font-size: 0.5em; font-weight: normal;">prendas recibidas en total</span>
+      </div>
+
+      <div style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,0.3); font-size: 0.85em; display: flex; flex-direction: column; gap: 6px;">
+
+        <div style="display: flex; justify-content: space-between; font-weight: bold;">
+          <span>🟢 En Almacén (Disponibles):</span>
+          <strong style="color: #27ae60; font-size: 1.1em;">
+            {{ stats.prendas_en_stock + stats.prendas_devueltas_tienda }}
+          </strong>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; color: #f39c12;" 
+             *ngIf="(stats.prendas_procesando + stats.prendas_enviada + stats.prendas_entregado) > 0">
+          <span>⏳ En Proceso de Envío:</span>
+          <strong>{{ stats.prendas_procesando + stats.prendas_enviada + stats.prendas_entregado }}</strong>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; color: #2ecc71;" *ngIf="stats.prendas_completada > 0">
+          <span>✅ Ventas Finalizadas:</span>
+          <strong style="font-size: 1.05em;">{{ stats.prendas_completada }}</strong>
+        </div>
+
+        <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dotted rgba(255,255,255,0.2); font-size: 0.95em; color: #94a3b8;"
+             *ngIf="stats.prendas_devueltas_dueno > 0 || stats.prendas_donado_a_ong > 0 || stats.prendas_extraviadas > 0">
+          <span style="font-size: 0.85em; text-transform: uppercase; display: block; margin-bottom: 4px; color: #cbd5e1; font-weight: bold;">
+            Salidas fuera de venta:
+          </span>
+          
+          <div style="display: flex; justify-content: space-between; font-size: 0.9em; margin-bottom: 2px;" *ngIf="stats.prendas_devueltas_dueno > 0">
+            <span>🔙 Retiradas por Dueño:</span>
+            <span>{{ stats.prendas_devueltas_dueno }}</span>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; font-size: 0.9em; margin-bottom: 2px;" *ngIf="stats.prendas_donado_a_ong > 0">
+            <span>💖 Donadas a ONG:</span>
+            <span>{{ stats.prendas_donado_a_ong }}</span>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; font-size: 0.9em; color: #ff8080;" *ngIf="stats.prendas_extraviadas > 0">
+            <span>⚠️ Paquetes Extraviados:</span>
+            <strong>{{ stats.prendas_extraviadas }}</strong>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="action-layout">
+    
+    <div class="payment-form-card" [ngClass]="{'edit-mode': pagoEditandoId}">
+      
+      <h3>
+        <span *ngIf="!pagoEditandoId">💸 Registrar Nuevo Pago</span>
+        <span *ngIf="pagoEditandoId">✏️ Editando Pago #{{pagoEditandoId}}</span>
+      </h3>
+
+      <!-- ✨ DESGLOSE DE TRAZABILIDAD (Añadido) -->
+      <div class="traceability-section" *ngIf="!pagoEditandoId && prendasPendientes.length > 0" style="margin-bottom: 20px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <h4 style="margin: 0; font-size: 0.9rem; color: #64748b;">Selecciona prendas a liquidar:</h4>
+          <label style="font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+            <input type="checkbox" [checked]="idsSeleccionados.size === prendasPendientes.length" (change)="toggleTodas($event)">
+            Todas
+          </label>
+        </div>
+
+        <div class="pending-list" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+          <div *ngFor="let p of prendasPendientes" 
+               class="pending-item" 
+               [ngClass]="{'selected': idsSeleccionados.has(p.stock_id)}"
+               (click)="toggleSeleccion(p.stock_id)"
+               style="display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 6px; border: 1px solid #eee; cursor: pointer; transition: all 0.2s; background: white;">
+            <input type="checkbox" [checked]="idsSeleccionados.has(p.stock_id)" (click)="$event.stopPropagation(); toggleSeleccion(p.stock_id)">
+            <img [src]="p.imagen || 'assets/img/default-product.png'" style="width: 30px; height: 30px; border-radius: 4px; object-fit: cover;">
+            <div style="flex: 1; font-size: 0.85rem;">
+              <div style="font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">{{ p.nombre_producto }}</div>
+              <small class="text-muted">{{ p.sku }}</small>
+            </div>
+            <div style="text-align: right; font-weight: bold; color: #27ae60; font-size: 0.9rem;">
+              {{ p.pago_cliente | currency:'EUR' }}
+            </div>
+          </div>
+        </div>
+        <small class="text-muted" style="display: block; margin-top: 8px; text-align: right;">{{ idsSeleccionados.size }} seleccionadas</small>
+      </div>
+      
+      <div class="field">
+        <label>Monto a pagar (€)</label>
+        <input type="number" step="0.01" [(ngModel)]="nuevoPago.monto" [max]="pagoEditandoId ? 9999 : stats.saldo_pendiente">
+        <small *ngIf="!pagoEditandoId" style="color: #64748b;">Monto calculado según selección de prendas.</small>
+      </div>
+
+      <div class="field">
+        <label>Método de Pago</label>
+        <select [(ngModel)]="nuevoPago.metodo_pago">
+          <option *ngFor="let metodo of metodosPago" [value]="metodo">{{ metodo }}</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Referencia (Opcional)</label>
+        <input type="text" [(ngModel)]="nuevoPago.referencia" placeholder="Ej: Transf. ES82...">
+      </div>
+
+      <div class="field">
+        <label>Notas internas</label>
+        <textarea [(ngModel)]="nuevoPago.notas" rows="2" placeholder="Ej: Pago de las ventas de marzo..."></textarea>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 15px;">
+        <button 
+          type="button" 
+          [ngClass]="pagoEditandoId ? 'btn-warning-edit' : 'btn-primary'" 
+          style="flex: 1;"
+          (click)="procesarPago()" 
+          [disabled]="isSubmitting || nuevoPago.monto <= 0">
+          {{ isSubmitting ? 'Procesando...' : (pagoEditandoId ? '💾 Guardar Cambios' : 'Registrar Pago') }}
+        </button>
+        
+        <button 
+          *ngIf="pagoEditandoId" 
+          type="button" 
+          class="btn-outline" 
+          style="flex: 1;"
+          (click)="cancelarEdicion()">
+          ❌ Cancelar
+        </button>
+      </div>
+    </div>
+
+    <div class="history-card">
+      <h3>📜 Historial de Pagos</h3>
+      
+      <div class="empty-state" *ngIf="pagos.length === 0">
+        No hay pagos registrados para este cliente.
+      </div>
+
+      <div class="payments-list" *ngIf="pagos.length > 0" [ngClass]="{'has-editing': pagoEditandoId}">
+        
+        <div class="payment-wrapper" *ngFor="let p of pagos">
+          <div class="payment-item" [ngClass]="{'editing-row': p.id === pagoEditandoId}">
+            
+            <div class="payment-icon">
+              <span *ngIf="p.metodo_pago === 'Bizum'">📱</span>
+              <span *ngIf="p.metodo_pago === 'Efectivo'">💵</span>
+              <span *ngIf="p.metodo_pago !== 'Bizum' && p.metodo_pago !== 'Efectivo'">🏦</span>
+            </div>
+            
+            <div class="payment-details" (click)="$any(p).expandir = !$any(p).expandir" style="cursor: pointer;">
+              <div class="payment-header">
+                <span class="payment-method" [style.text-decoration]="p.estado === 'anulado' ? 'line-through' : 'none'">
+                  {{ p.metodo_pago }} <small *ngIf="p.items_pagados?.length" style="color: var(--primary); margin-left: 5px;">({{ p.items_pagados?.length }} prendas {{ $any(p).expandir ? '▲' : '▼' }})</small>
+                </span>
+                <span class="payment-date">{{ p.fecha | date:'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+              <div class="payment-ref" *ngIf="p.referencia || p.notas" [style.text-decoration]="p.estado === 'anulado' ? 'line-through' : 'none'">
+                {{ p.referencia }} <span *ngIf="p.referencia && p.notas">-</span> {{ p.notas }}
+              </div>
+              <div *ngIf="p.estado === 'anulado'" style="color: #e74c3c; font-size: 0.8rem; font-weight: bold; margin-top: 4px;">
+                🚫 PAGO ANULADO: {{ p.motivo_anulacion }}
+              </div>
+            </div>
+            
+            <div class="payment-amount" style="margin-right: 15px;" [style.text-decoration]="p.estado === 'anulado' ? 'line-through' : 'none'" [style.color]="p.estado === 'anulado' ? '#a0aec0' : 'inherit'">
+              {{ p.monto | currency:'EUR' }}
+            </div>
+
+            <div class="payment-actions" style="display: flex; gap: 8px;" *ngIf="p.estado !== 'anulado'">
+              <button class="btn-icon-small" (click)="iniciarEdicion(p)" title="Editar Ref/Notas (No afecta monto)" style="background: none; border: none; cursor: pointer; font-size: 1.1em;">✏️</button>
+              <button class="btn-icon-small" (click)="anularPago(p.id)" title="Anular Pago (Revertir saldo)" style="background: none; border: none; cursor: pointer; font-size: 1.1em; opacity: 0.7;">🚫</button>
+            </div>
+          </div>
+
+          <!-- ✨ DESGLOSE EXPANDIBLE DE PRENDAS PAGADAS -->
+          <div class="payment-items-detail" *ngIf="$any(p).expandir && p.items_pagados?.length" 
+               style="background: #ffffff; border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 8px 8px; padding: 10px; margin-bottom: 10px; margin-left: 10px; margin-right: 10px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+            <table style="width: 100%; font-size: 0.8rem; border-collapse: collapse;">
+              <thead>
+                <tr style="text-align: left; color: #64748b; border-bottom: 1px solid #eee;">
+                  <th style="padding: 4px;">Prenda</th>
+                  <th style="padding: 4px;">SKU</th>
+                  <th style="padding: 4px; text-align: right;">PVP</th>
+                  <th style="padding: 4px; text-align: right;">Comisión</th>
+                  <th style="padding: 4px; text-align: right;">Pago Cliente</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of p.items_pagados" style="border-bottom: 1px dotted #f4f4f4;">
+                  <td style="padding: 4px; font-weight: 500;">{{ item.nombre_producto }}</td>
+                  <td style="padding: 4px; color: #94a3b8; font-family: monospace;">{{ item.sku }}</td>
+                  <td style="padding: 4px; text-align: right;">{{ item.precio_venta | currency:'EUR' }}</td>
+                  <td style="padding: 4px; text-align: right; color: #7f8c8d;">{{ item.comision_allsys | currency:'EUR' }}</td>
+                  <td style="padding: 4px; text-align: right; color: #27ae60; font-weight: bold;">{{ item.pago_cliente | currency:'EUR' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="loading-state" *ngIf="cargando">
+  Cargando panel de consignación...
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="items-section">
+    
+    <div class="items-header">
+      <h3>👕 Desglose de Prendas y Liquidación</h3>
+      
+      <div class="filters">
+        <button [class.active]="filtroEstado === ''" (click)="aplicarFiltro('')">Todas</button>
+        <button [class.active]="filtroEstado === 'vendida'" (click)="aplicarFiltro('vendida')">🛍️ Vendidas</button>
+        <button [class.active]="filtroEstado === 'en_stock'" (click)="aplicarFiltro('en_stock')">🟢 En Stock</button>
+        <button [class.active]="filtroEstado === 'devuelto'" (click)="aplicarFiltro('devuelto')">🔙 Devueltas</button>
+      </div>
+    </div>
+
+    <div class="table-responsive shadow-sm">
+      <div class="loading-overlay" *ngIf="prendasCargando">Cargando prendas...</div>
+      
+      <table class="items-table">
+        <thead>
+          <tr>
+            <th>Prenda</th>
+            <th>Logística (Envío)</th>         <th>Pago del Comprador</th>        <th>Plataforma</th>
+            <th>Fecha Venta</th>
+            <th class="text-right">PVP Original</th> <th class="text-right">Ganancia del Dueño</th> <th>Acciones</th>
+          </tr>
+        </thead>
+        
+        <tbody>
+          <tr *ngIf="prendas.length === 0 && !prendasCargando">
+            <td colspan="8" class="text-center empty-state">No se encontraron prendas con este filtro.</td>
+          </tr>
+          
+          <tr *ngFor="let item of prendas" class="item-row">
+            <td>
+              <div class="item-product-info">
+                <img [src]="item.imagen || 'assets/img/default-product.png'" alt="Img" class="item-thumb">
+                <div class="item-text">
+                  <strong>{{ item.nombre_producto }}</strong>
+                  <span class="sku-text">{{ item.sku }}</span>
+                </div>
+              </div>
+            </td>
+            
+            <td>
+              <span class="status-badge" [ngClass]="item.estado">
+                <span *ngIf="item.estado === 'en_stock'">🟢 En Almacén</span>
+                <span *ngIf="item.estado === 'procesando'">⏳ En Preparación</span>
+                <span *ngIf="item.estado === 'enviada'">🚚 En Tránsito</span>
+                <span *ngIf="item.estado === 'entregado'">📬 Entregado (Destino)</span>
+                <span *ngIf="item.estado === 'completada'">✅ Paquete Recibido</span> 
+                <span *ngIf="item.estado === 'cancelada'">❌ Anulado (No enviado)</span>
+                <span *ngIf="item.estado === 'devuelto_tienda'" style="background-color: #ebf5fb; color: #2e86de; border: 1px solid #aed6f1;">
+                  🔄 Devuelto por comprador
+                </span> 
+                
+                <span *ngIf="item.estado === 'extraviado'">⚠️ Paquete Extraviado</span>
+              </span>
+            </td>
+
+            <td>
+              <span class="status-badge" [ngClass]="item.estado_pago" *ngIf="item.estado_pago">
+                <span *ngIf="item.estado_pago === 'pendiente'">⏳ Retenido en App</span>
+                <span *ngIf="item.estado_pago === 'pagado'">💰 Cobrado Completo</span>
+                
+                <span *ngIf="item.estado_pago === 'reembolso_parcial'" style="background-color: var(--ap-color-danger-bg); color: var(--ap-color-danger);">
+                  ⚠️ Reembolso Parcial ({{ item.monto_reembolsado | currency:'EUR' }})
+                </span>
+                <span *ngIf="item.estado_pago === 'reembolsado'" style="background-color: var(--ap-color-danger-bg); color: var(--ap-color-danger);">
+                  💸 Reembolso Total ({{ item.monto_reembolsado | currency:'EUR' }})
+                </span>
+
+                <span *ngIf="item.estado_pago === 'no_aplica'" style="background-color: #f4f6f8; color: #7f8c8d; border: 1px solid #e0e6ed;">
+                  🚫 No Aplica (Sin Venta)
+                </span>
+              </span>
+              <span *ngIf="!item.estado_pago" class="text-muted">⏳ Pendiente</span>
+            </td>
+
+            <td>
+              <span class="platform-badge" *ngIf="item.canal_venta">
+                <span *ngIf="item.canal_venta === 'Vinted'" style="color: #007782; font-weight: bold;">Vinted</span>
+                <span *ngIf="item.canal_venta === 'Wallapop'" style="color: #13d2ab; font-weight: bold;">Wallapop</span>
+                <span *ngIf="item.canal_venta !== 'Vinted' && item.canal_venta !== 'Wallapop'">{{ item.canal_venta }}</span>
+              </span>
+              <span *ngIf="!item.canal_venta" class="text-muted">-</span>
+            </td>
+
+            <td>
+              <span *ngIf="item.fecha_venta">{{ item.fecha_venta | date:'dd/MM/yyyy' }}</span>
+              <span *ngIf="!item.fecha_venta" class="text-muted">-</span>
+            </td>
+
+            <td class="text-right font-weight-bold">
+              {{ item.finanzas.precio_venta > 0 ? (item.finanzas.precio_venta | currency:'EUR') : '-' }}
+            </td>
+
+            <td class="text-right">
+              <strong [ngClass]="item.finanzas.pago_cliente > 0 ? 'text-success' : (item.finanzas.pago_cliente < 0 ? 'text-danger' : '')">
+                {{ item.finanzas.pago_cliente | currency:'EUR' }}
+              </strong>
+              
+              <small *ngIf="item.estado_pago === 'pendiente'" style="display: block; color: #e67e22; font-size: 0.8em; font-weight: bold; margin-top: 2px;">
+                ⏳ En tránsito
+              </small>
+              <small *ngIf="item.estado_pago === 'pagado'" style="display: block; color: #27ae60; font-size: 0.8em; font-weight: bold; margin-top: 2px;">
+                💵 Disponible
+              </small>
+              <small *ngIf="item.estado_pago === 'reembolso_parcial'" style="display: block; color: #8e44ad; font-size: 0.8em; font-weight: bold; margin-top: 2px;">
+                🛡️ Cliente Protegido
+              </small>
+            </td>
+
+            <td class="text-center">
+              <button class="btn-link" (click)="verProducto(item.producto_id)" title="Ir al producto">
+                👁️ Ver Detalle
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    </div>

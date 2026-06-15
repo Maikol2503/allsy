@@ -1,0 +1,343 @@
+<div class="page-container" *ngIf="!cargando">
+  
+  <header class="form-header header-top">
+    <div class="title-group">
+      <span class="text-muted" (click)="volver()" style="cursor: pointer;">← Volver al Historial</span>
+      <h2 class="title mt-1">Editar Venta: {{ venta.codigo_venta }}</h2>
+      <p class="subtitle">Registrada el {{ venta.fecha | date:'dd/MM/yyyy HH:mm' }} | Canal: <strong>{{ venta.canal | uppercase }}</strong></p>
+    </div>
+  </header>
+
+  <div class="product-form">
+    
+    <div *ngIf="tieneItemsBloqueados" style="background-color: #fff3cd; color: #856404; padding: 15px; border-radius: 8px; border: 1px solid #ffeeba; margin-bottom: 5px; font-size: 0.95rem;">
+      🔒 <b>Alerta de Seguridad Contable:</b> Esta venta contiene artículos que ya han sido liquidados (pagados) a su respectivo <b>dueño</b>. Para evitar descuadres financieros, <b>el estado de cobro, método de pago y precio total han sido bloqueados</b>. Si necesitas modificar estos valores o cancelar toda la venta, primero debes anular el pago en el módulo de Consignación.
+    </div>
+
+    <!-- ✨ NUEVA SECCIÓN: Artículos Vendidos -->
+    <section class="card-section">
+      <div class="section-header"><h3>🛍️ Artículos en esta venta</h3></div>
+      
+      <div class="items-list">
+        <div class="item-row-edit" *ngFor="let item of venta.detalles" 
+             [ngClass]="{'item-locked': item.pago_consignacion_id, 'item-returned': item.devuelto}"
+             style="display: flex; align-items: center; gap: 15px; padding: 12px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 10px; background: white; transition: all 0.2s;"
+             [style.opacity]="item.devuelto ? '0.6' : '1'"
+             [style.background]="item.devuelto ? '#f8f9fa' : 'white'">
+          
+          <img [src]="item.imagen_cover || 'assets/img/default-product.png'" style="width: 50px; height: 50px; border-radius: 6px; object-fit: cover; border: 1px solid #ddd;">
+          
+          <div style="flex: 1;">
+            <div style="font-weight: 600; font-size: 1rem;" [style.text-decoration]="item.devuelto ? 'line-through' : 'none'">
+              {{ item.nombre_producto }}
+            </div>
+            <div style="font-size: 0.85rem; color: #64748b;">
+              Talla: <span style="color: #333; font-weight: 500;">{{ item.talla }}</span> | 
+              Color: <span style="color: #333; font-weight: 500;">{{ item.color }}</span> | 
+              ID: <span style="font-family: monospace;">#{{ item.stock_unit_id }}</span>
+            </div>
+            <div *ngIf="item.pago_consignacion_id" style="font-size: 0.75rem; color: #007782; font-weight: bold; margin-top: 4px; display: flex; align-items: center; gap: 4px;">
+              🔒 Liquidado al dueño (Pago #{{item.pago_consignacion_id}})
+            </div>
+            <div *ngIf="item.devuelto" style="font-size: 0.8rem; color: #e74c3c; font-weight: bold; margin-top: 4px;">
+              <span *ngIf="item.estado_gestion !== 'en_camino_devolucion'">🔄 ARTÍCULO DEVUELTO (EN ALMACÉN)</span>
+              <span *ngIf="item.estado_gestion === 'en_camino_devolucion'" style="color: #b45309;">📦 EN TRÁNSITO (DEVOLUCIÓN)</span>
+            </div>
+            
+            <div *ngIf="item.devuelto && item.estado_gestion === 'en_camino_devolucion'" style="margin-top: 6px;">
+              <select [(ngModel)]="item.estado_gestion" (change)="actualizarEstadoDevolucion(item, item.estado_gestion)"
+                      style="padding: 4px 8px; font-size: 0.8rem; border-radius: 4px; border: 1px solid #fde68a; background: #fffbeb; color: #b45309; outline: none; cursor: pointer;">
+                <option value="en_camino_devolucion" disabled>📦 En Tránsito</option>
+                <option value="en_stock">✅ Confirmar Llegada (Almacén)</option>
+                <option value="extraviado">⚠️ Marcar como Extraviado (Perdido por Transporte)</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="text-align: right; min-width: 150px;">
+            <div style="font-weight: bold; color: var(--primary); font-size: 1.1rem;" [style.text-decoration]="item.devuelto ? 'line-through' : 'none'">
+              {{ item.precio_unitario | currency:'EUR' }}
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 5px; align-items: flex-end;" *ngIf="!item.devuelto">
+              <button type="button" 
+                      *ngIf="!item.pago_consignacion_id" 
+                      (click)="corregirPrecioPrenda(item)"
+                      class="btn-devolver" 
+                      style="font-size: 0.8rem; cursor: pointer; background: #fdf2f2; border: 1px solid #f8d7da; color: #c53030; padding: 6px 10px; border-radius: 6px; font-weight: bold; width: 100%;">
+                ✏️ Corregir Precio
+              </button>
+              
+              <button type="button" 
+                      *ngIf="!item.pago_consignacion_id" 
+                      (click)="devolverItem(item.id, item.stock_unit_id)"
+                      class="btn-devolver" 
+                      style="font-size: 0.8rem; cursor: pointer; background: #fff5f5; border: 1px solid #feb2b2; color: #c53030; padding: 6px 10px; border-radius: 6px; font-weight: bold; width: 100%;">
+                🔄 Devolución Física
+              </button>
+              <small class="text-muted" style="font-size: 0.7rem; text-align: right; line-height: 1.1;">
+                El cliente devuelve la prenda. <br>
+                <b>Impacto:</b> Stock vuelve a tienda y el <b>dueño NO cobra</b>.
+              </small>
+            </div>
+            
+            <span *ngIf="item.pago_consignacion_id && !item.devuelto" 
+                  title="No se puede modificar porque el dueño ya cobró su parte."
+                  style="font-size: 0.75rem; color: #94a3b8; font-weight: 600; background: #f8fafc; padding: 4px 8px; border-radius: 4px; border: 1px solid #e2e8f0; display: inline-block; margin-top: 5px; text-align: center; width: 100%; box-sizing: border-box;">
+              Bloqueado
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resumen rápido de lo que compone el total -->
+      <div style="margin-top: 15px; padding: 12px; background: var(--ap-bg-variant); border-radius: 8px; border: 1px dashed var(--ap-border-base); font-size: 0.85rem;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+          <span>Suma de artículos:</span>
+          <strong>{{ (formData.total - (formData.costo_envio || 0) + (formData.descuento_total || 0)) | number:'1.2-2' }} €</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+          <span>Logística (Envío):</span>
+          <strong>+ {{ formData.costo_envio | number:'1.2-2' }} €</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; color: #e74c3c;" *ngIf="formData.descuento_total > 0">
+          <span>Descuentos:</span>
+          <strong>- {{ formData.descuento_total | number:'1.2-2' }} €</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="card-section">
+      <div class="section-header"><h3>⚙️ Gestión Financiera y Cobro</h3></div>
+      
+      <div class="grid-4" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+        
+        <div class="field">
+          <label>Fecha de Venta (Ticket)</label>
+          <input type="datetime-local" [(ngModel)]="formData.fecha">
+        </div>
+
+       <div class="field">
+          <label>Estado del Pago (Dinero)</label>
+          
+          <!-- Si el pago es normal (pendiente o pagado), mostramos el selector de 2 opciones -->
+          <select *ngIf="!formData.estado_pago.includes('reembolso')" 
+                  [(ngModel)]="formData.estado_pago" 
+                  (ngModelChange)="onEstadoPagoChange($event)"
+                  [disabled]="tieneItemsBloqueados">
+            <option value="pendiente">⏳ Pendiente / Retenido</option>
+            <option value="pagado">💰 Cobrado / Dinero Recibido</option>
+          </select>
+
+          <!-- Si el sistema ya lo marcó como reembolso, bloqueamos el select visualmente -->
+          <div *ngIf="formData.estado_pago.includes('reembolso')" 
+               style="background-color: #f8fafc; color: #475569; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; font-weight: 600;">
+            <span *ngIf="formData.estado_pago === 'reembolso_parcial'">⚠️ Reembolso Parcial Automático</span>
+            <span *ngIf="formData.estado_pago === 'reembolsado'">💸 Reembolsado (Venta Anulada)</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Método de Pago</label>
+          <select [(ngModel)]="formData.metodo_pago" [disabled]="tieneItemsBloqueados">
+            <option value="efectivo">💵 Efectivo</option>
+            <option value="tarjeta">💳 Tarjeta</option>
+            <option value="bizum">📱 Bizum</option>
+            <option value="plataforma">🌐 Plataforma Web</option>
+            <option value="vinted">👗 Vinted</option>
+            <option value="wallapop">📦 Wallapop</option>
+          </select>
+        </div>
+
+      </div>
+
+      <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;" *ngIf="formData.estado_pago.includes('reembolso')">
+        <div class="field" style="grid-column: span 2;">
+          <div style="background-color: #fff8e1; color: #856404; padding: 12px; border-radius: 8px; border: 1px solid #ffeeba; font-size: 0.9rem;">
+            ⚠️ <b>Efecto Automático:</b> Al marcar el pago como Reembolsado/Anulado, el sistema marcará globalmente la venta como <b>Cancelada</b> y devolverá todas las prendas al inventario automáticamente al guardar.
+          </div>
+        </div>
+
+        <div class="field" *ngIf="formData.estado_pago === 'reembolso_parcial'">
+          <label>Monto a reembolsar al comprador (€)</label>
+          <div style="background-color: #f8fafc; color: #475569; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
+            🤖 <i>El monto de los reembolsos parciales se calcula automáticamente al usar el botón <b>"🔄 Devolución Física"</b> en cada prenda.</i>
+            <div style="font-weight: bold; margin-top: 5px; color: #0f172a;">
+              Total reembolsado hasta ahora: {{ formData.monto_reembolsado | currency:'EUR' }}
+            </div>
+          </div>
+        </div>
+
+        <div class="field" *ngIf="formData.estado_pago === 'reembolsado'">
+          <label>Dinero a devolver (€)</label>
+          <div style="background-color: #fceceb; color: #c53030; padding: 10px; border-radius: 8px; font-weight: bold; border: 1px solid #feb2b2;">
+            💸 Se registra devolución de: {{ formData.total | currency:'EUR' }}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card-section" *ngIf="venta.canal !== 'tienda_fisica'">
+      <div class="section-header"><h3>📦 Logística y Paquetería</h3></div>
+      
+      <div class="grid-4" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
+        
+        <div class="field">
+          <label>Fase del Paquete</label>
+          <select [(ngModel)]="formData.estado_envio">
+            <option value="pendiente_envio">⏳ Pendiente de preparar</option>
+            <option value="empaquetado">📦 Empaquetado (En almacén)</option>
+            <option value="listo_envio">🚚 Listo para enviar</option>
+            <option value="enviado">🚀 Enviado (En Tránsito)</option>
+            <option value="entregado">✅ Entregado con éxito</option>
+            <option value="cancelado">❌ Cancelado (No enviado / Stock devuelto)</option>
+            <option value="devuelto">🔄 Devuelto por transporte (Stock devuelto)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Empresa Transporte</label>
+          <select [(ngModel)]="formData.empresa_transporte">
+            <option value="">Seleccionar...</option>
+            <option value="correos">Correos</option>
+            <option value="vinted_go">Vinted Go</option>
+            <option value="inpost">InPost</option>
+            <option value="seur">SEUR</option>
+            <option value="gls">GLS</option>
+            <option value="boyaca">Boyacá</option>
+            <option value="mondial_relay">Mondial Relay</option>
+            <option value="punto_pack">Punto Pack</option>
+            <option value="otros">Otros</option>
+            <option value="sin_transporte">Sin Transporte</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Número Seguimiento</label>
+          <input type="text" [(ngModel)]="formData.numero_seguimiento" placeholder="Ej: PKG123456789">
+        </div>
+
+        <div class="field">
+          <label class="text-muted"><small>Fecha Envío/Entrega al Comprador</small></label>
+          <input type="datetime-local" [(ngModel)]="formData.fecha_envio">
+        </div>
+      </div>
+
+      <div class="grid-1 mt-3" style="border-top: 1px dashed var(--ap-border-base); padding-top: 15px;">
+        <div class="field">
+          <label>URL / Foto de la Etiqueta de Envío</label>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <input type="text" [(ngModel)]="formData.etiqueta_url" 
+                   (blur)="validarUrlEtiqueta()"
+                   (keyup.enter)="validarUrlEtiqueta()"
+                   placeholder="Pega el link del PDF o foto de la etiqueta..." style="flex: 1;">
+            <button type="button" class="btn-outline-primary" *ngIf="formData.etiqueta_url && estadoEtiqueta === 'valida'" (click)="imprimirEtiqueta()">
+              🖨️ Imprimir Etiqueta
+            </button>
+          </div>
+          
+          <!-- ✨ MENSAJES DE VALIDACIÓN DE ETIQUETA -->
+          <div *ngIf="estadoEtiqueta === 'cargando'" style="margin-top: 8px; font-size: 0.85rem; color: #f39c12;">
+            ⏳ Verificando enlace...
+          </div>
+          <div *ngIf="estadoEtiqueta === 'invalida'" style="margin-top: 8px; font-size: 0.85rem; color: #e74c3c; font-weight: bold; background: #fadbd8; padding: 8px; border-radius: 6px; border: 1px solid #e74c3c;">
+            ❌ El enlace introducido está roto, caducado o no es un documento válido.
+          </div>
+          <div *ngIf="estadoEtiqueta === 'valida'" style="margin-top: 8px; font-size: 0.85rem; color: #27ae60; font-weight: bold;">
+            ✅ Enlace de etiqueta correcto y listo para imprimir.
+          </div>
+
+          <div *ngIf="formData.etiqueta_imprimida" style="margin-top: 8px; color: var(--primary); font-weight: bold; font-size: 0.85rem;">
+            🖨️ Etiqueta marcada como impresa
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card-section">
+      <div class="section-header">
+        <h3>Datos del Comprador Final</h3>
+        <span *ngIf="venta.cliente_id" style="font-size: 0.8rem; color: var(--ap-color-success); background: var(--ap-color-success-bg); padding: 2px 8px; border-radius: 12px; margin-left: 10px;">
+          ✓ Vinculado a CRM (ID: {{ venta.cliente_id }})
+        </span>
+      </div>
+
+      <div *ngIf="identificadorCrm" style="background-color: var(--ap-bg-variant); padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--ap-border-base); display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 1.5rem;">👤</span>
+        <div>
+          <small class="text-muted" style="display: block; line-height: 1;">Identificador principal (Usuario en Vinted / Wallapop)</small>
+          <strong style="font-size: 1.1rem; color: var(--ap-text-main);">{{ identificadorCrm }}</strong>
+        </div>
+      </div>
+
+      <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <div class="field">
+          <label>Nombre Real del Comprador (Para la Etiqueta)</label>
+          <input type="text" [(ngModel)]="formData.nombre_cliente">
+          <small class="text-muted" style="display: block; margin-top: 4px;">
+            Solo nombres reales para paquetería. Si ves un <b>&#64;usuario</b>, bórralo o pásalo al CRM.
+          </small>
+        </div>
+        <div class="field">
+          <label>Email del Comprador</label>
+          <input type="email" [(ngModel)]="formData.email_cliente">
+        </div>
+      </div>
+      
+      <div class="field" style="margin-top: 15px;">
+        <label>Notas Internas sobre esta Venta (Privado para el Staff)</label>
+        <textarea [(ngModel)]="formData.notas_internas" rows="3" placeholder="Ej: El comprador pidió cambio de talla, o el paquete llegó dañado..."></textarea>
+      </div>
+    </section>
+
+    <section class="card-section" style="border: 1px solid var(--vinted-teal); background-color: var(--vinted-teal-light);">
+      <div class="section-header">
+        <h3 style="color: var(--vinted-teal);">Resumen Financiero de la Venta</h3>
+      </div>
+      <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        
+        <div class="field">
+          <label>Subtotal Base</label>
+          <input type="text" [value]="venta.subtotal + ' €'" disabled style="background-color: var(--bg-body); cursor: not-allowed;">
+        </div>
+
+        <div class="field">
+          <label>Total Pagado por el Comprador (€) - <em>Automático</em></label>
+          <div style="display: flex; gap: 10px; align-items: flex-start;">
+            <div style="flex: 1;">
+              <input type="number" step="0.01" min="0" [value]="formData.total" disabled
+                     style="font-weight: bold; border: 2px solid var(--vinted-teal); font-size: 1.1em; background-color: #f4f6f8; color: #2c3e50;">
+              <small class="text-muted" style="display: block; margin-top: 4px;">
+                El total se calcula automáticamente sumando el precio de las prendas. Si necesitas corregirlo, usa el botón <b>✏️ Corregir Precio</b> en la prenda afectada.
+              </small>
+            </div>
+            <button type="button" (click)="darCompensacion()" 
+                    title="Registrar un reembolso asumido por la tienda Allsys sin afectar al dueño"
+                    style="background: #fdf2f2; border: 1px solid #f8d7da; color: #c53030; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem;">
+              💸 Dar Compensación Allsys
+            </button>
+          </div>
+          <p class="text-muted" style="margin-top: 10px; font-size: 0.85rem; background: #f8f9fa; padding: 10px; border-radius: 6px; border-left: 4px solid #c53030;">
+            💡 <b>¿Cuál es la diferencia?</b><br>
+            - Si usas <b>✏️ Corregir Precio</b> en una prenda: Es una corrección de error y el <b>dueño de la prenda cobrará menos</b>.<br>
+            - Si usas <b>💸 Dar Compensación</b>: Allsys asume la pérdida como un gasto y el <b>dueño cobra su parte íntegra</b>.
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+    <div class="form-actions" style="margin-top: 20px;">
+      <button type="button" class="btn-outline-primary" (click)="volver()">Cancelar</button>
+      <button type="button" class="btn-primary main-submit" [disabled]="guardando" (click)="guardarCambios()">
+        {{ guardando ? 'Guardando...' : '💾 Guardar Cambios de la Venta' }}
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<div class="ap-loader-container" *ngIf="cargando">
+  <div class="ap-spinner"></div>
+  <p class="ap-loader-text">Cargando datos de la venta...</p>
+</div>

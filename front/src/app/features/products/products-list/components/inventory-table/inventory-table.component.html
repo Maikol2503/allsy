@@ -1,0 +1,161 @@
+<div class="table-responsive">
+  <table class="custom-table">
+    <thead>
+      <tr>
+        <th class="text-center" style="width: 60px;">Acciones</th>
+        <th>Producto</th>
+        <th>Dueño / Origen</th>
+        <th>Estilo / Color</th>
+        <th class="text-center">Talla</th>
+        <th>Sede y Ubicación</th>
+        <th>Pr. Compra</th>
+        <th>Pr. Venta</th>
+        <th>Fecha Registro</th>
+        <th class="text-center">Stock Físico</th>
+      </tr>
+    </thead>
+    
+    <ng-container *ngFor="let lote of stocksAgrupados">
+      
+      <tr style="background: #ffffff;">
+        <td class="text-center">
+          <button class="btn-icon" [routerLink]="['/edit-stock', lote.stock_config_id]" title="Editar Lote Completo">✏️</button>
+        </td>
+        <td>
+          <div class="prod-info-flat" [routerLink]="['/stock-detail', lote.stock_config_id]" style="cursor: pointer;">
+            <img [src]="lote.imagen_cover || 'assets/img/default-product.png'" class="table-prod-img-small" alt="img">
+            <div class="prod-text-group">
+              <span class="prod-name-bold">{{ lote.producto_nombre | titlecase }}</span>
+              <span class="prod-brand-small" *ngIf="lote.marca">{{ lote.marca.nombre }}</span>
+            </div>
+          </div>
+        </td>
+        <td>
+          <span class="text-muted" *ngIf="!lote.propietario">Allsys (Propio)</span>
+          <span class="text-primary font-weight-bold" *ngIf="lote.propietario" 
+                [routerLink]="['/clientes/detalle', lote.propietario.id]" style="cursor: pointer;">
+            👤 {{ lote.propietario.nombre }}
+          </span>
+        </td>
+        <td>
+          <div class="style-cell">
+            <span class="color-dot" [style.background]="getBackground(lote.hex_identidad)" *ngIf="lote.hex_identidad !== '#FFFFFF'"></span>
+            <span class="style-name">{{ lote.identidad_variante }}</span>
+          </div>
+        </td>
+        <td class="text-center"><span class="badge-size">{{ lote.talla || 'Única' }}</span></td>
+        
+        <td>
+          <div class="location-group">
+            <span class="sede-text" title="{{ lote.ruta_localizacion }}">📍 {{ lote.ruta_localizacion }}</span>
+          </div>
+        </td>
+        <td class="price-buy text-muted">${{ lote.precio_compra | number:'1.2-2' }}</td>
+        <td class="price-sale">${{ lote.precio_venta | number:'1.2-2' }}</td>
+        <td class="text-muted" style="font-size: 0.85em;">{{ lote.fecha_registro | date:'dd/MM/yyyy' }}</td>
+
+        <!-- ✨ REUBICADO: El botón de desplegar ahora está integrado en la celda de Stock -->
+        <td class="text-center">
+          <span class="badge" [ngClass]="{'badge-success': lote.stock_disponible > 0, 'badge-danger': lote.stock_disponible === 0}" 
+                (click)="lote.expandido = !lote.expandido" style="cursor: pointer; display: inline-flex; align-items: center; gap: 6px;" 
+                [title]="lote.expandido ? 'Ocultar unidades' : 'Ver unidades'">
+            {{ lote.stock_disponible }} Uds {{ lote.expandido ? '🔼' : '🔽' }}
+          </span>
+        </td>
+      </tr>
+
+      <tr *ngIf="lote.expandido" style="background: #f8fafc;">
+        <td colspan="10" style="padding: 15px 30px; border-bottom: 2px solid #cbd5e1;">
+          <div style="background: white; border: 1px solid #e0e6ed; border-radius: 8px; padding: 15px;">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h5 style="margin: 0; color: #64748b; font-size: 0.9em; font-weight: 600;">
+                Desglose de unidades físicas (Lote de {{ lote.stock_units.length }} prendas):
+              </h5>
+              
+              <div *ngIf="lote.stock_units.length > 10" style="display: flex; gap: 8px; align-items: center;">
+                <button type="button" class="btn-outline-primary btn-sm" 
+                        [disabled]="lote.pagina_interna === 1" 
+                        (click)="lote.pagina_interna = lote.pagina_interna - 1">
+                  ◀ Ant
+                </button>
+                <span style="font-size: 0.85em; color: #7f8c8d; font-weight: 600;">
+                  Pág {{ lote.pagina_interna }} de {{ Math.ceil(lote.stock_units.length / 10) }}
+                </span>
+                <button type="button" class="btn-outline-primary btn-sm" 
+                        [disabled]="lote.pagina_interna >= (lote.stock_units.length / 10)" 
+                        (click)="lote.pagina_interna = lote.pagina_interna + 1">
+                  Sig ▶
+                </button>
+              </div>
+            </div>
+            
+            <table class="ap-table" style="width: 100%; font-size: 0.85em;">
+              <thead>
+                <tr style="background: #f4f6f8;">
+                  <th style="padding: 8px; border-bottom: 1px solid #e0e6ed;">ID Físico</th>
+                  <th style="padding: 8px; border-bottom: 1px solid #e0e6ed;">Código SKU</th>
+                  <th style="padding: 8px; border-bottom: 1px solid #e0e6ed;">Fecha Ingreso</th>
+                  <th style="padding: 8px; border-bottom: 1px solid #e0e6ed;">Canales Activos</th>
+                  <th style="padding: 8px; border-bottom: 1px solid #e0e6ed;">Gestión de Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let u of lote.stock_units | slice:(lote.pagina_interna - 1) * 10 : lote.pagina_interna * 10" style="border-bottom: 1px solid #f4f6f8;">
+                  <td style="padding: 8px;"><strong>#{{ u.id }}</strong></td>
+                  <td style="padding: 8px;"><span style="font-family: monospace; color: #7f8c8d;">{{ u.sku }}</span></td>
+                  <td style="padding: 8px; color: #7f8c8d;">{{ (u.fecha_compra | date:'dd/MM/yyyy') || '--' }}</td>
+                  <td style="padding: 8px; font-size: 1.2em;">
+                    <span *ngIf="u.canales?.web" title="Tienda Online">🌐</span>
+                    <span *ngIf="u.canales?.vinted" title="Vinted">🛍️</span>
+                    <span *ngIf="u.canales?.wallapop" title="Wallapop">📦</span>
+                    <span *ngIf="!u.canales?.web && !u.canales?.vinted && !u.canales?.wallapop" style="font-size: 0.8em; color: #7f8c8d;">Ninguno</span>
+                  </td>
+                  <td style="padding: 8px;">
+                     <!-- ✨ COLUMNA ESTABILIZADA: Contenedor con ancho fijo para evitar saltos visuales -->
+                     <div style="display: flex; gap: 8px; align-items: center; min-width: 270px; justify-content: flex-start;">
+                       
+                       <!-- Si NO está vendido, mostramos el select para poder editarlo -->
+                       <ng-container *ngIf="u.estado_gestion !== 'vendido'">
+                         <select [(ngModel)]="u.nuevo_estado" class="custom-select" style="padding: 4px; font-size: 0.9em; width: 175px;" title="Cambiar estado">
+                           <option value="en_stock">✅ En almacén</option>
+                           <option value="donado_a_ong">💖 Donado a ONG</option>
+                           <option value="devuelto_dueno">🔙 Devuelto al dueño</option>
+                           <option value="extraviado">⚠️ Extraviado</option>
+                           <option value="en_camino_devolucion">📦 En Tránsito (Dev.)</option>
+                         </select>
+                         
+                         <div style="width: 85px; display: flex; justify-content: center;">
+                           <button class="btn-primary btn-sm" 
+                                   *ngIf="u.nuevo_estado !== u.estado_gestion" 
+                                   (click)="guardarEstadoInline(u, lote)">
+                             💾 Guardar
+                           </button>
+                         </div>
+                       </ng-container>
+
+                       <!-- Si SÍ está vendido, mostramos un texto claro en lugar del select deshabilitado -->
+                       <ng-container *ngIf="u.estado_gestion === 'vendido'">
+                          <span style="font-weight: 600; color: #991b1b; background: #fef2f2; padding: 4px 12px; border-radius: 4px; border: 1px solid #fecaca; width: 175px; text-align: center; display: inline-block;">
+                            💰 Vendida
+                          </span>
+                       </ng-container>
+
+                       <ng-container *ngIf="u.estado_gestion === 'en_camino_devolucion' && u.nuevo_estado === u.estado_gestion">
+                          <span style="font-weight: 600; color: #b45309; background: #fffbeb; padding: 4px 12px; border-radius: 4px; border: 1px solid #fde68a; width: 175px; text-align: center; display: inline-block; font-size: 0.8rem;">
+                            {{ getLabelEstadoGestion(u.estado_gestion) }}
+                          </span>
+                       </ng-container>
+
+                     </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </td>
+      </tr>
+
+    </ng-container>
+  </table>
+</div>

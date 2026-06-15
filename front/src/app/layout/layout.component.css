@@ -1,0 +1,97 @@
+/* =========================================
+   LAYOUT PRINCIPAL (GRID)
+   ========================================= */
+:host {
+  display: grid;
+  /* Altura estándar de navbar: 64px */
+  grid-template-rows: 64px 1fr; 
+  /* Ancho estándar de sidebar: 260px */
+  grid-template-columns: 260px 1fr; 
+  grid-template-areas:
+    "navbar navbar"
+    "sidebar content";
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden; /* Evita el scroll global, solo el contenido hará scroll */
+  background-color: var(--bg-body); /* Fondo base de la app */
+}
+
+/* =========================================
+   NAVBAR (Barra Superior)
+   ========================================= */
+.nav-bar {
+  grid-area: navbar;
+  background-color: var(--ap-bg-main); /* Blanco puro */
+  border-bottom: 1px solid var(--ap-border-base);
+  display: flex;
+  align-items: center;
+  z-index: 20; /* Siempre por encima del sidebar y contenido */
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02); /* Sombra súper sutil inferior */
+}
+
+/* =========================================
+   SIDEBAR (Menú Lateral)
+   ========================================= */
+.sidebar {
+  grid-area: sidebar;
+  background-color: var(--ap-bg-main); /* Blanco puro */
+  border-right: 1px solid var(--ap-border-base);
+  overflow-y: auto;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+}
+
+/* =========================================
+   CONTENIDO PRINCIPAL (Router Outlet)
+   ========================================= */
+.router-outlet-content {
+  grid-area: content;
+  background-color: var(--bg-body); /* Fondo gris claro para que las tarjetas resalten */
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  /* El padding lo maneja cada componente internamente con la clase .page-container */
+  padding: 0; 
+}
+
+
+/* =========================================
+   RESPONSIVE (Móviles y Tablets)
+   ========================================= */
+@media (max-width: 768px) {
+  :host {
+    grid-template-columns: 1fr;
+    grid-template-rows: 60px 1fr;
+    grid-template-areas:
+      "navbar"
+      "content";
+  }
+
+  .sidebar {
+    /* Por ahora lo ocultamos, en el futuro puedes hacer un menú "Off-canvas" (desplegable) */
+    display: none; 
+  }
+}
+
+/* =========================================
+   SCROLLBARS MODERNOS (Webkit)
+   ========================================= */
+/* Esto hace que las barras de desplazamiento no se vean como las antiguas de Windows */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

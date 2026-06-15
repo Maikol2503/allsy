@@ -1,0 +1,38 @@
+<div class="audit-container">
+  <div class="audit-header" *ngIf="!entidadId">
+    <h3>📋 Historial de Auditoría</h3>
+  </div>
+
+  <div class="loading-state" *ngIf="cargando">
+    <div class="spinner-small"></div> Cargando historial...
+  </div>
+
+  <div class="empty-state" *ngIf="!cargando && logs.length === 0">
+    <p>No hay registros de actividad todavía.</p>
+  </div>
+
+  <div class="audit-timeline" *ngIf="!cargando && logs.length > 0">
+    <div class="audit-item" *ngFor="let log of logs">
+      <div class="audit-marker"></div>
+      <div class="audit-content">
+        <div class="audit-top">
+          <span class="audit-action" [attr.data-action]="log.accion">{{ formatAccion(log.accion) }}</span>
+          <span class="audit-date">{{ log.fecha | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        
+        <div class="audit-entity" *ngIf="!entidadId">
+          <strong>{{ log.entidad_tipo }}:</strong> #{{ log.entidad_id }}
+        </div>
+
+        <div class="audit-details">
+          {{ getDetalles(log) }}
+        </div>
+
+        <div class="audit-footer">
+          <span class="audit-user">👤 {{ log.nombre_usuario || 'Sistema' }}</span>
+          <span class="audit-loc" *ngIf="log.localizacion_id">📍 Tienda #{{ log.localizacion_id }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

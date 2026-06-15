@@ -1,0 +1,49 @@
+<div class="autocomplete-container">
+  <div class="input-wrapper">
+    <!-- ✨ NUEVO: Selector de tipo de búsqueda -->
+    <select [(ngModel)]="searchType" (change)="onInputFocus()" class="search-type-select">
+      <option value="todos">Todos</option>
+      <option value="nombre">Nombre</option>
+      <option value="email">Email</option>
+      <option value="telefono">Teléfono</option>
+      <option value="usuario">Usuario</option>
+    </select>
+
+    <input 
+      type="text" 
+      [(ngModel)]="searchTerm" 
+      (ngModelChange)="onSearch($event)"
+      (focus)="onInputFocus()"
+      (blur)="onBlur()"
+      placeholder="Escribe para buscar..."
+      class="autocomplete-input"
+      [ngClass]="{'has-value': clienteSeleccionadoId}"
+    />
+    <button *ngIf="clienteSeleccionadoId" type="button" class="clear-btn" (click)="limpiarSeleccion()">✕</button>
+  </div>
+
+  <div class="dropdown-list" *ngIf="isOpen">
+    <div class="dropdown-item default-item" (click)="seleccionar(null)">
+      {{ defaultLabel }}
+    </div>
+
+    <div class="dropdown-divider" *ngIf="clientes.length > 0"></div>
+
+    <div class="loading-state" *ngIf="cargando">Buscando...</div>
+
+    <div 
+      class="dropdown-item client-item" 
+      *ngFor="let c of clientes" 
+      (click)="seleccionar(c)">
+      <div class="client-name">👤 {{ c.nombre }} {{ c.apellidos || '' }}</div>
+      <div class="client-details">
+        <span *ngIf="c.usuario_vinted">Vinted: {{'@' + c.usuario_vinted}} • </span>
+        <span *ngIf="c.telefono">{{ c.telefono }}</span>
+      </div>
+    </div>
+    
+    <div class="empty-state" *ngIf="!cargando && clientes.length === 0 && searchTerm.length > 1">
+      No se encontraron clientes.
+    </div>
+  </div>
+</div>

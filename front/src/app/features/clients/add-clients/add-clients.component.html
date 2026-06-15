@@ -1,0 +1,133 @@
+<div class="page-container">
+  
+  <header class="form-header">
+    <div class="header-left">
+      <button type="button" class="btn-back" (click)="volver()">←</button>
+      <h2 class="title">{{ isEditMode ? '✏️ Editar Cliente' : '✨ Nuevo Cliente' }}</h2>
+    </div>
+   <span *ngIf="cliente.exento_comision || cliente.exento_tarifa_fija" class="vip-badge" style="background: #27ae60; color: white;">⭐ Exento de Tarifas (VIP)</span>
+  </header>
+
+  <div *ngIf="errorMessage" class="alert-box error">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="successMessage" class="alert-box success">
+    {{ successMessage }}
+  </div>
+  <div *ngIf="cargando" class="loading-state">
+    <p>⏳ Buscando información en el CRM...</p>
+  </div>
+
+  <form *ngIf="!cargando" (ngSubmit)="guardar()" class="client-form">
+    
+    <section class="card-section">
+      <div class="section-title"><h3>👤 Datos Personales</h3></div>
+      <div class="grid-2">
+        <div class="field">
+          <label>Nombre</label>
+          <input type="text" [(ngModel)]="cliente.nombre" name="nombre" placeholder="Ej: María" />
+        </div>
+        <div class="field">
+          <label>Apellidos</label>
+          <input type="text" [(ngModel)]="cliente.apellidos" name="apellidos" placeholder="Ej: Pérez Gómez" />
+        </div>
+      </div>
+    </section>
+
+    <section class="card-section">
+      <div class="section-title"><h3>🌐 Canales de Venta y Contacto</h3></div>
+      <div class="grid-2">
+        <div class="field">
+          <label>👗 Usuario Vinted</label>
+          <div class="input-addon">
+            <span class="addon">&#64;</span>
+            <input type="text" [(ngModel)]="cliente.usuario_vinted" name="vinted" placeholder="usuario_vinted" />
+          </div>
+        </div>
+        <div class="field">
+          <label>📦 Usuario Wallapop</label>
+          <div class="input-addon">
+            <span class="addon">&#64;</span>
+            <input type="text" [(ngModel)]="cliente.usuario_wallapop" name="wallapop" placeholder="usuario_wallapop" />
+          </div>
+        </div>
+        <div class="field">
+          <label>📱 Teléfono</label>
+          <input type="tel" [(ngModel)]="cliente.telefono" name="telefono" placeholder="+34 600 000 000" />
+        </div>
+        <div class="field">
+          <label>📧 Email</label>
+          <input type="email" [(ngModel)]="cliente.email" name="email" placeholder="correo@ejemplo.com" />
+        </div>
+      </div>
+    </section>
+
+    <section class="card-section">
+      <div class="section-title"><h3>📍 Dirección</h3></div>
+      <div class="field full-width">
+        <label>Dirección Completa</label>
+        <input type="text" [(ngModel)]="cliente.direccion" name="direccion" placeholder="Calle, número, piso..." />
+      </div>
+      <div class="grid-3">
+        <div class="field">
+          <label>C.P.</label>
+          <input type="text" [(ngModel)]="cliente.codigo_postal" name="cp" placeholder="28001" />
+        </div>
+        <div class="field">
+          <label>Ciudad</label>
+          <input type="text" [(ngModel)]="cliente.ciudad" name="ciudad" placeholder="Madrid" />
+        </div>
+        <div class="field">
+          <label>País</label>
+          <select [(ngModel)]="cliente.pais" name="pais">
+            <option *ngFor="let p of listaPaises" [value]="p.nombre">{{p.bandera}} {{p.nombre}}</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <section class="card-section" style="border: 2px solid #e0e6ed; border-left: 4px solid #f1c40f;">
+      <div class="section-title"><h3>🤝 Acuerdos Financieros (VIP)</h3></div>
+      
+      <div class="grid-3">
+        <div class="field toggle-field">
+          <label class="toggle-switch">
+            <input type="checkbox" [(ngModel)]="cliente.exento_comision" name="exentoComision" />
+            <span class="slider"></span>
+            <span class="label-text">Exento de Comisión (Ganancia 0%)</span>
+          </label>
+        </div>
+
+        <div class="field toggle-field">
+          <label class="toggle-switch">
+            <input type="checkbox" [(ngModel)]="cliente.exento_tarifa_fija" name="exentoFija" />
+            <span class="slider"></span>
+            <span class="label-text">Exento Tarifa Gestión (1.50€)</span>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <section class="card-section notes-section">
+      <div class="section-title"><h3>📝 Notas Internas</h3></div>
+      <textarea [(ngModel)]="cliente.notas_internas" name="notas" rows="3" placeholder="Información adicional sobre el cliente..."></textarea>
+    </section>
+
+    <div class="footer-actions">
+      <div class="left-actions">
+        <button *ngIf="isEditMode" type="button" class="btn-delete" (click)="desactivar()" [disabled]="isSubmitting">
+          🗑️ Desactivar Cliente
+        </button>
+      </div>
+
+      <div class="right-actions">
+        <button type="button" class="btn-cancel" (click)="volver()" [disabled]="isSubmitting">Cancelar</button>
+        <button type="submit" class="btn-save" [disabled]="isSubmitting">
+          {{ isSubmitting ? '⌛ Guardando...' : (isEditMode ? '💾 Guardar Cambios' : '✨ Registrar Cliente') }}
+        </button>
+      </div>
+    </div>
+
+  </form>
+</div>

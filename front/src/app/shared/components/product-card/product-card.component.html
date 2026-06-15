@@ -1,0 +1,60 @@
+<article class="product-card">
+      
+  <div class="product-image-container" [routerLink]="['/detail-product', producto.id]">
+    <img class="product-image" [src]="producto.imagen || 'assets/img/default-product.png'" alt="{{ producto.nombre }}">
+    <div class="image-overlay">
+      <span class="overlay-btn">Ver detalle</span>
+    </div>
+  </div>
+  
+  <div class="product-content">
+    
+    <div class="top-info">
+      <span class="brand-name" *ngIf="producto.marca">{{ producto.marca.nombre }}</span>
+      <span class="stock-badge" [ngClass]="{'no-stock': producto.stock_total === 0}">
+        {{ producto.stock_total > 0 ? producto.stock_total + ' en stock' : 'Agotado' }}
+      </span>
+    </div>
+    
+    <h3 class="product-title title-truncate" [routerLink]="['/detail-product', producto.id]">
+      {{ producto.nombre | titlecase }}
+    </h3>
+    
+    <p class="category-type">
+      {{ producto.categoria?.nombre || 'Sin categoría' }} <span class="dot">•</span> {{ producto.tipo | titlecase }}
+    </p>
+
+    <div class="card-footer-info">
+      
+      <div class="mid-info">
+        <div class="price-container">
+          <span class="price-label">Precio desde</span>
+          <p class="price" *ngIf="producto.precio_min !== null">
+            ${{ producto.precio_min | number:'1.2-2' }}
+            <span class="price-max" *ngIf="producto.precio_min !== producto.precio_max"> - ${{ producto.precio_max | number:'1.2-2' }}</span>
+          </p>
+          <p class="price empty-price" *ngIf="producto.precio_min === null">Consultar</p>
+        </div>
+
+        <div class="color-swatches" *ngIf="producto.colores?.length">
+          <span class="color-dot" 
+                *ngFor="let hex of producto.colores | slice:0:4" 
+                [style.background]="hex"
+                [title]="'Color: ' + hex">
+          </span>
+          <span class="color-dot-more" *ngIf="producto.colores.length > 4">+{{ producto.colores.length - 4 }}</span>
+        </div>
+      </div>
+
+      <div class="published-status" *ngIf="producto.canales?.web || producto.canales?.vinted || producto.canales?.wallapop">
+        <span class="channels-label">Publicado en:</span>
+        <div class="logos-container">
+          <img class="channel-logo" *ngIf="producto.canales.web" src="assets/img/logos/web-logo.png" alt="Web" title="Web">
+          <img class="channel-logo" *ngIf="producto.canales.vinted" src="assets/img/logos/vinted-logo.png" alt="Vinted" title="Vinted">
+          <img class="channel-logo" *ngIf="producto.canales.wallapop" src="assets/img/logos/wallapop-logo.png" alt="Wallapop" title="Wallapop">
+        </div>
+      </div>
+
+    </div>
+  </div>
+</article>

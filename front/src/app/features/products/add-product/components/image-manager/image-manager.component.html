@@ -1,0 +1,37 @@
+<div class="upload-wrapper">
+  <input type="file" [id]="'file-upload-' + variantId" multiple (change)="onFilesSelected($event)" accept="image/*" style="display: none;" />
+  
+  <label [for]="'file-upload-' + variantId" class="upload-box">
+    <div class="upload-content">
+      <span class="upload-icon">↑_</span>
+      <span class="upload-title">Subir imágenes</span>
+      <span class="upload-subtitle">Elige imágenes o arrástralas aquí. Max 20 MB.</span>
+    </div>
+  </label>
+</div>
+
+<div class="image-preview-list" cdkDropList cdkDropListOrientation="mixed" (cdkDropListDropped)="onImageDrop($event)">
+  <div class="image-thumbnail" *ngFor="let img of imagenes; let i = index" cdkDrag>
+    <img [src]="img" (click)="abrirModal(i)" alt="Vista previa" />
+    <span class="badge-cover" *ngIf="i === 0">Portada</span>
+    
+    <button type="button" class="btn-remove-img" (click)="eliminarImagen(i)">✕</button>
+    
+    <div class="example-custom-placeholder" *cdkDragPlaceholder></div>
+  </div>
+</div>
+
+<div class="image-modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
+  
+  <button type="button" class="modal-close-btn" (click)="cerrarModal()">✕</button>
+  
+  <button type="button" class="nav-btn prev" (click)="navegar(-1, $event)" *ngIf="imagenes.length > 1">‹</button>
+  
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <img [src]="imagenes[indiceActivo]" />
+    <div class="modal-counter">{{ indiceActivo + 1 }} / {{ imagenes.length }}</div>
+  </div>
+
+  <button type="button" class="nav-btn next" (click)="navegar(1, $event)" *ngIf="imagenes.length > 1">›</button>
+  
+</div>

@@ -1,0 +1,172 @@
+<div class="page-container" *ngIf="!cargando && cliente">
+  
+  <div class="client-header">
+    <div class="header-info">
+      <button class="btn-icon back-btn" (click)="volver()" title="Volver al Listado">←</button>
+      <div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <h2 class="client-name">{{ cliente.nombre }} {{ cliente.apellidos || '' }}</h2>
+          <span class="vip-badge" *ngIf="cliente.exento_comision || cliente.exento_tarifa_fija" title="Condiciones VIP Activas">🌟 VIP</span>
+        </div>
+        <p class="client-id" *ngIf="cliente.id">ID de Registro: #{{ cliente.id }} | Dueño de la Prenda</p>
+      </div>
+    </div>
+    <button class="btn-outline-primary" (click)="editarCliente()">✏️ Editar Datos</button>
+  </div>
+
+  <div class="dashboard-grid">
+    
+    <!-- CONTACTO Y PLATAFORMAS -->
+    <div class="card-column">
+      
+      <div class="info-card">
+        <div class="card-header">
+          <span class="icon">📞</span>
+          <div>
+            <h3>Datos de Contacto</h3>
+            <p class="sub">Información principal del dueño</p>
+          </div>
+        </div>
+        
+        <div class="data-row">
+          <span class="label">Email Personal</span>
+          <span class="value" *ngIf="cliente.email"><a [href]="'mailto:' + cliente.email">{{ cliente.email }}</a></span>
+          <span class="value empty" *ngIf="!cliente.email">No registrado</span>
+        </div>
+        <div class="data-row">
+          <span class="label">Teléfono / WhatsApp</span>
+          <span class="value">{{ cliente.telefono || 'No registrado' }}</span>
+        </div>
+        <div class="data-row">
+          <span class="label">DNI / Pasaporte / NIE</span>
+          <span class="value">{{ cliente.dni_nie || 'No registrado' }}</span>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="card-header">
+          <span class="icon">🛍️</span>
+          <div>
+            <h3>Perfiles en Plataformas</h3>
+            <p class="sub">Cuentas vinculadas</p>
+          </div>
+        </div>
+        
+        <div class="data-row">
+          <span class="label">Usuario Vinted</span>
+          <span class="value" *ngIf="cliente.usuario_vinted">
+            <a [href]="'https://www.vinted.es/member/' + cliente.usuario_vinted" target="_blank">&#64;{{ cliente.usuario_vinted }}</a>
+          </span>
+          <span class="value empty" *ngIf="!cliente.usuario_vinted">Sin vincular</span>
+        </div>
+        <div class="data-row">
+          <span class="label">Usuario Wallapop</span>
+          <span class="value" *ngIf="cliente.usuario_wallapop">&#64;{{ cliente.usuario_wallapop }}</span>
+          <span class="value empty" *ngIf="!cliente.usuario_wallapop">Sin vincular</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- LOGÍSTICA Y FINANZAS -->
+    <div class="card-column">
+      
+      <div class="info-card highlight-card">
+        <div class="card-header">
+          <span class="icon">🤝</span>
+          <div>
+            <h3>Acuerdos Financieros</h3>
+            <p class="sub">Condiciones para la venta de sus prendas</p>
+          </div>
+        </div>
+        
+        <div class="data-row">
+          <span class="label">Comisión de Allsys</span>
+          <span class="value" [class.text-danger]="cliente.exento_comision" [class.text-success]="!cliente.exento_comision">
+            <b>{{ cliente.exento_comision ? '0% (Exento VIP)' : 'Dinámica (Según PVP)' }}</b>
+          </span>
+        </div>
+        <div class="data-row">
+          <span class="label">Tarifa Fija de Gestión</span>
+          <span class="value">
+            {{ cliente.exento_tarifa_fija ? '✅ No se le cobra' : '❌ Paga 1.50€ por venta' }}
+          </span>
+        </div>
+        <div class="data-row">
+          <span class="label">Pago por Bizum</span>
+          <span class="value">Autorizado</span>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="card-header">
+          <span class="icon">📍</span>
+          <div>
+            <h3>Dirección Predeterminada</h3>
+            <p class="sub">Para envíos o recogidas</p>
+          </div>
+        </div>
+        
+        <div class="address-block">
+          <p *ngIf="cliente.direccion"><b>Calle:</b> {{ cliente.direccion }}</p>
+          <p *ngIf="cliente.ciudad || cliente.codigo_postal || cliente.provincia">
+            <b>Zona:</b> {{ cliente.codigo_postal }} {{ cliente.ciudad }}
+            <span *ngIf="cliente.provincia">({{ cliente.provincia }})</span>
+          </p>
+          <div style="margin-top: 10px;">
+             <span class="badge-pill">🇪🇸 {{ cliente.pais || 'España' }}</span>
+          </div>
+          <p class="empty" *ngIf="!cliente.direccion && !cliente.ciudad">El cliente no tiene dirección registrada.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- NOTAS INTERNAS (Sticky Note Style) -->
+    <div class="card-column" style="grid-column: span 1;">
+      <div class="info-card note-card" [class.empty-note]="!cliente.notas_internas">
+        <div class="card-header">
+          <span class="icon">📝</span>
+          <div>
+            <h3>Notas Internas</h3>
+            <p class="sub">Solo visible para el equipo</p>
+          </div>
+        </div>
+        <div class="note-content">
+          <p *ngIf="cliente.notas_internas">{{ cliente.notas_internas }}</p>
+          <p *ngIf="!cliente.notas_internas" class="empty">No hay notas registradas para este dueño.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="divider-modern"></div>
+
+  <!-- PANEL DE CONSIGNACIÓN Y FINANZAS REALES -->
+  <div class="consignacion-wrapper">
+    <div class="consignacion-header">
+      <span class="icon-big">📈</span>
+      <div>
+        <h2>Panel de Consignación e Inventario</h2>
+        <p>Aquí gestionas el dinero retenido y los pagos realizados a este dueño de prendas.</p>
+      </div>
+    </div>
+    
+    <!-- Componente inyectado -->
+    <app-consignacion-panel [clienteId]="cliente.id!"></app-consignacion-panel>
+  </div>
+
+</div>
+
+<div class="ap-loader-container" *ngIf="cargando">
+  <div class="ap-spinner"></div>
+  <p class="ap-loader-text">Cargando perfil del cliente...</p>
+</div>
+
+<div class="error-state" *ngIf="error">
+  <span class="error-icon">⚠️</span>
+  <h3>Oops, ha ocurrido un error</h3>
+  <p>{{ error }}</p>
+  <button class="btn-outline-primary" (click)="volver()">Regresar al listado</button>
+</div>

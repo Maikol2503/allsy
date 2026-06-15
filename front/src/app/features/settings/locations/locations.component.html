@@ -1,0 +1,112 @@
+<div class="page-container">
+  <div class="header-section">
+    <h2>📍 Gestión de Localizaciones</h2>
+    <p>Organiza la estructura física de tus tiendas y almacenes.</p>
+  </div>
+
+  <div class="layout-grid">
+    
+    <!-- Lista/Árbol de Localizaciones -->
+    <div class="card tree-card">
+      <div class="card-header">
+        <h3>Estructura Actual</h3>
+        <button class="btn-sm btn-outline-primary" (click)="nuevaLocalizacion()">+ Nueva Raíz</button>
+      </div>
+      
+      <div class="tree-container">
+        <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: arbol }"></ng-container>
+      </div>
+      
+      <div class="empty-state" *ngIf="arbol.length === 0 && !cargando">
+        No hay localizaciones creadas.
+      </div>
+      <div class="loading-state" *ngIf="cargando">Cargando estructura...</div>
+    </div>
+
+    <!-- Formulario de Edición/Creación -->
+    <div class="card form-card" *ngIf="locActual">
+      <div class="card-header">
+        <h3>{{ editandoId ? '✏️ Editar Localización' : '✨ Nueva Localización' }}</h3>
+      </div>
+      
+      <div class="form-body">
+        <div class="field">
+          <label>Nombre <span class="text-danger">*</span></label>
+          <input type="text" [(ngModel)]="locActual.nombre" placeholder="Ej: Tienda Centro, Armario 2...">
+        </div>
+
+        <div class="field">
+          <label>Tipo de Espacio</label>
+          <select [(ngModel)]="locActual.tipo">
+            <option value="tienda">🏪 Tienda (Venta Física)</option>
+            <option value="almacen">📦 Almacén (Inventario/Online)</option>
+            <option value="casa">🏠 Casa (Temporal/Trastero)</option>
+            <option value="estante">🗄️ Sub-división (Estante, Caja, Perchero)</option>
+          </select>
+        </div>
+
+        <div class="field" *ngIf="editandoId">
+          <label>Ubicación Padre</label>
+          <select [(ngModel)]="locActual.parent_id" [disabled]="(locActual.hijos?.length || 0) > 0">
+            <option [ngValue]="null">--- Nivel Principal (Raíz) ---</option>
+            <option *ngFor="let loc of flatList" [ngValue]="loc.id" [disabled]="loc.id === editandoId">
+              {{ loc.nombre }} ({{ loc.tipo }})
+            </option>
+          </select>
+          <small class="text-muted" *ngIf="(locActual.hijos?.length || 0) > 0">No puedes mover una ubicación que ya tiene hijos.</small>
+        </div>
+
+        <div class="field">
+          <label>Descripción / Notas</label>
+          <textarea [(ngModel)]="locActual.descripcion" rows="2" placeholder="Detalles de acceso, responsable..."></textarea>
+        </div>
+
+        <div class="form-actions mt-3">
+          <button class="btn-outline-primary" (click)="locActual = null">Cancelar</button>
+          <button class="btn-primary" (click)="guardar()" [disabled]="guardando || !locActual.nombre">
+            {{ guardando ? 'Guardando...' : '💾 Guardar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Template Recursivo para el Árbol -->
+<ng-template #recursiveList let-lista>
+  <ul class="loc-list">
+    <li *ngFor="let item of lista">
+      <div class="loc-row" [class.active]="editandoId === item.id">
+        <div class="loc-info">
+          <!-- Botón de expandir/contraer (solo visible si tiene hijos) -->
+          <button class="btn-toggle" 
+                  *ngIf="item.hijos && item.hijos.length > 0" 
+                  (click)="toggleExpand(item.id)">
+            {{ isExpanded(item.id) ? '▼' : '▶' }}
+          </button>
+          <!-- Espaciador si no tiene hijos para mantener alineación -->
+          <span class="btn-toggle-spacer" *ngIf="!item.hijos || item.hijos.length === 0"></span>
+
+          <span class="loc-icon">
+            <span *ngIf="item.tipo === 'tienda'">🏪</span>
+            <span *ngIf="item.tipo === 'almacen'">📦</span>
+            <span *ngIf="item.tipo === 'casa'">🏠</span>
+            <span *ngIf="item.tipo === 'estante'">🗄️</span>
+          </span>
+          <span class="loc-name" (click)="editar(item)" style="cursor: pointer;">{{ item.nombre }}</span>
+        </div>
+        <div class="loc-actions">
+          <button class="btn-tiny" (click)="nuevoHijo(item)" title="Añadir sub-división">+</button>
+          <button class="btn-tiny" (click)="editar(item)" title="Editar">✏️</button>
+          <button class="btn-tiny text-danger" (click)="eliminar(item)" title="Eliminar">🗑️</button>
+        </div>
+      </div>
+      
+      <!-- Recursividad para los hijos (solo se muestra si está expandido) -->
+      <div *ngIf="isExpanded(item.id) && item.hijos && item.hijos.length > 0" class="loc-children">
+        <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: item.hijos }"></ng-container>
+      </div>
+    </li>
+  </ul>
+</ng-template>

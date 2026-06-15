@@ -1,0 +1,198 @@
+<div class="online-orders-container">
+  
+  <div class="header">
+    <h2>🌐 Pedidos Online</h2>
+    <p>Historial completo de ventas realizadas en Vinted, Wallapop, y Tienda Online.</p>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="filters-bar">
+    
+    <div class="search-box">
+      <select [(ngModel)]="tipoBusqueda" (change)="aplicarFiltros()">
+        <option value="codigo_venta">Ticket / Cód. Venta</option>
+        <option value="numero_seguimiento">Nº Seguimiento</option>
+        <option value="stock_unit_id">ID Prenda (Stock Unit)</option>
+      </select>
+      <input type="text" [(ngModel)]="search" (keyup.enter)="aplicarFiltros()" placeholder="Buscar pedido...">
+    </div>
+
+    <select [(ngModel)]="filtro_estado" (change)="aplicarFiltros()" class="filter-select">
+      <option value="">Todos los Estados</option>
+      <option value="pendiente">Pendiente de enviar</option>
+      <option value="empaquetado">Empaquetado</option>
+      <option value="listo_envio">Listo para enviar</option>
+      <option value="enviado">Enviado</option>
+      <option value="entregado">Pedido finalizado (entregado)</option>
+      <option value="devolucion">Devolución en curso</option>
+      <option value="cancelado">Cancelado (Anulado)</option>
+    </select>
+
+    <div style="min-width: 250px;">
+      <app-client-selector 
+        [clienteInicialId]="cliente_id" 
+        [defaultLabel]="'Buscar Comprador (Todos)'"
+        (clientSelected)="onClienteSelected($event)">
+      </app-client-selector>
+    </div>
+
+    <div style="min-width: 200px;">
+      <app-location-selector 
+        [localizacionId]="localizacion_id" 
+        (localizacionChange)="localizacion_id = $event; aplicarFiltros()">
+      </app-location-selector>
+    </div>
+
+    <div class="date-filter-group" style="display: flex; align-items: center; gap: 10px; background: #f8fafc; padding: 5px 15px; border-radius: 8px; border: 1px solid #cbd5e1;">
+      <select [(ngModel)]="tipo_fecha" (change)="aplicarFiltros()" class="filter-select" style="border: none; background: transparent; padding: 5px; font-weight: 600; color: #007782;">
+        <option value="creacion">Fecha Creación</option>
+        <option value="envio">Fecha Envío</option>
+        <option value="entrega">Fecha Entrega</option>
+        <option value="finalizado">Fecha Finalizado</option>
+        <option value="cancelado">Fecha Cancelado</option>
+        <option value="devuelta">Fecha Devuelto</option>
+      </select>
+      
+      <app-date-selector
+        [fechaInicio]="fecha_inicio"
+        [fechaFin]="fecha_fin"
+        (fechasCambiadas)="onFechasSelected($event)">
+      </app-date-selector>
+    </div>
+
+    <button class="btn-primary" (click)="aplicarFiltros()" style="padding: 10px 20px; border-radius: 8px; border: none; background: #007782; color: white; cursor: pointer; font-weight: bold;">
+      Aplicar Filtros
+    </button>
+  </div>
+
+  <!-- FILTROS ACTIVOS (PÍLDORAS) -->
+  <div class="active-filters-bar" *ngIf="hasActiveFilters">
+    <div class="filter-pill" *ngIf="search">
+      <span>🔍 <strong>{{ tipoBusqueda }}:</strong> {{ search }}</span>
+      <span class="remove-btn" (click)="removerFiltro('search')">×</span>
+    </div>
+
+    <div class="filter-pill" *ngIf="filtro_estado">
+      <span>📌 <strong>Estado:</strong> {{ getLabelEstado(filtro_estado) }}</span>
+      <span class="remove-btn" (click)="removerFiltro('estado')">×</span>
+    </div>
+
+    <div class="filter-pill" *ngIf="cliente_id">
+      <span>👤 <strong>Cliente seleccionado</strong></span>
+      <span class="remove-btn" (click)="removerFiltro('cliente')">×</span>
+    </div>
+
+    <div class="filter-pill" *ngIf="fecha_inicio || fecha_fin">
+      <span>📅 <strong>{{ tipo_fecha }}:</strong> {{ fecha_inicio | date:'dd/MM' }} - {{ fecha_fin | date:'dd/MM' }}</span>
+      <span class="remove-btn" (click)="removerFiltro('fechas')">×</span>
+    </div>
+
+    <button class="clear-all-btn" (click)="limpiarFiltros()">Limpiar todo</button>
+  </div>
+
+  <!-- ESTADOS DE CARGA -->
+  <div *ngIf="cargando" class="loading-state">
+    <div class="spinner-small"></div> Obteniendo pedidos online...
+  </div>
+
+  <div *ngIf="!cargando && pedidos.length === 0" class="empty-state">
+    <h3>Sin resultados</h3>
+    <p>No se encontraron pedidos online con los filtros actuales.</p>
+  </div>
+
+  <!-- TABLA DE PEDIDOS -->
+  <div class="table-responsive" *ngIf="!cargando && pedidos.length > 0">
+    <table class="ap-table">
+      <thead>
+        <tr>
+          <th>Producto / Lote</th>
+          <th>Total Vendido</th>
+          <th>Comprador</th>
+          <th>Estado del Pedido</th>
+          <th>Fecha de Creación</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of pedidos">
+          
+          <td>
+            <div class="prod-cell">
+              <img [src]="p.imagen_cover || 'assets/img/default-product.png'" class="prod-img" alt="Imagen">
+              <div style="flex: 1;">
+                <div class="prod-title" *ngIf="!p.detalles || p.detalles.length === 1">
+                  {{ p.detalles?.[0]?.nombre_producto || 'Prenda' }}
+                </div>
+                <div class="prod-title" *ngIf="p.detalles && p.detalles.length > 1">
+                  📦 Lote de {{ p.detalles.length }} artículos
+                </div>
+                
+                <!-- ✨ DESGLOSE DE ÍTEMS -->
+                <div class="items-mini-list" style="margin-top: 8px; display: flex; flex-direction: column; gap: 4px;">
+                   <div *ngFor="let d of p.detalles | slice:0:3" style="font-size: 0.75rem; color: #64748b; background: #f8fafc; padding: 4px 8px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                      <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">#{{ $any(d).stock_unit_id }} - {{ $any(d).nombre_producto }}</span>
+                      
+                      <!-- Indicador de Devolución individual -->
+                      <span *ngIf="$any(d).devuelto" style="color: #e74c3c; font-weight: bold; background: #fceceb; padding: 1px 4px; border-radius: 3px; font-size: 0.7rem;">
+                        ↩️ DEVUELTO
+                      </span>
+                   </div>
+                   <div *ngIf="p.detalles?.length > 3" style="font-size: 0.75rem; color: #94a3b8; font-style: italic; padding-left: 4px;">
+                     ... y {{ p.detalles.length - 3 }} artículos más
+                   </div>
+                </div>
+
+                <div style="font-size: 0.8rem; color: #7f8c8d; margin-top: 8px; display: flex; justify-content: space-between; align-items: center;">
+                  <span>Canal: <strong style="color: #007782; text-transform: uppercase;">{{ p.canal }}</strong></span>
+                  <a [routerLink]="['/order-detail', p.id]" style="color: #007782; font-weight: bold; text-decoration: none; font-size: 0.85rem;">Ver Detalle 👁️</a>
+                </div>
+              </div>
+            </div>
+          </td>
+
+          <td>
+            <strong>{{ p.total | currency:'EUR':'symbol' }}</strong>
+          </td>
+
+          <td>
+            <div style="font-weight: 600; color: #1e293b;">{{ p.nombre_cliente || p.identificador_cliente || 'Desconocido' }}</div>
+            <div style="font-size: 0.8rem; color: #64748b;">Ticket: #{{ p.codigo_venta }}</div>
+          </td>
+
+          <td>
+            <span class="status-pill" 
+                  [ngClass]="{
+                    'finalizado': p.estado_envio === 'entregado',
+                    'cancelado': p.estado_envio === 'cancelado' || p.estado_pago === 'reembolsado',
+                    'devolucion': p.estado_envio === 'devuelto' || p.estado_pago === 'reembolso_parcial',
+                    'en_curso': p.estado_envio === 'enviado',
+                    'pendiente': !p.estado_envio || p.estado_envio === 'pendiente_envio',
+                    'empaquetado': p.estado_envio === 'empaquetado',
+                    'listo_envio': p.estado_envio === 'listo_envio'
+                  }">
+              {{ getEstatusInterpretado(p) }}
+            </span>
+            <div style="font-size: 0.8rem; color: #64748b; margin-top: 6px;">
+              <span *ngIf="p.estado_envio === 'cancelado' || p.estado_pago === 'reembolsado'">Venta Anulada</span>
+              <span *ngIf="p.estado_envio === 'devuelto' || p.estado_pago === 'reembolso_parcial'">Artículos devueltos</span>
+              <span *ngIf="p.estado_envio === 'entregado' && p.fecha_entrega">Entregado el: {{ p.fecha_entrega | date:'dd/MM/yyyy' }}</span>
+              <span *ngIf="p.estado_envio === 'enviado' && p.fecha_envio">Enviado el: {{ p.fecha_envio | date:'dd/MM/yyyy' }}</span>
+              <span *ngIf="p.numero_seguimiento" style="display: block; margin-top: 2px;">Trk: {{ p.numero_seguimiento }}</span>
+            </div>
+          </td>
+
+          <td>
+            <div style="color: #334155; font-weight: 500;">{{ p.fecha | date:'dd/MM/yyyy HH:mm' }}</div>
+          </td>
+
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- PAGINACIÓN SENCILLA -->
+  <div style="display: flex; justify-content: center; gap: 15px; margin-top: 20px;" *ngIf="!cargando && (page > 1 || pedidos.length === limit)">
+    <button (click)="cambiarPagina(-1)" [disabled]="page === 1" style="padding: 8px 16px; border-radius: 8px; border: 1px solid #cbd5e1; background: white; cursor: pointer;">◀ Anterior</button>
+    <button (click)="cambiarPagina(1)" [disabled]="pedidos.length < limit" style="padding: 8px 16px; border-radius: 8px; border: 1px solid #cbd5e1; background: white; cursor: pointer;">Siguiente ▶</button>
+  </div>
+
+</div>

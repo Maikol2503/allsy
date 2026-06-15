@@ -1,0 +1,150 @@
+<div class="page-container" *ngIf="!cargando && venta; else loadingTemplate">
+  <div class="header">
+    <div>
+      <h2>📄 Detalle del Pedido #{{ venta.codigo_venta }}</h2>
+      <p>Registrado el: {{ venta.fecha | date:'dd/MM/yyyy HH:mm' }} | Canal: <strong style="color: #007782; text-transform: uppercase;">{{ venta.canal }}</strong></p>
+    </div>
+    <div style="display: flex; gap: 10px;">
+      <button class="btn-back" (click)="volver()">← Volver</button>
+      <button class="btn-back" [routerLink]="['/edit-sale', venta.id]" style="background: #007782; color: white; border-color: #007782;">✏️ Editar Pedido</button>
+    </div>
+  </div>
+
+  <div class="info-grid">
+    <div class="info-card">
+      <h3>👤 Comprador</h3>
+      <div class="info-row">
+        <span class="info-label">Nombre:</span>
+        <span class="info-value">{{ venta.nombre_cliente || venta.cliente?.nombre || 'Desconocido' }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Email:</span>
+        <span class="info-value">{{ venta.email_cliente || venta.cliente?.email || 'N/A' }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">País:</span>
+        <span class="info-value">{{ venta.cliente?.pais || 'N/A' }}</span>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <h3>🚚 Logística y Estado</h3>
+      <div class="info-row">
+        <span class="info-label">Estado Envío:</span>
+        <span class="info-value" style="color: #007782;">{{ getEstatusInterpretado(venta) }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Nº Seguimiento:</span>
+        <span class="info-value">{{ venta.numero_seguimiento || 'No registrado' }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Transportista:</span>
+        <span class="info-value">{{ venta.empresa_transporte || 'No registrado' }}</span>
+      </div>
+    </div>
+
+    <div class="info-card" style="border-top: 4px solid #007782;">
+      <h3>💰 Finanzas</h3>
+      <div class="info-row">
+        <span class="info-label">Subtotal Prendas:</span>
+        <span class="info-value">{{ venta.subtotal | currency:'EUR':'symbol' }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Envío Cobrado:</span>
+        <span class="info-value">{{ venta.costo_envio | currency:'EUR':'symbol' }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Descuentos:</span>
+        <span class="info-value" style="color: #e74c3c;">-{{ venta.descuento_total | currency:'EUR':'symbol' }}</span>
+      </div>
+      <div class="info-row" style="border-top: 1px solid #e2e8f0; padding-top: 8px; margin-top: 8px; font-size: 1.1rem;">
+        <span class="info-label" style="color: #1e293b;">Total Final:</span>
+        <span class="info-value" style="color: #007782;">{{ venta.total | currency:'EUR':'symbol' }}</span>
+      </div>
+
+      <!-- ✨ LISTA DE COMPENSACIONES -->
+      <div *ngIf="venta.ajustes_financieros && venta.ajustes_financieros.length > 0" style="margin-top: 15px; border-top: 2px dashed #e2e8f0; padding-top: 10px;">
+        <h4 style="font-size: 0.9rem; color: #b45309; margin: 0 0 10px 0;">💸 Compensaciones Aplicadas</h4>
+        <div *ngFor="let ajuste of venta.ajustes_financieros" style="background: #fffbeb; border: 1px solid #fde68a; padding: 8px; border-radius: 6px; margin-bottom: 8px;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: bold; color: #92400e;">
+            <span>{{ ajuste.fecha | date:'dd/MM/yy' }}</span>
+            <span>-{{ ajuste.monto | currency:'EUR':'symbol' }}</span>
+          </div>
+          <div style="font-size: 0.75rem; color: #b45309; margin-top: 4px; line-height: 1.2;">
+            {{ ajuste.notas || ajuste.concepto }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="items-section">
+    <div class="items-header">
+      <h3>📦 Artículos en el Pedido ({{ itemsFiltrados.length }})</h3>
+      <div class="search-box">
+        <span style="padding: 8px 10px; color: #64748b;">🔍</span>
+        <input type="text" [(ngModel)]="filtroSku" (ngModelChange)="pageInterna = 1" placeholder="Buscar por ID o Nombre...">
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="ap-table">
+        <thead>
+          <tr>
+            <th>Prenda</th>
+            <th>ID Físico (SKU)</th>
+            <th>Talla / Color</th>
+            <th>Precio</th>
+            <th>Estado Logístico</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of itemsPaginados">
+            <td>
+              <div class="prod-cell">
+                <img [src]="item.imagen_cover || 'assets/img/default-product.png'" class="prod-img" alt="Imagen">
+                <span class="prod-title">{{ item.nombre_producto || 'Prenda' }}</span>
+              </div>
+            </td>
+            <td style="font-family: monospace; font-weight: 600; color: #64748b;">
+              #{{ item.stock_unit_id }}
+            </td>
+            <td>
+              {{ item.talla }} <span *ngIf="item.color">- {{ item.color }}</span>
+            </td>
+            <td style="font-weight: 600;">
+              {{ item.precio_unitario | currency:'EUR':'symbol' }}
+            </td>
+            <td>
+              <span class="status-pill" [ngClass]="item.devuelto ? 'returned' : 'active'">
+                {{ item.devuelto ? '↩️ DEVUELTO' : '✅ ENVIADO' }}
+              </span>
+              <div *ngIf="item.pago_consignacion_id" style="font-size: 0.75rem; color: #007782; font-weight: bold; margin-top: 4px;">
+                🔒 Liquidada al dueño
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="itemsPaginados.length === 0">
+            <td colspan="5" style="text-align: center; padding: 30px; color: #64748b;">
+              No se encontraron prendas con ese filtro.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination" *ngIf="totalPages > 1">
+      <button class="btn-page" [disabled]="pageInterna === 1" (click)="cambiarPaginaInterna(-1)">◀ Anterior</button>
+      <span style="font-weight: 600; color: #64748b;">Página {{ pageInterna }} de {{ totalPages }}</span>
+      <button class="btn-page" [disabled]="pageInterna === totalPages" (click)="cambiarPaginaInterna(1)">Siguiente ▶</button>
+    </div>
+
+  </div>
+</div>
+
+<ng-template #loadingTemplate>
+  <div class="page-container loading-state">
+    <div class="spinner"></div>
+    <p>Cargando todos los detalles del pedido...</p>
+  </div>
+</ng-template>

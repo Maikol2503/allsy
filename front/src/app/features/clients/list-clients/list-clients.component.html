@@ -1,0 +1,127 @@
+<div class="page-container">
+  
+  <div class="header-section">
+    <h2>👥 CRM y Clientes</h2>
+    <p>Gestiona tu cartera de compradores de Vinted, Wallapop, Web y Tienda Física.</p>
+  </div>
+
+  <div class="filters-card">
+    <div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: center; flex-wrap: wrap;">
+      
+      <div class="search-box" style="flex: 2; min-width: 300px; display: flex; background: white; border-radius: var(--ap-radius-md); border: 1px solid var(--ap-border-base); overflow: hidden;">
+        <span style="padding: 8px 12px; background: var(--ap-bg-variant); border-right: 1px solid var(--ap-border-base);" title="Buscar">🔍</span>
+        <input 
+          type="text" 
+          placeholder="Buscar por Nombre, Email, Teléfono, @Usuario o DNI..." 
+          [(ngModel)]="searchCliente" 
+          (keyup.enter)="buscar()" 
+          style="flex: 1; border: none; padding: 8px 12px; outline: none;"
+        >
+      </div>
+
+      <div class="filter-group" style="flex: 1; min-width: 150px; display: flex;">
+        <select [(ngModel)]="filtroPais" (change)="buscar()" style="width: 100%;">
+          <option value="">🌍 Todos los países</option>
+          <option *ngFor="let p of listaPaises" [value]="p.nombre">
+            {{ p.bandera }} {{ p.nombre }}
+          </option>
+        </select>
+      </div>
+
+      <button type="button" (click)="buscar()" style="padding: 8px 16px; background-color: var(--vinted-teal); color: white; border: none; border-radius: var(--ap-radius-md); cursor: pointer; font-weight: bold;">
+        Buscar
+      </button>
+      
+      <button class="btn-clear" (click)="limpiarFiltros()" style="background: transparent; border: 1px solid #ccc; border-radius: var(--ap-radius-md); padding: 8px 16px; cursor: pointer;">
+        Limpiar
+      </button>
+
+    </div>
+  </div>
+
+  <div class="table-container" *ngIf="!cargando && clientes.length > 0">
+    <table class="ap-table">
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>Identificadores de Contacto</th>
+          <th>Ubicación</th>
+          <th>Fecha Registro</th>
+          <th style="text-align: center;">Total Compras</th>
+          <th class="actions-col">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let cliente of clientes">
+          
+          <td>
+            <div style="line-height: 1.3;">
+              <strong>{{ cliente.nombre || 'Anónimo' }} {{ cliente.apellidos || '' }}</strong>
+              <br>
+              <span *ngIf="cliente.exento_comision || cliente.exento_tarifa_fija" title="Condiciones VIP Especiales" style="background: #f1c40f; color: #fff; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; cursor: help;">⭐ VIP</span>
+              <span *ngIf="!cliente.nombre && !cliente.apellidos" class="text-muted" style="font-size: 0.85rem;">(Sin nombre registrado)</span>
+            </div>
+          </td>
+
+          <td>
+            <div style="display: flex; flex-direction: column; gap: 4px; font-size: 0.85rem;">
+              <span *ngIf="cliente.usuario_vinted" style="color: #007782;">👗 {{ '@' + cliente.usuario_vinted }}</span>
+              <span *ngIf="cliente.usuario_wallapop" style="color: #13c1ac;">📦 {{ '@' + cliente.usuario_wallapop }}</span>
+              <span *ngIf="cliente.telefono" style="color: #2c3e50;">📱 {{ cliente.telefono }}</span>
+              <span *ngIf="cliente.email" style="color: #2980b9;">📧 {{ cliente.email }}</span>
+              <span *ngIf="cliente.dni_nie" style="color: #7f8c8d;">🪪 {{ cliente.dni_nie }}</span>
+              
+              <span *ngIf="!cliente.usuario_vinted && !cliente.usuario_wallapop && !cliente.telefono && !cliente.email && !cliente.dni_nie" class="text-muted">
+                Sin datos de contacto
+              </span>
+            </div>
+          </td>
+
+          <td>
+            <div style="line-height: 1.3;">
+              <strong *ngIf="cliente.pais">{{ cliente.pais }}</strong>
+              <strong *ngIf="!cliente.pais" class="text-muted">Desconocido</strong>
+              <br>
+              <span *ngIf="cliente.ciudad || cliente.provincia" style="color: #7f8c8d; font-size: 0.85rem;">
+                📍 {{ cliente.ciudad || '?' }}, {{ cliente.provincia || '?' }}
+              </span>
+            </div>
+          </td>
+
+          <td>{{ cliente.fecha_registro | date:'dd/MM/yyyy' }}</td>
+
+          <td style="text-align: center;">
+            <span [ngStyle]="{
+              'background': (cliente.total_ventas || 0) > 0 ? '#eafaf1' : '#f4f6f8', 
+              'color': (cliente.total_ventas || 0) > 0 ? '#27ae60' : '#7f8c8d', 
+              'padding': '4px 10px', 
+              'border-radius': '12px', 
+              'font-weight': 'bold', 
+              'border': (cliente.total_ventas || 0) > 0 ? '1px solid #27ae60' : '1px solid #e0e6ed'
+            }">
+              {{ cliente.total_ventas || 0 }}
+            </span>
+          </td>
+
+          <td class="actions-cell">
+            <button class="btn-icon view-btn" (click)="irADetalle(cliente.id!)" title="Ver Perfil y Finanzas">👁️</button>
+            <button class="btn-icon edit-btn" (click)="irAEditar(cliente.id!)" title="Editar Ficha">✏️</button>
+          </td>
+
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="empty-state" *ngIf="!cargando && clientes.length === 0">
+    <h3>No se encontraron clientes</h3>
+    <p>Prueba buscando con otro nombre, email, usuario o número de teléfono.</p>
+  </div>
+
+  <div class="pagination" *ngIf="totalItems > limit">
+    <button [disabled]="page === 1" (click)="cambiarPagina(page - 1)">« Anterior</button>
+    <span>Página {{ page }} de {{ totalPages }}</span>
+    <button [disabled]="page === totalPages" (click)="cambiarPagina(page + 1)">Siguiente »</button>
+  </div>
+
+</div>

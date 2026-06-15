@@ -1,0 +1,20 @@
+.dropdown-container { position: relative; display: inline-block; }
+.filter-pill { background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; outline: none; }
+.filter-pill:hover { background: var(--ap-bg-variant); }
+.filter-pill.active { background: var(--primary-light, #e6f2f3); border-color: var(--primary); color: var(--primary); }
+.chevron { font-size: 0.7rem; transition: transform 0.2s; }
+.chevron.rotated { transform: rotate(180deg); }
+.dropdown-menu { position: absolute; top: calc(100% + 8px); left: 0; width: 280px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--ap-radius-md); box-shadow: var(--shadow-md); z-index: 100; display: flex; flex-direction: column; }
+.dropdown-header { padding: 12px 16px; background: var(--bg-body); font-size: 0.85rem; font-weight: 700; color: var(--text-muted); border-bottom: 1px solid var(--border-color); }
+
+/* ESTILOS ESPECÍFICOS DEL FORMULARIO DE FECHAS */
+.date-form { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.date-field { display: flex; flex-direction: column; gap: 4px; }
+.date-field label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); }
+.date-input { padding: 8px 12px; border: 1px solid var(--border-color); border-radius: var(--ap-radius-md); font-family: inherit; font-size: 0.9rem; color: var(--text-main); outline: none; }
+.date-input:focus { border-color: var(--primary); }
+.date-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+.btn-clear { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.85rem; font-weight: 600; }
+.btn-clear:hover { color: var(--danger); }
+.btn-apply { background: var(--primary); color: white; border: none; padding: 6px 16px; border-radius: var(--ap-radius-md); font-weight: 600; cursor: pointer; transition: background 0.2s; }
+.btn-apply:hover { background: var(--ap-color-primary-hover); }

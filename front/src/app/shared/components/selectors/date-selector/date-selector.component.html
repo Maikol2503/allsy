@@ -1,0 +1,29 @@
+<div class="dropdown-container">
+  
+  <button class="filter-pill" (click)="toggleDropdown()" [class.active]="tieneFiltroActivo">
+    📅 Fechas 
+    <span class="chevron" [class.rotated]="isOpen">▼</span>
+  </button>
+
+  <div class="dropdown-menu" *ngIf="isOpen">
+    <div class="dropdown-header">Rango de fechas</div>
+    
+    <div class="date-form">
+      <div class="date-field">
+        <label>Desde:</label>
+        <input type="date" class="date-input" [(ngModel)]="tempInicio">
+      </div>
+      
+      <div class="date-field">
+        <label>Hasta:</label>
+        <input type="date" class="date-input" [(ngModel)]="tempFin">
+      </div>
+
+      <div class="date-actions">
+        <button class="btn-clear" (click)="limpiarFechas()">Limpiar</button>
+        <button class="btn-apply" (click)="aplicarFechas()">Aplicar</button>
+      </div>
+    </div>
+  </div>
+
+</div>

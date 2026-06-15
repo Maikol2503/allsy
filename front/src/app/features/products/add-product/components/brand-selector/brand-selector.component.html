@@ -1,0 +1,30 @@
+<div class="field marca-autocomplete">
+  <input 
+    type="text" 
+    [(ngModel)]="marcaInput" 
+    placeholder="Escribe o selecciona..." 
+    autocomplete="off" 
+    (focus)="onFocus()" 
+    (blur)="onBlur()" 
+    (input)="onInputChange()" 
+  />
+  
+  <div class="dropdown-list" *ngIf="dropdownOpen">
+    <div 
+      class="dropdown-item" 
+      *ngFor="let marca of listaFiltrada" 
+      (mousedown)="selectMarca(marca)" 
+      [class.selected]="marcaSeleccionada?.nombre === marca.nombre"
+    >
+      <span class="item-text">
+        {{ marca.nombre }} 
+        <small *ngIf="marca.isNew" style="color:#2563eb;">(Nueva)</small>
+      </span>
+      <input type="radio" [checked]="marcaSeleccionada?.nombre === marca.nombre" class="item-radio" />
+    </div>
+    
+    <div class="dropdown-item empty-state" *ngIf="listaFiltrada.length === 0">
+      Escribe para añadir "{{marcaInput}}"
+    </div>
+  </div>
+</div>

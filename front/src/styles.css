@@ -1,0 +1,94 @@
+*{
+    list-style: none;
+    padding: 0px;
+    margin: 0px;
+    box-sizing: border-box;
+}
+
+:root {
+  /* =========================================
+     TUS VARIABLES ORIGINALES (Actualizadas)
+     ========================================= */
+     
+  --primary: #007782; /* Antes azul, ahora Vinted Teal */
+  --text-main: #2c3e50; /* Un tono oscuro más neutro y elegante */
+  --text-muted: #7f8c8d; /* Gris medio para lecturas secundarias */
+  --bg-body: #f4f6f8; /* El fondo gris muy claro típico de los SaaS */
+  --card-bg: #ffffff;
+  --border-color: #e0e6ed; /* Borde más sutil y limpio */
+  
+  /* Sombras "Soft & Diffuse" (Más amplias y transparentes) */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  /* Colores de Marca/Acción */
+  --ap-color-primary: #007782; /* Vinted Teal */
+  --ap-color-primary-hover: #005c65; /* Teal oscuro para hovers */
+  --ap-color-success: #27ae60;
+  --ap-color-success-bg: #eafaf1;
+  --ap-color-danger: #e74c3c;
+  --ap-color-danger-bg: #fceceb;
+
+  /* Colores de Texto */
+  --ap-text-main: #2c3e50;
+  --ap-text-muted: #7f8c8d;
+  --ap-text-on-primary: #ffffff;
+
+  /* Colores de Fondo y Bordes */
+  --ap-bg-main: #ffffff;
+  --ap-bg-variant: #fafbfc; /* Fondo muy sutil para destacar áreas internas (ej. upload) */
+  --ap-bg-stock: #ffffff;
+  --ap-border-base: #e0e6ed;
+  --ap-border-light: #eaedf1;
+  
+  /* Sombras y Otros */
+  --ap-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --ap-radius-lg: 12px;
+  --ap-radius-md: 8px;
+
+  /* =========================================
+     NUEVAS VARIABLES AGREGADAS (Para el nuevo diseño)
+     ========================================= */
+     
+  --vinted-teal: #007782; 
+  --vinted-teal-hover: #005c65;
+  --vinted-teal-light: #e6f2f3; /* Ideal para fondos de inputs activos o botones outline */
+  --danger: #e74c3c;
+  --danger-light: #fceceb;
+  --bg-app: #f4f6f8; /* Alias para el fondo general */
+  --transition: all 0.2s ease-in-out; /* Animación estándar para botones e inputs */
+}
+
+/* =========================================
+   COMPONENTES GLOBALES: LOADERS
+   ========================================= */
+.ap-loader-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  width: 100%;
+  min-height: 200px;
+}
+
+.ap-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--vinted-teal-light);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: ap-spin 0.8s linear infinite;
+  margin-bottom: 16px;
+}
+
+.ap-loader-text {
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.5px;
+}
+
+@keyframes ap-spin {
+  to { transform: rotate(360deg); }
+}

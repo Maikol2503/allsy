@@ -1,0 +1,198 @@
+<div class="dashboard-wrapper">
+  
+  <div class="filter-toolbar">
+    <div class="toolbar-left">
+      <h2>Dashboard Financiero</h2>
+    </div>
+
+    <div class="toolbar-actions">
+      <div class="quick-filters">
+        <button (click)="setFiltroRapido('hoy')" [class.active]="filtros.fecha_inicio === getFechaHoy()">Hoy</button>
+        <button (click)="setFiltroRapido('mes')" [class.active]="filtros.fecha_inicio === getPrimerDiaMes()">Mes</button>
+        <button (click)="setFiltroRapido('año')">Año</button>
+      </div>
+
+      <div class="date-inputs">
+        <input type="date" [(ngModel)]="filtros.fecha_inicio" (change)="cargarTodo()" title="Desde">
+        <span style="color:#94a3b8;">→</span>
+        <input type="date" [(ngModel)]="filtros.fecha_fin" (change)="cargarTodo()" title="Hasta">
+      </div>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <h3>Rendimiento del Periodo</h3>
+    <span class="badge badge-dynamic">📅 Cambia con el filtro</span>
+  </div>
+
+  <div class="dashboard-grid">
+    
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-label">Ingresos Brutos Líquidos</span>
+        <div class="icon-box icon-teal">💰</div>
+      </div>
+      <div class="kpi-value">{{ resumen.ingresos_totales | currency:'EUR' }}</div>
+      
+      <div class="kpi-breakdown">
+        <div class="breakdown-item">
+          <span><span class="dot own"></span> Ventas Propias</span>
+          <strong>{{ resumen.ingresos_propios | currency:'EUR' }}</strong>
+        </div>
+        <div class="breakdown-item">
+          <span><span class="dot consig"></span> Consignación</span>
+          <strong>{{ resumen.ingresos_consignacion | currency:'EUR' }}</strong>
+        </div>
+        
+        <div class="breakdown-item" style="margin-top: 5px; padding-top: 5px; border-top: 1px dotted #e0e6ed;" *ngIf="resumen.ingresos_retenidos > 0">
+          <span style="color: #f39c12;">⏳ En Tránsito (Apps)</span>
+          <strong style="color: #f39c12;">+{{ resumen.ingresos_retenidos | currency:'EUR' }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-label">Gastos Operativos</span>
+        <div class="icon-box icon-danger">💸</div>
+      </div>
+      <div class="kpi-value">{{ resumen.gastos_operativos | currency:'EUR' }}</div>
+      <p class="kpi-subtext" style="margin-top: 14px;">Facturas, envíos y sueldos</p>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-label">Beneficio Real Neto</span>
+        <div class="icon-box icon-success">📈</div>
+      </div>
+      <div class="kpi-value">{{ resumen.ganancia_real | currency:'EUR' }}</div>
+      
+      <div class="kpi-breakdown">
+        <div class="breakdown-item">
+          <span><span class="dot own"></span> Margen Ropa Propia</span>
+          <strong style="color: #27ae60;">{{ resumen.margen_propio | currency:'EUR' }}</strong>
+        </div>
+        <div class="breakdown-item">
+          <span><span class="dot consig"></span> Margen Consignación</span>
+          <strong style="color: #27ae60;">{{ resumen.margen_consignacion | currency:'EUR' }}</strong>
+        </div>
+        
+        <div class="breakdown-item" style="margin-top: 5px; padding-top: 5px; border-top: 1px dotted #e0e6ed;" *ngIf="resumen.beneficio_retenido > 0">
+          <span style="color: #f39c12;">⏳ Margen en Tránsito</span>
+          <strong style="color: #f39c12;">+{{ resumen.beneficio_retenido | currency:'EUR' }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-label">Deuda Generada (Líquida)</span>
+        <div class="icon-box icon-warning">🤝</div>
+      </div>
+      <div class="kpi-value">{{ resumen.deuda_generada_periodo | currency:'EUR' }}</div>
+      
+      <div class="kpi-breakdown">
+        <div class="breakdown-item">
+          <span><span class="dot consig"></span> Nueva deuda (Caja)</span>
+          <strong style="color: #f39c12;">+{{ resumen.deuda_generada_periodo | currency:'EUR' }}</strong>
+        </div>
+        <div class="breakdown-item">
+          <span><span class="dot" style="background-color: #27ae60;"></span> Pagos realizados</span>
+          <strong style="color: #27ae60;">-{{ resumen.pagos_clientes_periodo | currency:'EUR' }}</strong>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-header" style="margin-top: 2rem;">
+    <h3>Estado General de la Empresa</h3>
+    <span class="badge badge-static">🏛️ Acumulado hasta hoy</span>
+  </div>
+
+  <div class="dashboard-grid">
+
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-label">Saldo Teórico Banco</span>
+        <div class="icon-box icon-teal">🏦</div>
+      </div>
+      <div class="kpi-value">{{ resumen.saldo_teorico_banco | currency:'EUR' }}</div>
+      <p class="kpi-subtext" style="margin-top: 14px;">Liquidez total tras compras y pagos</p>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-label">Deuda Total Real (Caja)</span>
+        <div class="icon-box icon-warning">🤝</div>
+      </div>
+      <div class="kpi-value">{{ resumen.deuda_absoluta | currency:'EUR' }}</div>
+      
+      <div class="kpi-breakdown">
+        <div class="breakdown-item">
+          <span>A pagar (Dinero en Banco):</span>
+          <strong style="color: #e74c3c;">{{ resumen.deuda_absoluta | currency:'EUR' }}</strong>
+        </div>
+        
+        <div class="breakdown-item" style="margin-top: 5px; padding-top: 5px; border-top: 1px dotted #e0e6ed;" *ngIf="resumen.deuda_retenida_total > 0">
+          <span style="color: #f39c12;">⏳ Próximas deudas (Apps):</span>
+          <strong style="color: #f39c12;">+{{ resumen.deuda_retenida_total | currency:'EUR' }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-label">Inventario Total en Tienda</span>
+        <div class="icon-box icon-info">📦</div>
+      </div>
+      <div class="kpi-value" style="font-size: 1.4rem;">
+        {{ resumen.inversion_en_stock | currency:'EUR' }} <span style="font-size: 0.8rem; color:#64748b; font-weight: 500;">(Inv. Propia)</span>
+      </div>
+      
+      <div class="kpi-breakdown">
+        <div class="breakdown-item">
+          <span><span class="dot own"></span> Ropa Propia</span>
+          <strong>{{ resumen.unidades_propias }} unds.</strong>
+        </div>
+        <div class="breakdown-item">
+          <span><span class="dot consig"></span> Ropa Consignación</span>
+          <strong>{{ resumen.unidades_consignacion }} unds.</strong>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="dashboard-lower-grid">
+    
+    <div class="chart-container">
+      <div class="chart-header">
+        <h4>Tendencia Mensual</h4>
+        <div *ngIf="cargando" class="loader-dots">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+      <div class="canvas-wrapper">
+        <canvas #canvasGrafica></canvas>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <h4>💡 Guía Rápida</h4>
+      <div class="info-item">
+        <strong>Beneficio Neto</strong>
+        <p>Es tu ganancia libre total. Se calcula sumando los márgenes propios y de consignación, y restándole los Gastos Operativos del periodo.</p>
+      </div>
+      <div class="info-item">
+        <strong>Flujo y Deuda</strong>
+        <p>Arriba ves cuánto dinero les debes por las ventas <b>de estos días</b>. Abajo ves cuánto dinero les debes <b>en total en toda la historia</b> de la tienda.</p>
+      </div>
+      <div class="info-item">
+        <strong>Stock Propio</strong>
+        <p>El valor en euros solo refleja la inversión en ropa que compraste a mayoristas, ignorando prendas de consignación.</p>
+      </div>
+    </div>
+
+  </div>
+</div>

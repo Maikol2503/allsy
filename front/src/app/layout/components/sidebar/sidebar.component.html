@@ -1,0 +1,84 @@
+<aside class="side-navbar">
+  <div class="nav-menu">
+    <p class="menu-label">Menú Principal</p>
+     <a routerLink="/dashboard" routerLinkActive="active-link" class="nav-item">
+      <span class="icon">📋</span>
+      home
+    </a>
+    <a routerLink="/view-products" routerLinkActive="active-link" class="nav-item">
+      <span class="icon">📋</span>
+      Ver Productos
+    </a>
+    
+    
+    <a routerLink="/new" routerLinkActive="active-link" class="nav-item">
+      <span class="icon">➕</span>
+      Agregar Producto
+    </a>
+
+    <a routerLink="/papelera" routerLinkActive="active-link" class="nav-item">
+      <!-- <span class="icon">➕</span> -->
+       Papelerta
+    </a>
+    <a routerLink="/pos" routerLinkActive="active-link" class="nav-item">
+      <!-- <span class="icon">➕</span> -->
+       Registar nueva venta
+    </a>
+
+    <a routerLink="/sales-list" routerLinkActive="active-link" class="nav-item">
+      <!-- <span class="icon">➕</span> -->
+       Ver todas las ventas
+    </a>
+
+    <a routerLink="/online-orders" routerLinkActive="active-link" class="nav-item">
+      <span class="icon">🌐</span>
+       Pedidos Online
+    </a>
+
+    <a routerLink="/fulfillment" routerLinkActive="active-link" class="nav-item">
+      <span class="icon">📦</span>
+       Pendientes por empaquetar
+    </a>
+
+    <a routerLink="/gastos" routerLinkActive="active-link" class="nav-item">
+      <!-- <span class="icon">➕</span> -->
+       Ver gastos
+    </a>
+    <a routerLink="/gastos/nuevo" routerLinkActive="active-link" class="nav-item">
+      <!-- <span class="icon">➕</span> -->
+       agregar un nuevo gasto
+    </a>
+    <a routerLink="/statistics" routerLinkActive="active-link" class="nav-item">
+      <!-- <span class="icon">➕</span> -->
+       ver estadisticas
+    </a>
+
+    <a routerLink="/clientes" routerLinkActive="active-link" class="nav-item">
+      <!-- <span class="icon">➕</span> -->
+       ver clientes
+    </a>
+
+    <a routerLink="/clientes/nuevo" routerLinkActive="active-link" class="nav-item">
+      <!-- <span class="icon">➕</span> -->
+       agregar nuevo cliente
+    </a>
+
+    <a routerLink="/audit" routerLinkActive="active-link" class="nav-item">
+       <span class="icon">🔐</span>
+       Auditoría
+    </a>
+
+    <a routerLink="/locations" routerLinkActive="active-link" class="nav-item">
+       <span class="icon">📍</span>
+       Localizaciones
+    </a>
+    
+  </div>
+
+  <div class="nav-footer">
+    <button (click)="logout()" class="nav-item logout-item">
+      <span class="icon">🚪</span>
+      Cerrar Sesión
+    </button>
+  </div>
+</aside>

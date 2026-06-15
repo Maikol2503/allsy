@@ -1,0 +1,28 @@
+<div class="color-selector-wrapper">
+  <!-- Agregamos un overlay invisible para cerrar el dropdown al hacer click fuera -->
+  <div class="backdrop-overlay" *ngIf="dropdownOpen" (click)="toggleDropdown()"></div>
+
+  <div class="color-trigger" (click)="toggleDropdown()" [class.has-value]="coloresSeleccionados.length > 0">
+    <div class="preview-dot" 
+         [style.background]="getCombinedBackground()">
+    </div>
+    
+    <span class="color-label">
+      {{ getCombinedLabel() }}
+    </span>
+
+    <span class="arrow-icon">▼</span>
+  </div>
+
+  <div class="color-menu" *ngIf="dropdownOpen">
+    <div class="color-grid">
+      <div *ngFor="let color of listaColores" 
+           class="color-option" 
+           (click)="selectColor(color)"
+           [class.selected]="isColorSelected(color.hex)">
+        <div class="option-dot" [style.background]="color.hex"></div>
+        <span class="option-name">{{ color.nombre }}</span>
+      </div>
+    </div>
+  </div>
+</div>

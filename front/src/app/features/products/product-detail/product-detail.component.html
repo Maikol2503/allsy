@@ -1,0 +1,185 @@
+<div class="page-container" *ngIf="!cargando && producto; else loading">
+  
+  <div *ngIf="afectadosIds.length > 0" class="alert-box-info mb-4" 
+       [ngStyle]="{'border-left': tipoAccion === 'creado' ? '4px solid #27ae60' : '4px solid #007782'}"
+       style="background: #ffffff; padding: 16px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 15px;">
+    <div class="alert-content" style="display: flex; gap: 15px; align-items: center; width: 100%;">
+      <span class="icon" style="font-size: 2rem;">{{ tipoAccion === 'creado' ? '🎉' : '✏️' }}</span>
+      <div class="text">
+          <h4 [style.color]="tipoAccion === 'creado' ? '#27ae60' : '#007782'" style="margin: 0 0 4px 0; font-size: 1.1rem; font-weight: bold;">
+            {{ tipoAccion === 'creado' ? '¡Nuevas unidades agregadas correctamente!' : '¡Actualización masiva completada!' }}
+          </h4>
+          
+          <div *ngIf="tipoAccion === 'creado'">
+            <p style="margin: 0 0 10px 0; color: #555; font-size: 0.95rem;">
+              Se generaron <strong>{{ afectadosIds.length }}</strong> nuevas prendas 
+              <span *ngIf="contextoAfectados" style="color: #166534; font-weight: 600;">
+                (Talla: {{ contextoAfectados.talla }} | {{ contextoAfectados.color }})
+              </span>.
+              Por favor, ponle las siguientes etiquetas físicas a tus artículos:
+            </p>
+            
+            <div class="tags-scroll-container">
+              <div *ngFor="let id of afectadosIds" class="id-print-pill">
+                <span class="main-id">#{{ id }}</span>
+                <span class="sub-info" *ngIf="contextoAfectados">
+                  {{ contextoAfectados.talla }} - {{ contextoAfectados.color }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <p *ngIf="tipoAccion === 'editado'" style="margin: 0; color: #555; font-size: 0.95rem;">
+            Se modificaron los atributos de las unidades de este lote con éxito. El lote afectado parpadea en color azul abajo.
+          </p>
+        </div>
+    </div>
+  </div>
+
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="title">{{ producto.nombre | titlecase }}</h1>
+      <p class="subtitle">{{ producto.descripcion }}</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-primary" [routerLink]="['/edit', producto?.id]">
+        ✏️ Editar Producto
+      </button>
+    </div>
+  </div>
+
+  <section class="card-section info-card">
+    <h3 class="section-title">Información General</h3>
+    <div class="meta-grid">
+      <div class="meta-item">
+        <span class="meta-label">Tipo</span>
+        <span class="meta-value">{{ producto.tipo | titlecase }}</span>
+      </div>
+      <div class="meta-item" *ngIf="producto.publico_objetivo">
+        <span class="meta-label">Público</span>
+        <span class="meta-value">{{ producto.publico_objetivo }}</span>
+      </div>
+      <div class="meta-item" *ngIf="producto.categoria?.nombre">
+        <span class="meta-label">Categoría</span>
+        <span class="meta-value badge-neutral">{{ producto.categoria?.nombre }}</span>
+      </div>
+      <div class="meta-item" *ngIf="producto.marca?.nombre">
+        <span class="meta-label">Marca</span>
+        <span class="meta-value">{{ producto.marca?.nombre }}</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="variantes-container">
+    <h2 class="section-main-title">Variantes y Stock</h2>
+    
+    <section class="card-section variant-card" *ngFor="let v of producto.variantes">
+      
+      <div class="variant-header">
+        <div class="variant-title-group">
+          <div class="color-dot" *ngIf="v.hex_identidad" [style.background]="v.hex_identidad"></div>
+          <h3 class="variant-title">{{ v.identidad_variante | titlecase }}</h3>
+        </div>
+        <span class="badge-location" *ngIf="v.ubicacion">📍 {{ v.ubicacion }}</span>
+      </div>
+
+      <div class="imagenes-variante" *ngIf="v.imagenes && v.imagenes.length > 0">
+        <div class="image-gallery">
+          <img *ngFor="let img of v.imagenes" 
+               [src]="img" 
+               (click)="verImagen(img)" 
+               alt="Imagen {{ v.identidad_variante }}"
+               class="gallery-img">
+        </div>
+      </div>
+
+      <div class="tallas-variante">
+        <h4 class="table-title">Resumen de Lotes e Inventario</h4>
+        <div class="table-responsive">
+          <table class="saas-table">
+            <thead>
+              <tr>
+                <th>Ref. Lote</th>
+                <th style="color: #007782;">Cantidad</th>
+                <th>Etiqueta / Talla</th>
+                <th>Estado General</th>
+                <th>Precio Venta</th>
+                <th>Canales</th>
+                <th class="text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let lote of v.lotes_agrupados" 
+                  [ngClass]="{
+                    'fila-nueva-creada': tipoAccion === 'creado' && loteTieneAfectados(lote.ids_incluidos),
+                    'fila-lote-modificada': tipoAccion === 'editado' && loteTieneAfectados(lote.ids_incluidos)
+                  }">
+                
+                <td class="text-muted" style="white-space: nowrap; position: relative;">
+                  <strong style="font-size: 1.1em; color: #2c3e50;">#{{ lote.id }}</strong>
+                  <div style="font-size: 0.75rem; color: #7f8c8d;">SKU Base: {{ lote.sku }}</div>
+                  
+                  <span *ngIf="tipoAccion === 'creado' && loteTieneAfectados(lote.ids_incluidos)" class="badge-nuevo-stock">
+                    ✨ Nuevo
+                  </span>
+                </td>
+                
+                <td>
+                  <span style="font-size: 1.2rem; font-weight: 800; color: #007782; background: #e6f2f3; padding: 4px 10px; border-radius: 8px;">
+                    {{ lote.cantidad_agrupada }} unds.
+                  </span>
+                </td>
+
+                <td>
+                  <strong>{{ lote.etiqueta }}</strong>
+                  <div class="atributos-detalle" *ngIf="lote.atributos && lote.atributos.length > 0">
+                    <span class="attr-pill" *ngFor="let attr of lote.atributos">
+                      {{ attr.nombre }}: <strong>{{ attr.valor }}</strong>
+                    </span>
+                  </div>
+                </td>
+                
+                <td>
+                  <span class="badge" [ngClass]="{
+                    'badge-success': lote.estado_gestion === 'en_stock',
+                    'badge-danger': lote.estado_gestion === 'vendido',
+                    'badge-warning': ['extraviado', 'devuelto_dueno', 'en_camino_devolucion'].includes(lote.estado_gestion),       
+                    'badge-info': lote.estado_gestion === 'donado_a_ong'
+                  }">
+                    {{ getLabelEstadoGestion(lote.estado_gestion) }}
+                  </span>
+                </td>
+                
+                <td class="price-cell">${{ lote.precio_venta | number:'1.2-2' }}</td>
+
+                <td>
+                  <div class="canales-badges">
+                    <span class="badge badge-web" *ngIf="lote.publicar_web" title="Visible en Web">🌐 Web</span>
+                    <span class="badge badge-vinted" *ngIf="lote.publicar_vinted" title="Anunciado en Vinted">👗 Vinted</span>
+                    <span class="badge badge-wallapop" *ngIf="lote.publicar_wallapop" title="Anunciado en Wallapop">🏷️ Wallapop</span>
+                  </div>
+                </td>
+                
+                <td class="text-center actions-cell" style="display: flex; gap: 8px; justify-content: center;">
+                   <button class="btn-outline-primary" style="padding: 4px 8px; font-size: 0.8rem;" [routerLink]="['/stock-detail', lote.id]">
+                     👁️ Ver Unidades
+                   </button>
+                   <button class="btn-primary" style="padding: 4px 8px; font-size: 0.8rem;" [routerLink]="['/edit-stock', lote.id]">
+                     ✏️ Editar
+                   </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<ng-template #loading>
+  <div class="page-container loading-container">
+    <div class="spinner"></div>
+    <p>Cargando información del producto...</p>
+  </div>
+</ng-template>

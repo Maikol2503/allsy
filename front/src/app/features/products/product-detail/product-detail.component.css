@@ -1,0 +1,543 @@
+/* =========================================
+   ESTRUCTURA GENERAL Y TARJETAS (CARDS)
+   ========================================= */
+
+.page-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Tarjetas base: separan visualmente la información */
+.card-section {
+  background-color: var(--ap-bg-main);
+  border-radius: var(--ap-radius-lg);
+  padding: 1.5rem 2rem;
+  margin-bottom: 2rem; /* Espacio crucial entre tarjetas */
+  box-shadow: var(--ap-shadow-sm);
+  border: 1px solid var(--ap-border-base);
+}
+
+/* Toque especial para las variantes: un borde superior de color */
+.variant-card {
+  border-left: 4px solid var(--ap-color-primary);
+}
+
+
+/* =========================================
+   CABECERA DE PÁGINA (PAGE HEADER)
+   ========================================= */
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--ap-text-main);
+  margin: 0 0 0.5rem 0;
+}
+
+.subtitle {
+  color: var(--ap-text-muted);
+  font-size: 1rem;
+  margin: 0;
+  max-width: 600px;
+  line-height: 1.5;
+}
+
+.btn-primary {
+  background: var(--ap-color-primary);
+  color: var(--ap-text-on-primary);
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: var(--ap-radius-md);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-primary:hover {
+  background: var(--ap-color-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--ap-shadow-sm);
+}
+
+
+/* =========================================
+   TIPOGRAFÍA DE SECCIONES
+   ========================================= */
+
+.section-main-title {
+  font-size: 1.4rem;
+  color: var(--ap-text-main);
+  margin: 2rem 0 1rem 0;
+}
+
+.section-title, .table-title {
+  font-size: 1.1rem;
+  color: var(--ap-text-main);
+  margin: 0 0 1.2rem 0;
+  font-weight: 600;
+}
+
+
+/* =========================================
+   META GRID (Información general)
+   ========================================= */
+
+.meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.meta-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ap-text-muted);
+  font-weight: 600;
+}
+
+.meta-value {
+  font-size: 1rem;
+  color: var(--ap-text-main);
+  font-weight: 500;
+}
+
+
+/* =========================================
+   CABECERA DE VARIANTE
+   ========================================= */
+
+.variant-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--ap-border-base);
+}
+
+.variant-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.variant-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--ap-text-main);
+}
+
+.color-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--ap-border-light);
+  box-shadow: inset 0 0 2px rgba(0,0,0,0.1);
+}
+
+
+/* =========================================
+   GALERÍA DE IMÁGENES
+   ========================================= */
+
+.image-gallery {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.gallery-img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: var(--ap-radius-md);
+  border: 1px solid var(--ap-border-base);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  flex-shrink: 0;
+}
+
+.gallery-img:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--ap-shadow-sm);
+  border-color: var(--ap-color-primary);
+}
+
+
+/* =========================================
+   TABLA SAAS (Inventario)
+   ========================================= */
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.saas-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.95rem;
+}
+
+.saas-table th {
+  background-color: var(--ap-bg-variant);
+  color: var(--ap-text-muted);
+  font-weight: 600;
+  padding: 1rem;
+  border-bottom: 2px solid var(--ap-border-base);
+  white-space: nowrap;
+}
+
+.saas-table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--ap-border-base);
+  vertical-align: middle;
+}
+
+.saas-table tbody tr:hover {
+  background-color: var(--ap-bg-variant);
+}
+
+.saas-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.price-cell {
+  font-weight: 600;
+  color: var(--ap-color-primary);
+}
+
+.text-muted { 
+  color: var(--ap-text-muted); 
+}
+
+
+/* =========================================
+   ATRIBUTOS, BADGES Y ESTADOS
+   ========================================= */
+
+.atributos-detalle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.attr-pill {
+  font-size: 0.75rem;
+  background-color: var(--ap-bg-variant);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  color: var(--ap-text-muted);
+  border: 1px solid var(--ap-border-base);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge-neutral { 
+  background-color: var(--ap-bg-variant); 
+  color: var(--ap-text-main); 
+  border: 1px solid var(--ap-border-base); 
+  padding: 0.2rem 0.6rem; 
+  border-radius: var(--ap-radius-md); 
+}
+
+.badge-location { 
+  background-color: #e6f2f3; /* Vinted teal light */
+  color: var(--ap-color-primary); 
+  font-size: 0.85rem; 
+  padding: 0.3rem 0.8rem; 
+  border-radius: 20px; 
+  font-weight: 500;
+}
+
+/* Canales Badges */
+.canales-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.badge-inventory { background-color: var(--ap-bg-variant); color: var(--ap-text-muted); border: 1px solid var(--ap-border-base); }
+.badge-web { background-color: #e6f2f3; color: var(--ap-color-primary); } /* Teal claro */
+.badge-vinted { background-color: #e0f7fa; color: #0097a7; } /* Fijo para marca */
+.badge-wallapop { background-color: #e8f5e9; color: #2e7d32; } /* Fijo para marca */
+
+/* Stock Status */
+.stock-status {
+  font-weight: 600;
+  color: var(--ap-color-success);
+}
+
+.stock-status.out-of-stock {
+  color: var(--ap-color-danger);
+  background: var(--ap-color-danger-bg);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+
+/* =========================================
+   ESTADO DE CARGA (LOADING)
+   ========================================= */
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  color: var(--ap-text-muted);
+}
+
+.spinner {
+  border: 3px solid var(--ap-border-light);
+  border-top: 3px solid var(--ap-color-primary);
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+
+
+
+
+
+
+
+
+/* =========================================
+   DISEÑO RESPONSIVO (TABLETS Y MÓVILES)
+   ========================================= */
+
+/* --- TABLETS (Pantallas medianas, iPad, etc.) --- */
+@media screen and (max-width: 768px) {
+  
+  .page-container {
+    padding: 1.5rem 1rem;
+  }
+
+  /* Reducimos los márgenes internos de las tarjetas para ganar espacio */
+  .card-section {
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .subtitle {
+    font-size: 0.95rem;
+  }
+
+  .section-main-title {
+    font-size: 1.25rem;
+  }
+
+  .variant-title {
+    font-size: 1.15rem;
+  }
+
+  /* Hacemos que las imágenes de la galería sean un poquito más pequeñas */
+  .gallery-img {
+    width: 100px;
+    height: 100px;
+  }
+
+  /* Reducimos el padding de la tabla para que quepa más información */
+  .saas-table th,
+  .saas-table td {
+    padding: 0.8rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* --- MÓVILES (Teléfonos) --- */
+@media screen and (max-width: 480px) {
+  
+  .page-container {
+    padding: 1rem 0.5rem;
+  }
+
+  .card-section {
+    padding: 1rem;
+    border-radius: var(--ap-radius-md); /* Suavizamos las esquinas un poco en móvil */
+  }
+
+  /* La cabecera principal se apila en vertical */
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.5rem;
+  }
+
+  /* El botón de editar toma todo el ancho en móvil para ser fácil de tocar */
+  .header-actions .btn-primary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* La cabecera de la variante también se apila */
+  .variant-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.8rem;
+  }
+
+  .meta-grid {
+    /* Forzamos a que la info general sea de 1 sola columna en pantallas muy estrechas */
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .color-dot {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Las etiquetas (badges) en la tabla necesitan un poco más de aire si se apilan */
+  .canales-badges {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  /* Ajuste ultra compacto para la tabla en móviles */
+  .saas-table th,
+  .saas-table td {
+    padding: 0.6rem;
+    font-size: 0.85rem;
+  }
+  
+  .attr-pill {
+    font-size: 0.7rem;
+  }
+}
+
+
+
+
+/* 🟢 Animación para Nuevos Stocks Agregados (Parpadeo Verde a Transparente) */
+@keyframes flash-creado {
+  0% { background-color: #eafaf1; border-left: 4px solid #27ae60; }
+  30% { background-color: #c2eed3; }
+  100% { background-color: transparent; }
+}
+
+.saas-table tbody tr.fila-nueva-creada {
+  animation: flash-creado 4s ease-in-out forwards;
+}
+
+/* 🔵 Animación para Atributos/Medidas Modificados (Parpadeo Azul de Lote) */
+@keyframes flash-editado {
+  0% { background-color: #e6f2f3; border-left: 4px solid #007782; }
+  30% { background-color: #bce0e4; }
+  100% { background-color: transparent; }
+}
+
+.saas-table tbody tr.fila-lote-modificada {
+  animation: flash-editado 4s ease-in-out forwards;
+}
+/* ✨ Estilo para las etiquetas físicas virtuales */
+.id-print-pill {
+  background-color: #f0fdf4;
+  color: #166534;
+  border: 2px dashed #4ade80;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-family: monospace;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  display: inline-flex;
+  flex-direction: column; /* Apilamos hacia abajo */
+  align-items: center;
+  justify-content: center;
+}
+
+.id-print-pill .main-id {
+  font-size: 1.4rem;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.id-print-pill .sub-info {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #15803d;
+  margin-top: 4px;
+  text-transform: uppercase;
+  font-family: sans-serif; /* Para que se lea más claro que la fuente monospace del ID */
+}
+
+
+/* ✨ Contenedor blindado contra miles de registros */
+.tags-scroll-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  max-height: 180px; /* Límite de altura (unas 2-3 filas de etiquetas) */
+  overflow-y: auto;  /* Activa el scroll vertical solo si es necesario */
+  padding: 8px;
+  border: 1px solid #eaedf1;
+  border-radius: 8px;
+  background-color: #fafbfc;
+}
+
+/* ✨ Estilo personalizado para la barra de scroll (Opcional pero recomendado para que se vea Pro) */
+.tags-scroll-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.tags-scroll-container::-webkit-scrollbar-track {
+  background: #f4f6f8; 
+  border-radius: 8px;
+}
+
+.tags-scroll-container::-webkit-scrollbar-thumb {
+  background-color: #c1c9d2; 
+  border-radius: 8px;
+  border: 2px solid #f4f6f8; /* Le da un efecto de margen interior */
+}
+
+.tags-scroll-container::-webkit-scrollbar-thumb:hover {
+  background-color: #a0abb6; 
+}

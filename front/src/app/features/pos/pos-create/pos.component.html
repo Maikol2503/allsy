@@ -1,0 +1,294 @@
+<div class="pos-container">
+  
+  <div class="cart-section">
+    <div class="search-bar">
+      <div class="input-wrapper">
+        <span class="icon">🔍</span>
+        <input 
+          type="text" 
+          placeholder="Escanea el código de barras o teclea el ID Físico Único..." 
+          [(ngModel)]="codigoBusqueda"
+          (keyup.enter)="buscarYAgregarProducto()"
+          autofocus>
+      </div>
+      <button class="btn-primary" (click)="buscarYAgregarProducto()">Añadir</button>
+    </div>
+
+    <div class="cart-items" *ngIf="!cargando">
+      <div class="empty-cart" *ngIf="carrito.length === 0">
+        <span class="empty-icon">🛒</span>
+        <p>El carrito está vacío. Escanea el ID único de un ítem para empezar.</p>
+      </div>
+
+      <div class="cart-item-card" *ngFor="let item of carrito; let i = index">
+        <img [src]="item.imagen_cover || 'assets/img/default-product.png'" alt="Producto" class="item-img">
+        <div class="item-details">
+          <h4>{{ item.producto_nombre }}</h4>
+          <p class="text-muted">
+            ID: <strong>#{{item.stock_unit_id}}</strong> | Talla: <strong>{{ item.talla || item.etiqueta }}</strong>
+          </p>
+        </div>
+        
+        <!-- ✨ LA CANTIDAD ES SIEMPRE 1 PORQUE CADA ÍTEM ES FÍSICAMENTE ÚNICO ✨ -->
+        <div class="item-quantity" style="background: #f4f6f8; padding: 5px 15px; border-radius: 8px; font-weight: bold; color: #2c3e50;">
+          1 ud.
+        </div>
+        
+        <div class="item-price">
+          <input type="number" [(ngModel)]="item.precio_unitario" (ngModelChange)="calcularTotales()">
+          <span class="currency">€</span>
+        </div>
+        <button class="btn-delete" (click)="eliminarDelCarrito(i)" title="Quitar">🗑️</button>
+      </div>
+    </div>
+
+    <div class="ap-loader-container" *ngIf="cargando" style="flex: 1; height: 100%;">
+      <div class="ap-spinner"></div>
+      <p class="ap-loader-text">Buscando producto...</p>
+    </div>
+  </div>
+
+  <div class="checkout-section">
+    <div class="checkout-card">
+      <div class="grid-2" style="margin-bottom: 12px;">
+        <div class="field">
+          <label>Fecha de Venta <span style="color: #e74c3c; font-weight: bold;">*</span></label>
+          <input type="date" [(ngModel)]="datosVenta.fecha">
+        </div>
+        <div class="field">
+          <label>Vendedor <span style="color: #e74c3c; font-weight: bold;">*</span></label>
+          <select [(ngModel)]="datosVenta.vendedor">
+            <option value="">Selecciona...</option>
+            <option value="Yenny">Yenny</option>
+            <option value="Maikol">Maikol</option>
+            <option value="Paola">Paola</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-bottom: 12px;">
+        <div class="field">
+          <label>Canal</label>
+          <select [(ngModel)]="datosVenta.canal" (change)="onCanalChange()">
+            <option value="tienda_fisica">🏪 Tienda Física</option>
+            <option value="web">🌐 Web Propia</option>
+            <option value="vinted">👗 Vinted</option>
+            <option value="wallapop">📦 Wallapop</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Estado del Pago</label>
+          <select [(ngModel)]="datosVenta.estado_pago">
+            <option value="pagado">✅ Pagado</option>
+            <option value="pendiente">⏳ Pendiente</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="field" *ngIf="datosVenta.canal !== 'tienda_fisica'">
+          <label>Fase del Envío</label>
+          <select [(ngModel)]="datosVenta.estado_envio">
+            <option value="pendiente_envio">⏳ Pendiente de Envío</option>
+            <option value="empaquetado">📦 Empaquetado</option>
+            <option value="listo_envio">🚚 Listo Envío</option>
+            <option value="enviado">🚀 Enviado</option>
+            <option value="entregado">📬 Entregado</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="checkout-card">
+      <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <h4 style="margin: 0; font-size: 0.9rem; color: #7f8c8d;">👤 Identificación de Cliente</h4>
+        <span *ngIf="comprasPreviasCliente !== null && comprasPreviasCliente > 0" 
+              style="background: #eafaf1; color: #27ae60; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; border: 1px solid #27ae60;">
+          ⭐ Recurrente: {{ comprasPreviasCliente }} compras
+        </span>
+      </div>
+
+      <ng-container *ngIf="datosVenta.canal === 'tienda_fisica'">
+        <div class="grid-2" style="margin-bottom: 12px;">
+          <div class="field">
+            <label>Tipo Identificador</label>
+            <select [(ngModel)]="datosVenta.tipo_identificador" (change)="datosVenta.identificador_cliente = ''">
+              <option value="telefono">📱 Teléfono</option>
+              <option value="email">📧 Email</option> 
+              <option value="documento">🪪 DNI/NIE</option>
+              <option value="nombre_anonimo">👤 Nombre / Anónimo</option>
+            </select>
+          </div>
+
+          <div class="field" *ngIf="datosVenta.tipo_identificador === 'telefono'">
+            <label>Teléfono <span style="color: #e74c3c; font-weight: bold;">*</span></label>
+            <div style="display: flex; gap: 5px;">
+              <select [(ngModel)]="datosVenta.prefijo_telefono" style="width: 80px;">
+                <option *ngFor="let p of prefijosPaises" [value]="p.codigo">{{ p.codigo }}</option>
+              </select>
+              <input type="text" [(ngModel)]="datosVenta.identificador_cliente" (blur)="buscarHistorialCliente()" placeholder="600123456" style="flex: 1;">
+            </div>
+          </div>
+
+          <div class="field" *ngIf="datosVenta.tipo_identificador === 'email'">
+            <label>Email <span style="color: #e74c3c; font-weight: bold;">*</span></label>
+            <input type="email" [(ngModel)]="datosVenta.identificador_cliente" (blur)="buscarHistorialCliente()" placeholder="correo@ejemplo.com">
+          </div>
+          
+          <div class="field" *ngIf="datosVenta.tipo_identificador === 'documento'">
+            <label>Documento <span style="color: #e74c3c; font-weight: bold;">*</span></label>
+            <input type="text" [(ngModel)]="datosVenta.identificador_cliente" (blur)="buscarHistorialCliente()" placeholder="12345678X">
+          </div>
+
+          <div class="field" *ngIf="datosVenta.tipo_identificador === 'nombre_anonimo'">
+            <label>Identificador <span style="color: #e74c3c; font-weight: bold;">*</span></label>
+            <input type="text" [(ngModel)]="datosVenta.identificador_cliente" (blur)="buscarHistorialCliente()" placeholder="Ej: Anónimo o Cliente Mostrador">
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="datosVenta.canal !== 'tienda_fisica'">
+        <div class="field" style="margin-bottom: 12px;">
+          <label>
+            <span *ngIf="datosVenta.canal === 'vinted' || datosVenta.canal === 'wallapop'">Usuario de la App (&#64;usuario)</span>
+            <span *ngIf="datosVenta.canal === 'web'">Email del Cliente</span>
+            <span style="color: #e74c3c; font-weight: bold;"> *</span>
+          </label>
+          <input 
+            type="text" 
+            [(ngModel)]="datosVenta.identificador_cliente" 
+            (blur)="buscarHistorialCliente()"
+            [placeholder]="datosVenta.canal === 'web' ? 'ejemplo@correo.com' : 'Ej: @maria_cool'">
+        </div>
+      </ng-container>
+
+      <div class="field">
+        <label>País de Compra <span style="color: #e74c3c; font-weight: bold;">*</span></label>
+        <select [(ngModel)]="datosVenta.pais">
+          <option value="">Selecciona el país...</option>
+          <option *ngFor="let p of listaPaises" [value]="p.nombre">
+            {{ p.bandera }} {{ p.nombre }}
+          </option>
+        </select>
+      </div>
+
+      <div class="field" style="border-top: 1px solid #f0f2f5; margin-top: 10px; padding-top: 10px;">
+        <label>Nombre y Apellidos Reales <span class="text-muted">(Factura/Envío)</span></label>
+        <div style="display: flex; gap: 10px; margin-bottom: 5px;">
+          <input type="text" [(ngModel)]="datosVenta.nombre_cliente" placeholder="Nombre" style="flex: 1;">
+          <input type="text" [(ngModel)]="datosVenta.apellidos_cliente" placeholder="Apellidos" style="flex: 1;">
+        </div>
+        
+        <div style="margin-top: 10px;">
+          <div *ngIf="comprasPreviasCliente !== null && comprasPreviasCliente > 0" 
+              style="background: #eafaf1; color: #27ae60; padding: 8px; border-radius: 8px; border: 1px solid #27ae60; display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 1.2rem;">⭐</span>
+            <div>
+              <strong style="display: block;">¡CLIENTE RECONOCIDO!</strong>
+              <span>Ha realizado {{ comprasPreviasCliente }} compra{{ comprasPreviasCliente > 1 ? 's' : '' }} anteriormente.</span>
+            </div>
+          </div>
+
+          <div *ngIf="comprasPreviasCliente === 0" 
+              style="background: #f4f6f8; color: #7f8c8d; padding: 8px; border-radius: 8px; border: 1px solid #e0e6ed; display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 1.2rem;">🆕</span>
+            <div>
+              <strong style="display: block;">CLIENTE NUEVO</strong>
+              <span>No hay registros previos de este identificador en el CRM.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="checkout-card" *ngIf="datosVenta.canal !== 'tienda_fisica'">
+      <h4 style="margin: 0 0 10px 0; font-size: 0.9rem; color: #7f8c8d;">📦 Logística y Etiqueta</h4>
+      <div class="grid-2">
+        <div class="field">
+          <label>Transportista</label>
+          <select [(ngModel)]="datosVenta.empresa_transporte">
+            <option value="">Seleccionar...</option>
+            <option value="correos">Correos</option>
+            <option value="vinted_go">Vinted Go</option>
+            <option value="inpost">InPost</option>
+            <option value="seur">SEUR</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Nº Seguimiento</label>
+          <input type="text" [(ngModel)]="datosVenta.numero_seguimiento" placeholder="Seguimiento...">
+        </div>
+      </div>
+
+      <div class="field mt-2">
+        <label>URL / Foto de Etiqueta</label>
+        <input type="text" [(ngModel)]="datosVenta.etiqueta_url" 
+               (blur)="validarUrlEtiqueta()"
+               (keyup.enter)="validarUrlEtiqueta()"
+               placeholder="Pega el link del PDF o foto de la etiqueta...">
+        <small class="text-muted">Si son varias prendas, el lote compartirá esta etiqueta.</small>
+
+        <!-- ✨ MENSAJES DE VALIDACIÓN DE ETIQUETA Y VISOR -->
+        <div *ngIf="estadoEtiqueta === 'cargando'" style="margin-top: 8px; font-size: 0.85rem; color: #f39c12;">
+          ⏳ Verificando enlace...
+        </div>
+        <div *ngIf="estadoEtiqueta === 'invalida'" style="margin-top: 8px; font-size: 0.85rem; color: #e74c3c; font-weight: bold; background: #fadbd8; padding: 8px; border-radius: 6px; border: 1px solid #e74c3c;">
+          ❌ El enlace introducido está roto, caducado o no es un documento válido.
+        </div>
+        <div *ngIf="estadoEtiqueta === 'valida'" style="margin-top: 15px;">
+          <div style="font-size: 0.85rem; color: #27ae60; font-weight: bold; margin-bottom: 8px;">
+            ✅ Enlace correcto. Previsualización de la etiqueta:
+          </div>
+          <div style="height: 250px; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; background: #f8fafc; position: relative;">
+             <embed [src]="fixUrl(datosVenta.etiqueta_url) | safeUrl" type="application/pdf" width="100%" height="100%" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="checkout-card totals-card">
+      <div class="tot-row">
+        <span>Subtotal</span>
+        <span>{{ subtotal | number:'1.2-2' }} €</span>
+      </div>
+      <div class="tot-row">
+        <span>Descuento</span>
+        <div class="discount-input">
+          <span>-</span>
+          <input type="number" [(ngModel)]="datosVenta.descuento_total" (ngModelChange)="calcularTotales()">
+          <span>€</span>
+        </div>
+      </div>
+      <div class="tot-row" *ngIf="datosVenta.canal !== 'tienda_fisica'">
+        <span>Envío</span>
+        <div class="discount-input">
+          <span>+</span>
+          <input type="number" [(ngModel)]="datosVenta.costo_envio" (ngModelChange)="calcularTotales()">
+          <span>€</span>
+        </div>
+      </div>
+      <div class="tot-row total-row">
+        <span>TOTAL</span>
+        <span class="total-amount">{{ total | number:'1.2-2' }} €</span>
+      </div>
+    </div>
+
+    <div class="checkout-card methods-card">
+      <label>Método de Pago</label>
+      <div class="payment-grid">
+        <button [class.active]="datosVenta.metodo_pago === 'efectivo'" (click)="datosVenta.metodo_pago = 'efectivo'">💵 Efectivo</button>
+        <button [class.active]="datosVenta.metodo_pago === 'tarjeta'" (click)="datosVenta.metodo_pago = 'tarjeta'">💳 Tarjeta</button>
+        <button [class.active]="datosVenta.metodo_pago === 'bizum'" (click)="datosVenta.metodo_pago = 'bizum'">📱 Bizum</button>
+        <button [class.active]="datosVenta.metodo_pago === 'plataforma'" *ngIf="datosVenta.canal !== 'tienda_fisica'" (click)="datosVenta.metodo_pago = 'plataforma'">🌐 Web</button>
+        <button [class.active]="datosVenta.metodo_pago === 'vinted'" (click)="datosVenta.metodo_pago = 'vinted'">🌐 Vinted</button>
+      </div>
+    </div>
+
+    <button 
+      class="btn-checkout" 
+      [disabled]="carrito.length === 0 || procesando"
+      (click)="completarVenta()">
+      {{ procesando ? '⏳ Procesando...' : '💰 COMPLETAR VENTA' }}
+    </button>
+  </div>
+</div>

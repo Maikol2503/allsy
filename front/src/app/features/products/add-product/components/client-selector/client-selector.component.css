@@ -1,0 +1,120 @@
+.autocomplete-container { 
+  position: relative; 
+  width: 100%; 
+}
+
+.input-wrapper { 
+  position: relative; 
+  display: flex; 
+  align-items: center; 
+}
+
+.search-icon { 
+  position: absolute; 
+  left: 10px; 
+  color: #7f8c8d; 
+  font-size: 0.9rem; 
+}
+
+.autocomplete-input { 
+  flex-grow: 1;
+  padding: 0.75rem 30px 0.75rem 10px; 
+  border: 3px solid var(--border-color, #e0e6ed); 
+  border-radius: 0 var(--border-radius-md, 8px) var(--border-radius-md, 8px) 0; 
+  border-left: none;
+  font-size: 0.95rem; 
+  background: #fcfcfc; 
+  transition: all 0.2s;
+  box-sizing: border-box;
+}
+
+.search-type-select {
+  padding: 0.75rem 10px;
+  background: #f4f6f8;
+  border: 3px solid var(--border-color, #e0e6ed);
+  border-right: 1px solid #ccc;
+  border-radius: var(--border-radius-md, 8px) 0 0 var(--border-radius-md, 8px);
+  color: #2c3e50;
+  font-weight: 600;
+  font-size: 0.85rem;
+  outline: none;
+  cursor: pointer;
+}
+
+.search-type-select:focus, .autocomplete-input:focus { 
+  border-color: var(--vinted-teal, #007782); 
+}
+
+.autocomplete-input.has-value { 
+  background-color: var(--vinted-teal-light, #e6f2f3); 
+  border-color: var(--vinted-teal, #007782); 
+  color: var(--vinted-teal-hover, #005c65); 
+  font-weight: 500; 
+}
+
+.clear-btn { 
+  position: absolute; 
+  right: 10px; 
+  background: none; 
+  border: none; 
+  cursor: pointer; 
+  color: var(--danger, #e74c3c); 
+  font-weight: bold; 
+  font-size: 1rem;
+  padding: 0 5px;
+}
+
+.dropdown-list {
+  position: absolute; 
+  top: 100%; 
+  left: 0; 
+  right: 0; 
+  background: white; 
+  border: 1px solid var(--border-color, #e0e6ed);
+  border-radius: var(--border-radius-md, 8px); 
+  margin-top: 4px; 
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+  z-index: 1000;
+  max-height: 250px; 
+  overflow-y: auto;
+}
+
+.dropdown-item { 
+  padding: 10px 15px; 
+  cursor: pointer; 
+  transition: background 0.2s; 
+}
+
+.dropdown-item:hover { 
+  background: #f4f6f8; 
+}
+
+.default-item { 
+  font-weight: 600; 
+  color: var(--text-main, #2c3e50); 
+}
+
+.dropdown-divider { 
+  height: 1px; 
+  background: var(--border-color, #e0e6ed); 
+  margin: 0; 
+}
+
+.client-name { 
+  font-weight: 500; 
+  color: var(--text-main, #2c3e50); 
+  font-size: 0.95rem; 
+}
+
+.client-details { 
+  font-size: 0.8rem; 
+  color: var(--text-muted, #7f8c8d); 
+  margin-top: 2px; 
+}
+
+.loading-state, .empty-state { 
+  padding: 10px 15px; 
+  color: var(--text-muted, #7f8c8d); 
+  font-size: 0.9rem; 
+  text-align: center; 
+}

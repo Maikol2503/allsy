@@ -1,0 +1,168 @@
+<div class="page-container products-view">
+  
+  <header class="page-header">
+    
+    <div class="custom-tabs">
+      <button 
+        class="tab-btn" 
+        [class.active]="vistaActual === 'inventario'" 
+        (click)="cambiarVista('inventario')">
+        📦 Inventario 
+        <span class="tab-count" *ngIf="totalInventario > 0">{{ totalInventario }}</span>
+      </button>
+      <button 
+        class="tab-btn" 
+        [class.active]="vistaActual === 'catalogo'" 
+        (click)="cambiarVista('catalogo')">
+        🏷️ Catálogo 
+        <span class="tab-count" *ngIf="totalCatalogo > 0">{{ totalCatalogo }}</span>
+      </button>
+    </div>
+
+    <div class="filter-bar">
+      <div class="search-group">
+        <div class="input-wrapper" style="display: flex; align-items: stretch; border: 1px solid var(--border-color); border-radius: var(--ap-radius-md); overflow: hidden;">
+          
+          <input 
+            type="text" 
+            [(ngModel)]="filtros.search" 
+            (input)="onSearchInput($event)" 
+            [placeholder]="vistaActual === 'catalogo' ? '🔍 Buscar ID de Producto Padre (#)...' : '🧵 Buscar ID de Prenda Física (#)...'" 
+            class="input-search"
+            style="border: none; flex-grow: 1; outline: none;"
+          >
+          <span class="clear-input-icon" *ngIf="filtros.search" (click)="eliminarFiltro('search')" style="align-self: center; padding: 0 12px; cursor: pointer;">✕</span>
+        </div>
+        <button (click)="aplicarFiltros()" class="btn-search">Buscar</button>
+      </div>
+
+      <div class="pills-container">
+        <app-category-selector 
+          [value]="filtros.categoria_id"
+          [permitirSeleccionarTodo]="true"
+          (categorySelected)="onCategorySelected($event)">
+        </app-category-selector>
+
+        <app-color-selector 
+          [initialHex]="filtros.color"
+          (colorChanged)="onColorSelected($event)">
+        </app-color-selector>
+
+        <app-provider-selector
+          [seleccionados]="filtros.proveedores_ids"
+          (seleccionCambiada)="onProveedoresSelected($event)">
+        </app-provider-selector>
+
+        <app-date-selector
+          [fechaInicio]="filtros.fecha_inicio"
+          [fechaFin]="filtros.fecha_fin"
+          (fechasCambiadas)="onFechasSelected($event)">
+        </app-date-selector>
+
+        <div class="filter-pill" style="min-width: 250px;">
+          <app-client-selector 
+            [clienteInicialId]="filtros.propietario_id" 
+            (clientSelected)="onPropietarioSelected($event)">
+          </app-client-selector>
+        </div>
+
+        <div class="filter-pill" style="min-width: 250px;">
+          <app-location-selector 
+            [localizacionId]="filtros.localizacion_id" 
+            (localizacionChange)="filtros.localizacion_id = $event; aplicarFiltros()">
+          </app-location-selector>
+        </div>
+
+        <div class="filter-pill">
+          <select [(ngModel)]="filtros.ordenar_por" (change)="aplicarFiltros()">
+            <option value="fecha_desc">Nuevos primero</option>
+            <option value="fecha_asc">Antiguos primero</option>
+            <option value="precio_venta_asc">P. Venta: Menor a mayor</option>
+            <option value="precio_venta_desc">P. Venta: Mayor a menor</option>
+            <option value="precio_compra_asc" *ngIf="vistaActual === 'inventario'">P. Compra: Menor a mayor</option>
+            <option value="precio_compra_desc" *ngIf="vistaActual === 'inventario'">P. Compra: Mayor a menor</option>
+          </select>
+        </div>
+
+        <div class="filter-pill">
+          <select [(ngModel)]="filtros.estado" (change)="aplicarFiltros()">
+            <option value="">Estado</option>
+            <option value="nuevo">Nuevo</option>
+            <option value="segunda_mano">Usado</option>
+          </select>
+        </div>
+
+        <div class="filter-item">
+          <label class="filter-label">Disponibilidad</label>
+          <div class="segmented-control">
+            <button 
+              type="button" 
+              [class.active]="filtros.disponibilidad === 'todos'"
+              (click)="filtros.disponibilidad = 'todos'; aplicarFiltros()">
+              Todos
+            </button>
+            <button 
+              type="button" 
+              [class.active]="filtros.disponibilidad === 'en_stock'"
+              (click)="filtros.disponibilidad = 'en_stock'; aplicarFiltros()">
+              En Stock ✅
+            </button>
+            <button 
+              type="button" 
+              [class.active]="filtros.disponibilidad === 'agotado'"
+              (click)="filtros.disponibilidad = 'agotado'; aplicarFiltros()">
+              Agotados 🚫
+            </button>
+          </div>
+        </div>
+
+        <button class="btn-clear" *ngIf="listaFiltrosActivos.length > 0" (click)="limpiarFiltros()">
+          Borrar filtros
+        </button>
+      </div>
+    </div>
+
+    <div class="chips-row" *ngIf="listaFiltrosActivos.length > 0">
+      <div class="filter-chip" *ngFor="let chip of listaFiltrosActivos">
+        <span *ngIf="chip.isColor" class="color-circle-small" [style.backgroundColor]="chip.hex"></span>
+        {{ chip.label }}
+        <span class="close-chip" (click)="eliminarFiltro(chip.id)">✕</span>
+      </div>
+    </div>
+  </header>
+
+  <div *ngIf="vistaActual === 'inventario' && stocks.length === 0 && !cargando" class="empty-state">
+    <div class="empty-icon">📦</div>
+    <h3 class="empty-title">Sin resultados en Inventario</h3>
+    <p class="empty-text">No hay lotes de stock que coincidan con tu búsqueda.</p>
+  </div>
+
+  <div *ngIf="vistaActual === 'catalogo' && productosPadre.length === 0 && !cargando" class="empty-state">
+    <div class="empty-icon">🏷️</div>
+    <h3 class="empty-title">Sin resultados en Catálogo</h3>
+    <p class="empty-text">No hay productos que coincidan con tu búsqueda.</p>
+  </div>
+
+  <div *ngIf="cargando && (stocks.length === 0 && productosPadre.length === 0)" class="loading-state">
+    <div class="spinner"></div>
+    <p>Buscando en {{ vistaActual }}...</p>
+  </div>
+
+  <app-inventory-table 
+    *ngIf="vistaActual === 'inventario' && stocks.length > 0" 
+    [stocks]="stocks">
+  </app-inventory-table>
+
+  <app-catalog-grid 
+    *ngIf="vistaActual === 'catalogo' && productosPadre.length > 0" 
+    [productos]="productosPadre">
+  </app-catalog-grid>
+
+  <div class="load-more-container" *ngIf="!sinMasResultados && (stocks.length > 0 || productosPadre.length > 0)">
+    <button (click)="cargarDatos()" [disabled]="cargando" class="btn-load-more">
+      <span *ngIf="!cargando">Cargar más resultados</span>
+      <span *ngIf="cargando" class="spinner-small"></span>
+    </button>
+  </div>
+
+</div>
