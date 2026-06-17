@@ -275,18 +275,25 @@
                   </td>
                 </tr>
                 <!-- ✨ ÍTEMS FANTASMA (ANULADOS INDIVIDUALMENTE) -->
-                <tr *ngFor="let item of p.items_anulados" style="border-bottom: 1px dotted #f4f4f4; opacity: 0.6;">
-                  <td style="padding: 4px; font-weight: 500; text-decoration: line-through;">{{ item.nombre_producto }}</td>
-                  <td style="padding: 4px; color: #94a3b8; font-family: monospace; text-decoration: line-through;">{{ item.sku }}</td>
-                  <td style="padding: 4px; text-align: right; text-decoration: line-through;">{{ item.precio_venta | currency:'EUR' }}</td>
-                  <td style="padding: 4px; text-align: right; color: #7f8c8d; text-decoration: line-through;">{{ item.comision_allsys | currency:'EUR' }}</td>
-                  <td style="padding: 4px; text-align: right; color: #e74c3c; font-weight: bold;">0,00 €</td>
-                  <td style="padding: 4px; text-align: center;">
-                    <span style="font-size: 0.7rem; color: #e74c3c; font-weight: bold; background: #fceceb; padding: 2px 4px; border-radius: 4px;" [title]="item.motivo">
-                      ⚠️ Anulado
-                    </span>
-                  </td>
-                </tr>
+                <ng-container *ngFor="let item of p.items_anulados">
+                  <tr style="border-bottom: none; opacity: 0.6;">
+                    <td style="padding: 4px; font-weight: 500; text-decoration: line-through;">{{ item.nombre_producto }}</td>
+                    <td style="padding: 4px; color: #94a3b8; font-family: monospace; text-decoration: line-through;">{{ item.sku }}</td>
+                    <td style="padding: 4px; text-align: right; text-decoration: line-through;">{{ item.precio_venta | currency:'EUR' }}</td>
+                    <td style="padding: 4px; text-align: right; color: #7f8c8d; text-decoration: line-through;">{{ item.comision_allsys | currency:'EUR' }}</td>
+                    <td style="padding: 4px; text-align: right; color: #e74c3c; font-weight: bold;">0,00 €</td>
+                    <td style="padding: 4px; text-align: center;">
+                      <span style="font-size: 0.7rem; color: #e74c3c; font-weight: bold; background: #fceceb; padding: 2px 4px; border-radius: 4px;">
+                        ⚠️ Anulado
+                      </span>
+                    </td>
+                  </tr>
+                  <tr style="border-bottom: 1px dotted #f4f4f4; opacity: 0.8; background: #fffbfb;">
+                    <td colspan="6" style="padding: 4px 10px 8px 10px; font-size: 0.75rem; color: #b91c1c;">
+                      <strong>Motivo de anulación:</strong> {{ item.motivo }}
+                    </td>
+                  </tr>
+                </ng-container>
               </tbody>
             </table>
           </div>
