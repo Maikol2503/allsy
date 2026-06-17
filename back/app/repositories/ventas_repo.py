@@ -146,6 +146,38 @@ def actualizar_venta(db: Session, venta_id: int, datos: dict):
     estado_pago_anterior = venta.estado_pago
     estado_envio_anterior = venta.estado_envio
 
+    # ✨ SEGURIDAD LOGÍSTICA: Flujos desde 'entregado'
+    if estado_envio_anterior == "entregado" and nuevo_est_envio:
+        if nuevo_est_envio in ["pendiente_envio", "empaquetado", "listo_envio", "enviado"]:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Operación denegada. El paquete ya fue entregado al comprador. No puedes retroceder el envío a '{nuevo_est_envio}'."
+            )
+        if nuevo_est_envio == "cancelado":
+            raise HTTPException(
+                status_code=400,
+                detail="Operación denegada. Un paquete entregado no se puede 'Cancelar' (ya que el envío sí se realizó). Usa el estado 'En Devolución'."
+            )
+            
+        # Validación de plazos de devolución (aproximados basados en canal)
+        if nuevo_est_envio in ["en_devolucion", "devuelto"] and venta.fecha_entrega:
+            dias_desde_entrega = (datetime.utcnow() - venta.fecha_entrega).days
+            
+            if venta.canal in ["vinted", "wallapop"]:
+                # Vinted/Wallapop dan ~48h. Permitimos hasta 3 días por margen de error.
+                if dias_desde_entrega > 3:
+                     raise HTTPException(
+                        status_code=400,
+                        detail=f"Operación denegada. El plazo de devolución de {venta.canal} (48h) ha expirado. Han pasado {dias_desde_entrega} días desde la entrega."
+                    )
+            elif venta.canal in ["tienda_fisica", "web"]:
+                # Tienda y Web tienen 14 o 15 días legales
+                if dias_desde_entrega > 15:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Operación denegada. El plazo legal de devolución (15 días) ha expirado. Han pasado {dias_desde_entrega} días desde la entrega."
+                    )
+
     for key, value in datos.items():
         if hasattr(venta, key):
             if key == "estado_venta": continue # Obsoleto
