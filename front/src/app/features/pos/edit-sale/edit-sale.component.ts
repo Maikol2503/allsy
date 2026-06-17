@@ -23,6 +23,7 @@ export class EditSaleComponent implements OnInit {
     fecha: '', 
     fecha_pago: '',
     fecha_envio: '',
+    estado_venta: '',
     estado_pago: '',
     metodo_pago: '',
     nombre_cliente: '',
@@ -40,6 +41,10 @@ export class EditSaleComponent implements OnInit {
   // ✨ Variables de validación de etiqueta
   estadoEtiqueta: 'vacio' | 'cargando' | 'valida' | 'invalida' = 'vacio';
 
+  // ✨ Variables para Modal de Devolución Parcial
+  mostrarModalDevolucion = false;
+  estadoEnvioPrevio = '';
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -52,6 +57,18 @@ export class EditSaleComponent implements OnInit {
     this.ventaId = Number(this.route.snapshot.paramMap.get('id'));
     if (this.ventaId) {
       this.cargarVenta();
+    }
+  }
+
+  // ✨ Manejador del Dropdown de Logística
+  onEstadoEnvioChange(nuevoEstado: string) {
+    if (nuevoEstado === 'devolucion_parcial') {
+      // Revertimos el select visualmente al estado real
+      setTimeout(() => this.formData.estado_envio = this.estadoEnvioPrevio, 0);
+      // Abrimos el modal
+      this.mostrarModalDevolucion = true;
+    } else {
+      this.estadoEnvioPrevio = nuevoEstado;
     }
   }
 
@@ -134,6 +151,7 @@ export class EditSaleComponent implements OnInit {
           fecha: this.formatDateForInput(res.fecha), 
           fecha_pago: this.formatDateForInput(res.fecha_pago), 
           fecha_envio: this.formatDateForInput(res.fecha_envio),
+          estado_venta: (res.estado_venta || '').toLowerCase(),
           estado_pago: (res.estado_pago || '').toLowerCase(),
           monto_reembolsado: res.monto_reembolsado || 0,
           nombre_cliente: res.nombre_cliente || '', 
@@ -370,5 +388,10 @@ export class EditSaleComponent implements OnInit {
 
   volver() {
     this.router.navigate(['/sales-list']);
+  }
+
+  get ventaGlobalCerradaLogistica(): boolean {
+    const e = this.formData.estado_envio;
+    return e === 'extraviado_envio' || e === 'extraviado_devolucion' || e === 'cancelado' || e === 'devuelto' || e === 'en_devolucion';
   }
 }

@@ -155,8 +155,14 @@
                     <option value="en_camino_devolucion">📦 En Tránsito (Devolución)</option>
                   </select>
                 </div>
+                <!-- ✨ INPUT DINÁMICO PARA PAGO POR EXTRAVÍO -->
+                <div *ngIf="u.estado_gestion === 'extraviado' && stockData.propietario_id" style="margin-top: 5px; width: 100%; max-width: 200px;">
+                   <small style="color: #d97706; font-size: 0.7rem; font-weight: bold; display: block; margin-bottom: 2px;">Valor base para liquidación al dueño (€):</small>
+                   <input type="number" step="0.01" [(ngModel)]="stockData.precio_venta" [name]="'precio_extravio_' + u.id" placeholder="Obligatorio para pagarle" style="padding: 4px 8px; font-size: 0.9rem; width: 100%; border: 1px solid #f59e0b; border-radius: 4px; outline: none; background: #fffbeb;">
+                </div>
               </td>
               <td style="padding: 10px 0; display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                <a *ngIf="u.venta_id" [routerLink]="['/order-detail', u.venta_id]" style="font-weight: 600; color: #0f172a; text-decoration: none; border: 1px solid #cbd5e1; padding: 4px 8px; border-radius: 4px; background: white; font-size: 0.85em;">Ver Venta</a>
                 <button type="button" class="btn-text-primary" (click)="guardarEstadoUnidad(((paginaInterna-1)*10) + idx)" style="font-weight: 600; color: #007782; cursor: pointer; border: none; background: none;">💾 Guardar</button>
                 <button type="button" class="btn-text-danger" *ngIf="u.estado_gestion !== 'vendido'" (click)="eliminarUnidadFisica(((paginaInterna-1)*10) + idx, u.id)" style="font-weight: 600;">🗑️ Borrar</button>
               </td>
@@ -215,9 +221,13 @@
             (localizacionChange)="stockData.localizacion_id = $event">
           </app-location-selector>
         </div>
-        <div class="field" *ngIf="!stockData.propietario_id">
-          <label>Proveedor <span class="required-asterisk">*</span></label>
-          <app-supplier-selector [proveedorInicialId]="stockData.proveedor_id" (supplierChanged)="onSupplierChanged($event)"></app-supplier-selector>
+        <div class="field" style="grid-column: span 2;">
+          <label>Dueño de la prenda <span class="required-asterisk" title="Requerido para inventario">*</span></label>
+          <app-client-selector 
+            [clienteInicialId]="stockData.propietario_id" 
+            [defaultLabel]="'Inventario Propio (Allsys)'"
+            (clientSelected)="onPropietarioChanged($event)">
+          </app-client-selector>
         </div>
       </div>
     </section>

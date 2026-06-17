@@ -52,10 +52,14 @@ export class OnlineOrdersComponent implements OnInit {
     let backend_estado_legado: string | undefined = undefined;
     
     if (this.filtro_estado === 'entregado') backend_estado_envio = 'entregado';
+    else if (this.filtro_estado === 'completado') backend_estado_envio = 'completado';
     else if (this.filtro_estado === 'enviado') backend_estado_envio = 'enviado';
     else if (this.filtro_estado === 'pendiente') backend_estado_envio = 'pendiente_envio';
     else if (this.filtro_estado === 'empaquetado') backend_estado_envio = 'empaquetado';
     else if (this.filtro_estado === 'listo_envio') backend_estado_envio = 'listo_envio';
+    else if (this.filtro_estado === 'en_devolucion') backend_estado_envio = 'en_devolucion';
+    else if (this.filtro_estado === 'extraviado_envio') backend_estado_envio = 'extraviado_envio';
+    else if (this.filtro_estado === 'extraviado_devolucion') backend_estado_envio = 'extraviado_devolucion';
     // ✨ PARA ESTADOS COMPLEJOS USAMOS EL MAPEADOR INTELIGENTE DEL BACKEND
     else if (this.filtro_estado === 'devolucion') backend_estado_legado = 'devuelta';
     else if (this.filtro_estado === 'cancelado') backend_estado_legado = 'cancelada';
@@ -146,35 +150,45 @@ export class OnlineOrdersComponent implements OnInit {
       'empaquetado': 'Empaquetado',
       'listo_envio': 'Listo para enviar',
       'enviado': 'Enviado',
-      'entregado': 'Finalizado (entregado)',
-      'devolucion': 'Devolución',
+      'entregado': 'Entregado (Pendiente Aceptación)',
+      'completado': 'Finalizado / Venta Completada',
+      'devolucion': 'Devolución (Todas)',
+      'en_devolucion': 'Devolución en curso',
+      'extraviado_envio': 'Extraviado (Envío)',
+      'extraviado_devolucion': 'Extraviado (Devolución)',
       'cancelado': 'Cancelado'
     };
     return mapa[valor] || valor;
   }
 
   getEstatusInterpretado(pedido: any): string {
-    if (pedido.estado_pago === 'reembolsado' || pedido.estado_envio === 'cancelado') {
-      if (pedido.estado_envio === 'cancelado') return 'Anulado (En camino de vuelta)';
-      return 'Cancelado. (Venta anulada)';
-    }
-    if (pedido.estado_pago === 'reembolso_parcial' || pedido.estado_envio === 'devuelto') {
-      if (pedido.estado_envio === 'devuelto') return 'Devuelto (En Almacén)';
-      return 'Devolución procesada.';
-    }
-    if (pedido.estado_envio === 'entregado') {
-      return 'Pedido finalizado (Entregado).';
-    }
+    const env = pedido.estado_envio;
+    const pag = pedido.estado_pago;
+    const ev = pedido.estado_venta;
+
+    if (ev === 'completada' || ev === 'completado') return '🏁 Finalizado / Venta Cerrada';
+    if (ev === 'cancelada') return '❌ Anulado (Venta Cancelada)';
+    if (ev === 'devuelta_totalmente') return '🔄 Devuelto Totalmente';
+    if (ev === 'devuelta_parcialmente') return '⚠️ Devuelta Parcialmente';
+
+    if (env === 'extraviado_envio') return '📦 EXTRAVIADO (Envío al cliente)';
+    if (env === 'extraviado_devolucion') return '⚠️ EXTRAVIADO (Durante devolución)';
+    if (env === 'en_devolucion') return '↩️ Devolución en curso';
+    if (env === 'devuelto') return '✅ Devuelto (En Almacén)';
     
-    // Si no está finalizado/cancelado, vemos la logística
-    const estado = pedido.estado_envio || 'pendiente_envio';
-    const mapa: Record<string, string> = {
-      'pendiente_envio': 'Pendiente de enviar',
-      'empaquetado': 'Empaquetado (en almacén)',
-      'listo_envio': 'Listo para enviar',
-      'enviado': 'Enviado (en tránsito)'
-    };
+    if (pag === 'reembolsado' || env === 'cancelado') {
+      if (env === 'cancelado') return '❌ Anulado (En camino de vuelta)';
+      return '🚫 Cancelado. (Venta anulada)';
+    }
+
+    if (env === 'entregado') return '📦 Entregado (Pendiente Aceptación)';
+    if (env === 'enviado') return '🚚 Enviado (En tránsito)';
+    if (env === 'listo_envio') return '📤 Listo para enviar';
+    if (env === 'empaquetado') return '📦 Empaquetado (En almacén)';
+    if (env === 'pendiente_envio' || !env) return '🕒 Pendiente de enviar';
     
-    return mapa[estado] || 'Procesando';
+    if (pag === 'reembolso_parcial') return '⚠️ Devolución parcial procesada';
+
+    return env || 'Procesando';
   }
 }

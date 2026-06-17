@@ -32,6 +32,7 @@ class Venta(Base):
     transaccion_id_externo = Column(String(100), nullable=True)
 
     # --- FLUJO DE TRABAJO ---
+    estado_venta = Column(String(50), default="abierta") # abierta, completada, cancelada, devuelta_parcialmente, devuelta_totalmente
     canal = Column(String(50), nullable=False) 
     vendedor = Column(String(50), nullable=False) 
 
@@ -74,4 +75,4 @@ class DetalleVenta(Base):
 
     venta = relationship("Venta", back_populates="detalles")
     # ✨ ACTUALIZADO: Relación con StockUnit
-    stock_unit = relationship("StockUnit")
+    stock_unit = relationship("StockUnit", back_populates="detalles_venta")

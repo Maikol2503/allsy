@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ProductsService } from '../../../core/services/products.service';
 import { SupplierSelectorComponent, Proveedor } from "../add-product/components/supplier-selector/supplier-selector.component";
 import { LocationSelectorComponent } from '../../../shared/components/selectors/location-selector/location-selector.component';
+import { ClientSelectorComponent } from '../add-product/components/client-selector/client-selector.component';
 import { map, switchMap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { formatLabel, getPlaceholder } from '../add-product/product-utils';
@@ -20,12 +21,13 @@ export interface UnidadLote {
   publicar_web?: boolean; // ✨ NUEVO
   publicar_vinted?: boolean; // ✨ NUEVO
   publicar_wallapop?: boolean; // ✨ NUEVO
+  venta_id?: number; // ✨ AÑADIDO PARA VINCULAR A VENTA
 }
 
 @Component({
   selector: 'app-edit-stock',
   standalone: true,
-  imports: [CommonModule, FormsModule, SupplierSelectorComponent, LocationSelectorComponent],
+  imports: [CommonModule, FormsModule, SupplierSelectorComponent, LocationSelectorComponent, ClientSelectorComponent],
   templateUrl: './edit-stock.component.html',
   styleUrls: ['./edit-stock.component.css']
 })
@@ -195,6 +197,13 @@ export class EditStockComponent implements OnInit {
 
   onSupplierChanged(prov: Proveedor) { this.stockData.proveedor_id = prov.id || null; }
 
+  onPropietarioChanged(clienteId: number | null | undefined) {
+    this.stockData.propietario_id = clienteId;
+    if (clienteId) {
+      this.stockData.proveedor_id = null;
+    }
+  }
+
   getLabelEstadoGestion(estado: string): string {
     const mapa: any = {
       'en_stock': '✅ En Almacén',
@@ -259,6 +268,12 @@ export class EditStockComponent implements OnInit {
         u.editandoId = false;
         u.id_original = res.id;
         u.id = res.id;
+
+        // ✨ Si es extraviado y tiene precio, actualizamos el stock config en paralelo
+        if (u.estado_gestion === 'extraviado' && this.stockData.propietario_id && this.stockData.precio_venta !== undefined) {
+          this.productsService.actualizarStockIndividual(this.stockId!, { precio_venta: this.stockData.precio_venta }).subscribe();
+        }
+
         alert(`✅ Datos de la prenda #${u.id} actualizados.`);
       },
       error: (err) => {

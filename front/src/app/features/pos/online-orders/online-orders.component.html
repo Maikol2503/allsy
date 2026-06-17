@@ -23,8 +23,12 @@
       <option value="empaquetado">Empaquetado</option>
       <option value="listo_envio">Listo para enviar</option>
       <option value="enviado">Enviado</option>
-      <option value="entregado">Pedido finalizado (entregado)</option>
-      <option value="devolucion">Devolución en curso</option>
+      <option value="entregado">Entregado (Pendiente Aceptación)</option>
+      <option value="completado">Finalizado / Venta Completada</option>
+      <option value="devolucion">Devolución (Todas)</option>
+      <option value="en_devolucion">Devolución en curso</option>
+      <option value="extraviado_envio">Extraviado (Envío)</option>
+      <option value="extraviado_devolucion">Extraviado (Devolución)</option>
       <option value="cancelado">Cancelado (Anulado)</option>
     </select>
 
@@ -159,21 +163,23 @@
           </td>
 
           <td>
-            <span class="status-pill" 
-                  [ngClass]="{
-                    'finalizado': p.estado_envio === 'entregado',
-                    'cancelado': p.estado_envio === 'cancelado' || p.estado_pago === 'reembolsado',
-                    'devolucion': p.estado_envio === 'devuelto' || p.estado_pago === 'reembolso_parcial',
-                    'en_curso': p.estado_envio === 'enviado',
-                    'pendiente': !p.estado_envio || p.estado_envio === 'pendiente_envio',
-                    'empaquetado': p.estado_envio === 'empaquetado',
-                    'listo_envio': p.estado_envio === 'listo_envio'
-                  }">
+            <span class="status-badge" [ngClass]="{
+              'finalizado': p.estado_venta === 'completado',
+              'entregado': p.estado_envio === 'entregado',
+              'extraviado': p.estado_envio === 'extraviado_envio' || p.estado_envio === 'extraviado_devolucion',
+              'cancelado': p.estado_venta === 'cancelada',
+              'devolucion': p.estado_venta === 'devuelta_totalmente' || p.estado_venta === 'devuelta_parcialmente',
+              'en_curso': p.estado_envio === 'enviado',
+              'pendiente': !p.estado_envio || p.estado_envio === 'pendiente_envio',
+              'empaquetado': p.estado_envio === 'empaquetado',
+              'listo_envio': p.estado_envio === 'listo_envio'
+            }">
               {{ getEstatusInterpretado(p) }}
             </span>
             <div style="font-size: 0.8rem; color: #64748b; margin-top: 6px;">
               <span *ngIf="p.estado_envio === 'cancelado' || p.estado_pago === 'reembolsado'">Venta Anulada</span>
               <span *ngIf="p.estado_envio === 'devuelto' || p.estado_pago === 'reembolso_parcial'">Artículos devueltos</span>
+              <span *ngIf="p.estado_envio === 'completado' && p.fecha_finalizado">Finalizado el: {{ p.fecha_finalizado | date:'dd/MM/yyyy' }}</span>
               <span *ngIf="p.estado_envio === 'entregado' && p.fecha_entrega">Entregado el: {{ p.fecha_entrega | date:'dd/MM/yyyy' }}</span>
               <span *ngIf="p.estado_envio === 'enviado' && p.fecha_envio">Enviado el: {{ p.fecha_envio | date:'dd/MM/yyyy' }}</span>
               <span *ngIf="p.numero_seguimiento" style="display: block; margin-top: 2px;">Trk: {{ p.numero_seguimiento }}</span>

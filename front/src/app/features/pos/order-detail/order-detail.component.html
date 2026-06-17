@@ -31,7 +31,21 @@
       <h3>🚚 Logística y Estado</h3>
       <div class="info-row">
         <span class="info-label">Estado Envío:</span>
-        <span class="info-value" style="color: #007782;">{{ getEstatusInterpretado(venta) }}</span>
+        <span class="info-value">
+          <span class="status-pill" 
+                <span class="status-badge" [ngClass]="{
+                  'finalizado': venta.estado_venta === 'completado' || venta.estado_venta === 'completada',
+                  'extraviado': venta.estado_envio === 'extraviado_envio' || venta.estado_envio === 'extraviado_devolucion',
+                  'cancelado': venta.estado_venta === 'cancelada',
+                  'devolucion': venta.estado_venta === 'devuelta_totalmente' || venta.estado_venta === 'devuelta_parcialmente',
+                  'en_curso': venta.estado_envio === 'enviado' || venta.estado_envio === 'entregado',
+                  'pendiente': !venta.estado_envio || venta.estado_envio === 'pendiente_envio',
+                  'empaquetado': venta.estado_envio === 'empaquetado',
+                  'listo_envio': venta.estado_envio === 'listo_envio'
+                }">
+                  {{ getEstatusInterpretado(venta) }}
+          </span>
+        </span>
       </div>
       <div class="info-row">
         <span class="info-label">Nº Seguimiento:</span>

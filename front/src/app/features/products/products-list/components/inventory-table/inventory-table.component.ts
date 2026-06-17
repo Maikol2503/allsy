@@ -12,6 +12,7 @@ export interface UnidadStock {
   nuevo_estado?: string; 
   canales?: any;
   fecha_compra?: string; // ✨ AÑADIDO PARA LA TABLA INTERNA
+  venta_id?: number; // ✨ AÑADIDO PARA ENLACE A VENTA
 }
 
 export interface LoteAgrupado {
@@ -135,6 +136,11 @@ export class InventoryTableComponent implements OnChanges, OnInit {
           lote.stock_disponible--;
         } else if (estadoAnterior !== 'en_stock' && u.nuevo_estado === 'en_stock') {
           lote.stock_disponible++;
+        }
+
+        // ✨ Si es extraviado y tiene precio, actualizamos el stock config en paralelo
+        if (u.nuevo_estado === 'extraviado' && lote.propietario && lote.precio_venta !== undefined) {
+          this.productsService.actualizarStockIndividual(lote.stock_config_id, { precio_venta: lote.precio_venta }).subscribe();
         }
       },
       error: (err) => {

@@ -11,9 +11,10 @@ export interface DetalleVenta {
 
 export interface VentaData {
   fecha?: string;
-  canal: string;          
-  vendedor: string;       
-  metodo_pago: string;    
+  canal: string;
+  vendedor: string;
+  metodo_pago: string;
+  estado_venta?: string;
   estado_pago: string;    // 👈 NUEVO
   estado_envio?: string;  // ✨ NUEVO
   nombre_cliente?: string;

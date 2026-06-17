@@ -228,6 +228,12 @@ export class PosComponent {
       precio_unitario: Number(item.precio_unitario)
     }));
 
+    if (this.datosVenta.canal === 'tienda_fisica') {
+      this.datosVenta.estado_venta = 'completada';
+    } else {
+      this.datosVenta.estado_venta = 'abierta';
+    }
+
     this.ventasService.registrarVenta(this.datosVenta).subscribe({
       next: (res) => {
         alert(`✅ VENTA REGISTRADA\nCódigo: ${res.codigo}`);

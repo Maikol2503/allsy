@@ -53,3 +53,4 @@ class StockUnit(Base):
 
     stock_config = relationship("StockConfig", back_populates="stock_units")
     pago_consignacion = relationship("PagoConsignacion")
+    detalles_venta = relationship("DetalleVenta", back_populates="stock_unit")

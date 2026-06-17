@@ -1099,7 +1099,8 @@ def obtener_stock_configs_individuales_paginados(
             "stock_units": [
                 {
                     "id": u.id, "sku": u.sku, "estado_gestion": u.estado_gestion,
-                    "canales": {"web": u.publicar_web, "vinted": u.publicar_vinted, "wallapop": u.publicar_wallapop}
+                    "canales": {"web": u.publicar_web, "vinted": u.publicar_vinted, "wallapop": u.publicar_wallapop},
+                    "venta_id": u.detalles_venta[-1].venta_id if u.detalles_venta and len(u.detalles_venta) > 0 else None
                 } 
                 for u in unidades_activas
             ]
@@ -1254,7 +1255,8 @@ def obtener_stock_config_detalle(db: Session, stock_config_id: int):
                 "publicar_vinted": u.publicar_vinted, 
                 "publicar_wallapop": u.publicar_wallapop,
                 "fecha_compra": u.fecha_compra.isoformat() if u.fecha_compra else None,
-                "fecha_registro": u.fecha_registro.isoformat() if u.fecha_registro else None
+                "fecha_registro": u.fecha_registro.isoformat() if u.fecha_registro else None,
+                "venta_id": u.detalles_venta[-1].venta_id if u.detalles_venta and len(u.detalles_venta) > 0 else None
             } for u in config.stock_units if u.activo
         ]
     }
