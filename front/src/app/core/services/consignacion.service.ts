@@ -43,6 +43,7 @@ export interface PagoRead extends PagoCreate {
   estado: string; // ✨ NUEVO
   motivo_anulacion?: string; // ✨ NUEVO
   items_pagados?: any[]; 
+  items_anulados?: any[]; // ✨ NUEVO PARA HISTORIAL FANTASMA
 }
 
 @Injectable({
