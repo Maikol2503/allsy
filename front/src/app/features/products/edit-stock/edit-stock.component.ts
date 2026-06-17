@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProductsService } from '../../../core/services/products.service';
 import { SupplierSelectorComponent, Proveedor } from "../add-product/components/supplier-selector/supplier-selector.component";
 import { LocationSelectorComponent } from '../../../shared/components/selectors/location-selector/location-selector.component';
@@ -27,7 +27,7 @@ export interface UnidadLote {
 @Component({
   selector: 'app-edit-stock',
   standalone: true,
-  imports: [CommonModule, FormsModule, SupplierSelectorComponent, LocationSelectorComponent, ClientSelectorComponent],
+  imports: [CommonModule, FormsModule, SupplierSelectorComponent, LocationSelectorComponent, ClientSelectorComponent, RouterLink],
   templateUrl: './edit-stock.component.html',
   styleUrls: ['./edit-stock.component.css']
 })
