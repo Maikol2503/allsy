@@ -358,6 +358,13 @@ def registrar_devolucion_fisica_item(db: Session, venta_id: int, detalle_id: int
     if not venta or not detalle: raise HTTPException(status_code=404, detail="No encontrado")
     if detalle.devuelto: raise HTTPException(status_code=400, detail="Ya devuelto")
 
+    # ✨ SEGURIDAD CONTABLE: Bloquear retorno si la prenda ya fue pagada a su dueño
+    if detalle.stock_unit and detalle.stock_unit.pago_consignacion_id is not None:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Operación denegada. La prenda #{detalle.stock_unit_id} ya ha sido liquidada al dueño. Ve a Consignación y anula o quita la prenda de ese pago antes de devolverla al stock."
+        )
+
     if detalle.stock_unit:
         detalle.stock_unit.estado_gestion = estado_stock
         detalle.stock_unit.activo = True
