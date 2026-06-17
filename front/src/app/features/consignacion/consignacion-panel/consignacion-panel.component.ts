@@ -241,4 +241,29 @@ export class ConsignacionPanelComponent implements OnInit {
       }
     });
   }
+
+  // ✨ Nueva función para quitar un ítem individual
+  quitarItemDePago(pagoId: number, stockUnitId: number) {
+    const motivo = prompt("⚠️ Vas a desvincular esta prenda de este pago. \n\n- El monto de esta prenda se restará del total del pago.\n- La prenda volverá a estar pendiente de liquidación.\n\nEscribe el motivo del error:");
+    
+    if (motivo === null) return;
+    if (motivo.trim() === '') {
+      alert("Debes escribir un motivo para corregir el pago.");
+      return;
+    }
+
+    this.isSubmitting = true;
+    this.consignacionService.quitarItemDePago(pagoId, stockUnitId, motivo).subscribe({
+      next: () => {
+        alert('✅ Prenda desvinculada y total del pago actualizado.');
+        this.isSubmitting = false;
+        this.cargarDatos();
+        this.cargarPendientesPago();
+      },
+      error: (err) => {
+        this.isSubmitting = false;
+        alert('❌ Error: ' + (err.error?.detail || 'Inténtalo de nuevo'));
+      }
+    });
+  }
 }

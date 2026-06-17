@@ -73,6 +73,10 @@ export class ConsignacionService {
     return this.http.put(`${this.apiUrl}/pago/${pagoId}/anular?motivo=${encodeURIComponent(motivo)}`, {});
   }
 
+  quitarItemDePago(pagoId: number, stockUnitId: number, motivo: string) {
+    return this.http.put(`${this.apiUrl}/pago/${pagoId}/quitar-item/${stockUnitId}?motivo=${encodeURIComponent(motivo)}`, {});
+  }
+
   getPrendasPendientesPago(clienteId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/cliente/${clienteId}/pendientes-pago`);
   }

@@ -18,6 +18,7 @@ class PagoConsignacion(Base):
     estado = Column(String(50), default="completado") # completado, anulado
     motivo_anulacion = Column(Text, nullable=True)
     fecha_anulacion = Column(DateTime, nullable=True)
+    items_anulados_json = Column(Text, nullable=True) # ✨ Auditoría: Prendas que fueron quitadas de este pago por error
     
     cliente = relationship("Cliente")
     # ✨ TRAZABILIDAD: Prendas que fueron pagadas con esta transacción

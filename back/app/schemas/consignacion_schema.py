@@ -23,8 +23,11 @@ class ItemPagadoRead(BaseModel):
 class PagoRead(PagoCreate):
     id: int
     fecha: datetime
+    estado: str = "completado"
+    motivo_anulacion: Optional[str] = None
     # ✨ TRAZABILIDAD: Desglose de qué se pagó exactamente
     items_pagados: List[ItemPagadoRead] = []
+    items_anulados: Optional[List[dict]] = [] # ✨ Prendas que fueron quitadas por error
     class Config:
         from_attributes = True
 

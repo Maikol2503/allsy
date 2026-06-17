@@ -121,12 +121,14 @@ def obtener_estadisticas_cliente(db: Session, cliente_id: int):
         # LÓGICA DE VALIDEZ DEDUCIDA
         # Una venta no cuenta para el dueño si el envío se canceló, se reembolsó el pago, 
         # O SI EL ÍTEM ESPECÍFICO FUE DEVUELTO.
-        es_invalida = (est_envio == 'cancelado' or est_pago == 'reembolsado' or item_devuelto)
+        es_invalida = (est_envio in ['cancelado', 'devuelto', 'en_devolucion'] or est_pago == 'reembolsado' or item_devuelto)
         
         # Sumar contadores de estados (Aproximados ahora por estado_envio)
-        if est_envio == "pendiente_envio": stats["prendas_procesando"] += 1
+        if est_envio in ["pendiente_envio", "empaquetado", "listo_envio"]: stats["prendas_procesando"] += 1
         elif est_envio == "enviado": stats["prendas_enviada"] += 1
-        elif est_envio == "entregado": stats["prendas_entregado"] += 1
+        elif est_envio in ["entregado", "completado", "extraviado_envio", "extraviado_devolucion"]: stats["prendas_entregado"] += 1
+        
+        if est_envio in ["devuelto", "en_devolucion"]: stats["prendas_devueltas_tienda"] += 1
         
         if es_invalida: stats["prendas_cancelada"] += 1
 
@@ -146,6 +148,23 @@ def obtener_estadisticas_cliente(db: Session, cliente_id: int):
                 ingresos_en_transito += precio_base
                 saldo_en_transito += desglose["pago_cliente"]
                 beneficio_en_transito += desglose["comision_total_allsys"]
+
+    # 3. Sumar también las prendas EXTRAVIADAS en almacén (no tienen venta, pero se pagan)
+    prendas_extraviadas_almacen = db.query(
+        StockConfig.precio_venta,
+        StockConfig.donar_ganancias
+    ).join(StockUnit).filter(
+        StockConfig.propietario_id == cliente_id,
+        StockUnit.estado_gestion == 'extraviado',
+        StockUnit.id.notin_(db.query(DetalleVenta.stock_unit_id)) # Que no estén en una venta (extravío en almacén puro)
+    ).all()
+
+    for precio_config, donar in prendas_extraviadas_almacen:
+        precio_base = float(precio_config or 0.0) # Si no hay precio, se queda en 0 para revisión manual
+        
+        # ✨ Allsys asume la pérdida total, el dueño cobra el 100% sin comisiones
+        # Allsys NO registra beneficio por comisión ni cuenta esto como "Venta Generada".
+        dinero_para_cliente += precio_base
 
     pagos_realizados = float(db.query(func.sum(PagoConsignacion.monto)).filter(
         PagoConsignacion.cliente_id == cliente_id,
@@ -250,6 +269,7 @@ def listar_prendas_detalle_cliente(db: Session, cliente_id: int, page: int = 1, 
         # Si la prenda se vendió, inyectamos los datos reales de la venta
         if u.id in ventas_dict:
             detalle, venta = ventas_dict[u.id]
+            item_data["estado"] = venta.estado_envio # ✨ INYECTAR EL ESTADO REAL DE LA VENTA LOGÍSTICA
             item_data["canal_venta"] = venta.canal
             item_data["fecha_venta"] = venta.fecha
             item_data["estado_pago"] = venta.estado_pago
@@ -266,6 +286,10 @@ def listar_prendas_detalle_cliente(db: Session, cliente_id: int, page: int = 1, 
                     donar_ganancias=getattr(config, 'donar_ganancias', False)
                 )
                 item_data["finanzas"] = desglose
+        elif u.estado_gestion == 'extraviado':
+            # ✨ Extraviado en almacén sin venta: Cobra el 100% de la indemnización
+            item_data["nombre_producto"] = f"{producto.nombre} (Extraviado en Almacén)"
+            item_data["finanzas"]["pago_cliente"] = item_data["finanzas"]["precio_venta"]
 
         resultados.append(item_data)
 
@@ -297,14 +321,30 @@ def registrar_pago(db: Session, cliente_id: int, data: PagoCreate):
 
     # ✨ VINCULACIÓN DE PRENDAS (Trazabilidad)
     if data.stock_unit_ids:
-        # Buscamos las prendas que pertenecen al cliente y están marcadas como vendidas
+        # Buscamos las prendas que pertenecen al cliente y están marcadas como vendidas o extraviadas
         prendas = db.query(StockUnit).join(StockConfig).filter(
             StockUnit.id.in_(data.stock_unit_ids),
             StockConfig.propietario_id == cliente_id
         ).all()
         
+        monto_extraviado = 0.0
+
         for p in prendas:
             p.pago_consignacion_id = nuevo_pago.id
+            if p.estado_gestion == 'extraviado':
+                precio_base = float(p.stock_config.precio_venta or 0.0)
+                # ✨ Allsys asume la pérdida total, el dueño cobra el 100% sin comisiones
+                monto_extraviado += precio_base
+
+        if monto_extraviado > 0:
+            db.add(Gasto(
+                concepto=f"Compensación por prendas extraviadas en almacén (Pago Consignación #{nuevo_pago.id})",
+                categoria="Pérdidas y Mermas",
+                monto=round(monto_extraviado, 2),
+                metodo_pago=nuevo_pago.metodo_pago,
+                fecha=datetime.utcnow(),
+                notas=f"Pago al cliente #{cliente_id} por prendas perdidas físicamente en el almacén."
+            ))
 
     db.commit()
     db.refresh(nuevo_pago)
@@ -323,11 +363,10 @@ def obtener_prendas_pendientes_pago(db: Session, cliente_id: int):
     Retorna todas las prendas vendidas de un cliente que aún NO han sido pagadas.
     Útil para el desglose en el formulario de pago de consignación.
     """
-    # 1. Obtenemos las prendas del cliente en estados de venta válidos que no tengan pago asociado
-    # Unimos con ventas para asegurarnos de que la venta sea real y no solo un cambio de estado manual
+    # 1. Obtenemos las prendas del cliente en estados válidos (vendido o extraviado en almacén) que no tengan pago asociado
     query = db.query(StockUnit).join(StockConfig).filter(
         StockConfig.propietario_id == cliente_id,
-        StockUnit.estado_gestion == 'vendido',
+        StockUnit.estado_gestion.in_(['vendido', 'extraviado']),
         StockUnit.pago_consignacion_id.is_(None)
     )
 
@@ -345,7 +384,7 @@ def obtener_prendas_pendientes_pago(db: Session, cliente_id: int):
         ventas = db.query(DetalleVenta, Venta).join(Venta, DetalleVenta.venta_id == Venta.id).filter(
             DetalleVenta.stock_unit_id.in_(unidad_ids),
             Venta.estado_pago == 'pagado', 
-            Venta.estado_envio != 'cancelado'
+            ~Venta.estado_envio.in_(['cancelado', 'devuelto', 'en_devolucion'])
         ).all()
         ventas_dict = {detalle.stock_unit_id: (detalle, venta) for detalle, venta in ventas}
 
@@ -355,9 +394,9 @@ def obtener_prendas_pendientes_pago(db: Session, cliente_id: int):
 
     resultados = []
     for u in unidades:
-        if u.id not in ventas_dict: continue # Si no hay venta válida, no se puede pagar
+        # Si está vendido, DEBE tener una venta válida
+        if u.estado_gestion == 'vendido' and u.id not in ventas_dict: continue 
 
-        detalle, venta = ventas_dict[u.id]
         config = u.stock_config
         variante = config.variante
         producto = variante.producto
@@ -367,21 +406,31 @@ def obtener_prendas_pendientes_pago(db: Session, cliente_id: int):
             img_sorted = sorted(variante.imagenes, key=lambda x: x.orden or 0)
             img_url = img_sorted[0].url if img_sorted else None
 
-        desglose = calcular_desglose_venta(
-            float(detalle.precio_unitario_en_venta or config.precio_venta),
-            exento_tarifa_fija=exento_tarifa_fija,
-            exento_comision=exento_comision,
-            donar_ganancias=getattr(config, 'donar_ganancias', False)
-        )
+        # Si hay venta, tomamos el precio real. Si es extravío, tomamos el precio de configuración.
+        if u.id in ventas_dict:
+            detalle, venta = ventas_dict[u.id]
+            precio_base = float(detalle.precio_unitario_en_venta or config.precio_venta)
+            fecha_ref = venta.fecha
+            desglose = calcular_desglose_venta(
+                precio_base,
+                exento_tarifa_fija=exento_tarifa_fija,
+                exento_comision=exento_comision,
+                donar_ganancias=getattr(config, 'donar_ganancias', False)
+            )
+            pago_cliente = desglose["pago_cliente"]
+        else:
+            precio_base = float(config.precio_venta or 0.0)
+            fecha_ref = datetime.utcnow() # Fecha simulada para el extravío
+            pago_cliente = precio_base # ✨ Allsys asume la pérdida total, el dueño cobra el 100% sin comisiones
 
         resultados.append({
             "stock_id": u.id,
             "sku": u.sku,
-            "nombre_producto": producto.nombre,
+            "nombre_producto": f"{producto.nombre} {'(Extraviado en Almacén)' if u.estado_gestion == 'extraviado' else ''}",
             "imagen": img_url,
-            "fecha_venta": venta.fecha,
-            "precio_venta": float(detalle.precio_unitario_en_venta or config.precio_venta),
-            "pago_cliente": desglose["pago_cliente"]
+            "fecha_venta": fecha_ref,
+            "precio_venta": precio_base,
+            "pago_cliente": pago_cliente
         })
 
     return resultados
@@ -420,10 +469,26 @@ def listar_pagos(db: Session, cliente_id: int):
             )
 
             # Inyectamos atributos dinámicos al objeto para que Pydantic los encuentre
-            u.nombre_producto = producto.nombre
-            u.precio_venta = precio_real
-            u.pago_cliente = desglose["pago_cliente"]
-            u.comision_allsys = desglose["comision_total_allsys"]
+            if u.estado_gestion == 'extraviado':
+                u.nombre_producto = f"{producto.nombre} (Extraviado en Almacén)"
+                u.precio_venta = precio_real
+                u.pago_cliente = precio_real # ✨ Allsys no cobra comisión
+                u.comision_allsys = 0.0
+            else:
+                u.nombre_producto = producto.nombre
+                u.precio_venta = precio_real
+                u.pago_cliente = desglose["pago_cliente"]
+                u.comision_allsys = desglose["comision_total_allsys"]
+        
+        # ✨ Parsear ítems anulados fantasma
+        import json
+        if pago.items_anulados_json:
+            try:
+                pago.items_anulados = json.loads(pago.items_anulados_json)
+            except Exception:
+                pago.items_anulados = []
+        else:
+            pago.items_anulados = []
             
     return pagos
 
@@ -476,3 +541,78 @@ def anular_pago(db: Session, pago_id: int, motivo: str):
     )
 
     return {"message": "Pago anulado correctamente. El saldo vuelve a estar pendiente.", "pago": pago}
+
+def quitar_item_de_pago(db: Session, pago_id: int, stock_unit_id: int, motivo: str):
+    """
+    Desvincula una prenda individual de un pago de consignación.
+    Recalcula el monto total del pago para mantener la integridad contable.
+    """
+    pago = db.query(PagoConsignacion).filter(PagoConsignacion.id == pago_id).first()
+    if not pago:
+        raise HTTPException(status_code=404, detail="Registro de pago no encontrado.")
+    
+    if pago.estado == 'anulado':
+        raise HTTPException(status_code=400, detail="No se pueden quitar ítems de un pago que ya está anulado globalmente.")
+
+    unidad = db.query(StockUnit).filter(StockUnit.id == stock_unit_id, StockUnit.pago_consignacion_id == pago_id).first()
+    if not unidad:
+        raise HTTPException(status_code=404, detail="La prenda no pertenece a este pago o ya fue desvinculada.")
+
+    # 1. Calcular cuánto se le pagó al cliente por esta prenda específica para restarlo del total
+    cliente = pago.cliente
+    config = unidad.stock_config
+    
+    # Buscamos la venta
+    detalle_v = db.query(DetalleVenta).filter(DetalleVenta.stock_unit_id == unidad.id).first()
+    precio_real = float(detalle_v.precio_unitario_en_venta if detalle_v else config.precio_venta)
+
+    if unidad.estado_gestion == 'extraviado':
+        pago_por_esta_prenda = precio_real # 100% indemnización
+    else:
+        desglose = calcular_desglose_venta(
+            precio_real,
+            exento_tarifa_fija=getattr(cliente, 'exento_tarifa_fija', False),
+            exento_comision=getattr(cliente, 'exento_comision', False),
+            donar_ganancias=getattr(config, 'donar_ganancias', False)
+        )
+        pago_por_esta_prenda = desglose["pago_cliente"]
+
+    # 2. Guardar el ítem en el JSON fantasma
+    import json
+    items_anulados = []
+    if pago.items_anulados_json:
+        try:
+            items_anulados = json.loads(pago.items_anulados_json)
+        except Exception:
+            pass
+            
+    items_anulados.append({
+        "id": unidad.id,
+        "sku": unidad.sku,
+        "nombre_producto": f"{config.variante.producto.nombre} (Anulado de este pago)",
+        "precio_venta": precio_real,
+        "pago_cliente": pago_por_esta_prenda,
+        "comision_allsys": desglose["comision_total_allsys"] if unidad.estado_gestion != 'extraviado' else 0.0,
+        "fecha_anulacion": datetime.utcnow().isoformat(),
+        "motivo": motivo
+    })
+    pago.items_anulados_json = json.dumps(items_anulados)
+
+    # 3. Actualizar el pago global
+    monto_anterior = pago.monto
+    pago.monto = max(0.0, float(pago.monto) - pago_por_esta_prenda)
+    
+    # 4. Desvincular la prenda
+    unidad.pago_consignacion_id = None
+    
+    # 5. Auditoría detallada
+    registrar_log(
+        db, accion="QUITAR_ITEM_PAGO", entidad_tipo="PAGO_CONSIGNACION", entidad_id=pago_id,
+        valor_anterior={"monto": monto_anterior, "item_id": stock_unit_id},
+        valor_nuevo={"monto": pago.monto},
+        notas=f"Se retiró la prenda #{stock_unit_id} del pago #{pago_id} por error. Motivo: {motivo}. Se restaron {pago_por_esta_prenda}€ del total del pago."
+    )
+
+    db.commit()
+    db.refresh(pago)
+    return pago
