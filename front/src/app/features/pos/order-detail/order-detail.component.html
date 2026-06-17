@@ -32,8 +32,7 @@
       <div class="info-row">
         <span class="info-label">Estado Envío:</span>
         <span class="info-value">
-          <span class="status-pill" 
-                <span class="status-badge" [ngClass]="{
+          <span class="status-badge" [ngClass]="{
                   'finalizado': venta.estado_venta === 'completado' || venta.estado_venta === 'completada',
                   'extraviado': venta.estado_envio === 'extraviado_envio' || venta.estado_envio === 'extraviado_devolucion',
                   'cancelado': venta.estado_venta === 'cancelada',
