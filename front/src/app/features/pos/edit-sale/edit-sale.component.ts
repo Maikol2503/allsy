@@ -23,6 +23,7 @@ export class EditSaleComponent implements OnInit {
     fecha: '', 
     fecha_pago: '',
     fecha_envio: '',
+    fecha_entrega: '', // ✨ NUEVO
     estado_venta: '',
     estado_pago: '',
     metodo_pago: '',

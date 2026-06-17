@@ -233,8 +233,13 @@
         </div>
 
         <div class="field">
-          <label class="text-muted"><small>Fecha Envío/Entrega al Comprador</small></label>
+          <label class="text-muted"><small>Fecha Envío</small></label>
           <input type="datetime-local" [(ngModel)]="formData.fecha_envio">
+        </div>
+
+        <div class="field" *ngIf="formData.estado_envio === 'entregado' || formData.fecha_entrega">
+          <label class="text-muted"><small>Fecha Entrega al Comprador</small></label>
+          <input type="datetime-local" [(ngModel)]="formData.fecha_entrega">
         </div>
       </div>
 
