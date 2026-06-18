@@ -303,10 +303,12 @@ export class AddProductComponent implements OnInit {
     this.marcaSeleccionada = marca; 
   }
 
-  onSupplierChanged(prov: Proveedor, stock: StockVariante) {
-    stock.proveedor = prov.nombre;
-    stock.proveedor_id = prov.id || null;
-    if (prov.isNew) (stock as any).proveedor_nombre_nuevo = prov.nombre;
+  onPropietarioChanged(clienteId: number | null | undefined, stock: StockVariante) {
+    stock.propietario_id = clienteId;
+    if (clienteId) {
+      stock.proveedor = ''; // Limpiamos proveedor si ahora tiene dueño
+      stock.proveedor_id = null;
+    }
   }
 
   onCategorySelected(event: CategorySelectionEvent): void {
@@ -1219,7 +1221,12 @@ getAtributosVacios(): any[] {
         const hayDisponibles = grupoStock.unidades!.some((u: any) => u.estado_gestion === 'en_stock');
         grupoStock.estado_gestion = hayDisponibles ? 'en_stock' : unidad.estado_gestion;
         grupoStock.stock = grupoStock.unidades!.filter((u: any) => u.estado_gestion === 'en_stock').length;
-        
+
+        // ✨ Si es extraviado y tiene precio, actualizamos el stock config en paralelo
+        if (unidad.estado_gestion === 'extraviado' && grupoStock.propietario_id && grupoStock.precio_venta !== undefined) {
+          this.productsService.actualizarStockIndividual(grupoStock.id!, { precio_venta: grupoStock.precio_venta }).subscribe();
+        }
+
         alert('✅ ID y cambios guardados correctamente.');
       },
       error: (err) => {

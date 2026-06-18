@@ -36,6 +36,11 @@ def void_payment(pago_id: int, motivo: str, db: Session = Depends(get_session)):
     """Anula un pago y devuelve el saldo al cliente sin borrar el registro financiero."""
     return consignacion_repo.anular_pago(db, pago_id, motivo)
 
+@router.put("/pago/{pago_id}/quitar-item/{stock_unit_id}")
+def remove_item_from_payment(pago_id: int, stock_unit_id: int, motivo: str, db: Session = Depends(get_session)):
+    """Quita una prenda individual de un pago (por error al marcarla) y recalcula el total."""
+    return consignacion_repo.quitar_item_de_pago(db, pago_id, stock_unit_id, motivo)
+
 from typing import Optional
 from fastapi import Query
 

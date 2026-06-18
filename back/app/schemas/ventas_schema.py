@@ -14,6 +14,7 @@ class VentaCreate(BaseModel):
     metodo_pago: str 
     pais: Optional[str] = "España"
     # ✨ NUEVOS CAMPOS
+    estado_venta: str = "abierta"
     estado_pago: str = "pagado"
     estado_envio: str = "pendiente_envio"
 
@@ -50,6 +51,7 @@ class VentaCreate(BaseModel):
 
 
 class VentaUpdate(BaseModel):
+    estado_venta: Optional[str] = None
     estado_pago: Optional[str] = None
     metodo_pago: Optional[str] = None
     nombre_cliente: Optional[str] = None

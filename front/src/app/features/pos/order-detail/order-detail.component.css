@@ -178,6 +178,16 @@
 .status-pill.active { background: #eafaf1; color: #27ae60; border: 1px solid #a9dfbf; }
 .status-pill.paid { background: #e0f2f1; color: #00796b; border: 1px solid #b2dfdb; }
 
+/* Global Order Status Pills */
+.status-pill.finalizado { background: #eafaf1; color: #27ae60; border-color: #27ae60; }
+.status-pill.cancelado { background: #fceceb; color: #e74c3c; border-color: #e74c3c; }
+.status-pill.devolucion { background: #fef3c7; color: #b91c1c; border-color: #ef4444; }
+.status-pill.en_curso { background: #eff6ff; color: #1d4ed8; border-color: #3b82f6; }
+.status-pill.pendiente { background: #fff8e1; color: #d97706; border-color: #f59e0b; }
+.status-pill.empaquetado { background: #f3e8ff; color: #6d28d9; border-color: #a855f7; }
+.status-pill.listo_envio { background: #e0e7ff; color: #4338ca; border-color: #6366f1; }
+.status-pill.extraviado { background: #fff7ed; color: #c2410c; border-color: #f97316; }
+
 /* Loader */
 .loading-state {
   text-align: center;

@@ -137,6 +137,7 @@
 .status-pill.pendiente { background: #fff8e1; color: #d97706; border-color: #f59e0b; }
 .status-pill.empaquetado { background: #f3e8ff; color: #6d28d9; border-color: #a855f7; }
 .status-pill.listo_envio { background: #e0e7ff; color: #4338ca; border-color: #6366f1; }
+.status-pill.extraviado { background: #fff7ed; color: #c2410c; border-color: #f97316; }
 
 /* Loader */
 .spinner-small {
