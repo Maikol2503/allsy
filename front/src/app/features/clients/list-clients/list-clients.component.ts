@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ClientesService, ClienteData } from '../../../core/services/clientes.service';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 // import { DateSelectorComponent } from '../../../shared/components/date-selector/date-selector.component';
 
 @Component({
@@ -25,6 +25,7 @@ export class ListClientsComponent implements OnInit {
   filtroPais: string = '';
   fechaInicio: string = '';
   fechaFin: string = '';
+  conDeuda: boolean = false;
 
   // Lista de países para el filtro
   listaPaises = [
@@ -40,10 +41,19 @@ export class ListClientsComponent implements OnInit {
     { nombre: 'Otros', bandera: '🌍' }
   ];
 
-  constructor(private clientesService: ClientesService, private router: Router) {}
+  constructor(
+    private clientesService: ClientesService, 
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit(): void {
-    this.cargarClientes();
+    this.route.queryParams.subscribe(params => {
+      if (params['conDeuda'] === 'true') {
+        this.conDeuda = true;
+      }
+      this.cargarClientes();
+    });
   }
 
   cargarClientes() {
@@ -54,7 +64,8 @@ export class ListClientsComponent implements OnInit {
       search: this.searchCliente,
       pais: this.filtroPais,
       fecha_inicio: this.fechaInicio,
-      fecha_fin: this.fechaFin
+      fecha_fin: this.fechaFin,
+      con_deuda: this.conDeuda
     };
 
     this.clientesService.obtenerClientes(filtros).subscribe({
@@ -80,6 +91,7 @@ export class ListClientsComponent implements OnInit {
     this.filtroPais = '';
     this.fechaInicio = '';
     this.fechaFin = '';
+    this.conDeuda = false;
     this.buscar();
   }
 

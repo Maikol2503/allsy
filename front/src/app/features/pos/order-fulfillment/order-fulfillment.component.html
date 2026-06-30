@@ -12,9 +12,9 @@
 
   <!-- --- BARRA DE CONTROL --- -->
   <div class="controls-bar">
-    <div class="search-box" style="display: flex; gap: 0; background: white; border-radius: 10px; border: 1px solid #cbd5e1; overflow: hidden; padding: 0;">
+    <div class="search-box" style="display: flex; gap: 0; background: white; border-radius: 10px; border: 1px solid var(--border-color); overflow: hidden; padding: 0;">
       <select [(ngModel)]="tipoBusqueda" (change)="onFiltrosChange()" 
-              style="border: none; background: #f1f5f9; padding: 0 15px; font-weight: 800; color: #475569; border-right: 1px solid #cbd5e1; outline: none; cursor: pointer;">
+              style="border: none; background: #f1f5f9; padding: 0 15px; font-weight: 800; color: var(--text-muted); border-right: 1px solid var(--border-color); outline: none; cursor: pointer;">
         <option value="general">🔍 Todo</option>
         <option value="stock_unit_id">🧵 ID Prenda</option>
         <option value="codigo_venta">📄 Ticket</option>
@@ -67,7 +67,7 @@
         <div class="items-scroll-container">
           <div style="display: flex; flex-direction: column; gap: 12px;">
              <div *ngFor="let item of orden.items" style="display: flex; gap: 15px; background: #fff; padding: 12px; border-radius: 10px; border: 2px solid; align-items: center; transition: all 0.3s;"
-                  [ngStyle]="{'border-color': item.cambiandoId ? '#f1c40f' : '#f1f5f9'}">
+                  [ngStyle]="{'border-color': item.cambiandoId ? 'var(--text-muted)' : '#f1f5f9'}">
                
                <img [src]="item.imagen_cover || 'assets/img/default-product.png'" alt="Ropa" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px; border: 1px solid #e2e8f0;">
                
@@ -76,7 +76,7 @@
                  <span style="font-size: 0.8rem; color: #64748b;">{{ item.color }} | Talla: <b>{{ item.talla }}</b></span>
                  
                  <!-- ✨ Indicador de Bloqueo Financiero -->
-                 <div *ngIf="item.pago_consignacion_id" style="font-size: 0.75rem; color: #007782; font-weight: bold; margin-top: 4px; display: flex; align-items: center; gap: 4px;">
+                 <div *ngIf="item.pago_consignacion_id" style="font-size: 0.75rem; color: var(--ap-color-primary); font-weight: bold; margin-top: 4px; display: flex; align-items: center; gap: 4px;">
                    🔒 Liquidada al dueño
                  </div>
                  
@@ -101,7 +101,7 @@
                            *ngIf="!item.pago_consignacion_id && !item.cambiandoId" 
                            (click)="cambiarIdFisico(orden, item)"
                            title="Cambiar por otra prenda idéntica (Mismo lote)"
-                           style="background: #f8fafc; border: 1px solid #cbd5e1; color: #475569; border-radius: 6px; padding: 4px 6px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s;">
+                           style="background: #f8fafc; border: 1px solid var(--border-color); color: var(--text-muted); border-radius: 6px; padding: 4px 6px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s;">
                      ✏️
                    </button>
                    
@@ -122,7 +122,7 @@
               Fase Logística del Envío: <div *ngIf="orden.guardando" class="spinner-mini"></div>
             </label>
             <select [(ngModel)]="orden.estado_envio" (change)="cambiarFase(orden)"
-                    style="width: 100%; padding: 12px; border-radius: 10px; border: 2px solid #cbd5e1; font-weight: 800; font-size: 0.95rem; cursor: pointer;"
+                    style="width: 100%; padding: 12px; border-radius: 10px; border: 2px solid var(--border-color); font-weight: 800; font-size: 0.95rem; cursor: pointer;"
                     [ngClass]="{
                       'status-pending': orden.estado_envio === 'pendiente_envio',
                       'status-packed': orden.estado_envio === 'empaquetado',
@@ -164,7 +164,7 @@
         </div>
 
         <ng-template #noUrl>
-          <div style="font-size: 0.9rem; color: #94a3b8; font-style: italic; padding: 100px 20px; background: white; border-radius: 12px; border: 2px dashed #cbd5e1; text-align: center; flex: 1; display: flex; align-items: center; justify-content: center;">
+          <div style="font-size: 0.9rem; color: #94a3b8; font-style: italic; padding: 100px 20px; background: white; border-radius: 12px; border: 2px dashed var(--border-color); text-align: center; flex: 1; display: flex; align-items: center; justify-content: center;">
             No hay etiqueta de envío registrada.
           </div>
         </ng-template>

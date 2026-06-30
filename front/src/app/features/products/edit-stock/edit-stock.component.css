@@ -26,7 +26,7 @@
   height: 80px;
   border-radius: var(--ap-radius-md, 8px);
   overflow: hidden;
-  border: 1px solid var(--border-color, #e0e6ed);
+  border: 1px solid var(--border-color, var(--border-color));
   box-shadow: var(--shadow-sm);
   background: white;
 }
@@ -39,12 +39,12 @@
 
 .title-group .title {
   font-size: 1.5rem;
-  color: var(--text-main, #2c3e50);
+  color: var(--text-main, var(--text-main));
   margin: 0.5rem 0 0.2rem 0;
 }
 
 .title-group .subtitle {
-  color: var(--text-muted, #7f8c8d);
+  color: var(--text-muted, var(--text-muted));
   font-size: 0.95rem;
 }
 
@@ -59,7 +59,7 @@
 
 .alert-box-info {
   background-color: var(--vinted-teal-light, #e6f2f3);
-  border: 1px solid var(--vinted-teal, #007782);
+  border: 1px solid var(--vinted-teal, var(--ap-color-primary));
   border-radius: var(--ap-radius-lg, 12px);
   padding: 1rem;
   display: flex;
@@ -79,14 +79,14 @@
 .alert-content h4 {
   margin: 0 0 0.2rem 0;
   font-size: 0.9rem;
-  color: var(--vinted-teal, #007782);
+  color: var(--vinted-teal, var(--ap-color-primary));
 }
 
 .alert-content p {
   margin: 0;
   font-size: 0.8rem;
   line-height: 1.3;
-  color: var(--text-main, #2c3e50);
+  color: var(--text-main, var(--text-main));
 }
 
 /* Secciones de Tarjeta (Cards) */
@@ -94,7 +94,7 @@
   background: var(--card-bg, #ffffff);
   border-radius: var(--ap-radius-lg, 12px);
   padding: 1.5rem;
-  border: 1px solid var(--border-color, #e0e6ed);
+  border: 1px solid var(--border-color, var(--border-color));
   box-shadow: var(--shadow-sm);
   margin-bottom: 1.5rem;
 }
@@ -102,8 +102,8 @@
 .section-header h3 {
   font-size: 1.1rem;
   margin-bottom: 1.2rem;
-  color: var(--text-main, #2c3e50);
-  border-left: 4px solid var(--vinted-teal, #007782);
+  color: var(--text-main, var(--text-main));
+  border-left: 4px solid var(--vinted-teal, var(--ap-color-primary));
   padding-left: 0.8rem;
 }
 
@@ -123,7 +123,7 @@
 .field label {
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--text-main, #2c3e50);
+  color: var(--text-main, var(--text-main));
 }
 
 /* Inputs y Selects */
@@ -132,7 +132,7 @@ input[type="number"],
 input[type="date"],
 select {
   padding: 0.7rem;
-  border: 1px solid var(--border-color, #e0e6ed);
+  border: 1px solid var(--border-color, var(--border-color));
   border-radius: var(--ap-radius-md, 8px);
   font-size: 0.9rem;
   transition: all 0.2s;
@@ -140,7 +140,7 @@ select {
 
 input:focus, select:focus {
   outline: none;
-  border-color: var(--vinted-teal, #007782);
+  border-color: var(--vinted-teal, var(--ap-color-primary));
   box-shadow: 0 0 0 3px rgba(0, 119, 130, 0.1);
 }
 
@@ -178,7 +178,7 @@ input:focus, select:focus {
 }
 
 input:checked + .slider {
-  background-color: var(--vinted-teal, #007782);
+  background-color: var(--vinted-teal, var(--ap-color-primary));
 }
 
 input:checked + .slider:before {
@@ -199,7 +199,7 @@ input:checked + .slider:before {
 }
 
 .btn-primary, .vinted-btn-primary {
-  background: var(--vinted-teal, #007782);
+  background: var(--vinted-teal, var(--ap-color-primary));
   color: white;
   border: none;
   padding: 0.8rem 1.5rem;
@@ -216,13 +216,13 @@ input:checked + .slider:before {
 }
 
 .btn-primary:hover, .vinted-btn-primary:hover {
-  background: var(--vinted-teal-hover, #005c65);
+  background: var(--vinted-teal-hover, var(--ap-color-primary-hover));
 }
 
 .btn-outline-primary {
   background: transparent;
-  color: var(--vinted-teal, #007782);
-  border: 1px solid var(--vinted-teal, #007782);
+  color: var(--vinted-teal, var(--ap-color-primary));
+  border: 1px solid var(--vinted-teal, var(--ap-color-primary));
   padding: 0.8rem 1.5rem;
   border-radius: var(--ap-radius-md, 8px);
   font-weight: 600;
@@ -246,7 +246,7 @@ input:checked + .slider:before {
   width: 40px;
   height: 40px;
   border: 4px solid rgba(0, 119, 130, 0.1);
-  border-left-color: var(--vinted-teal, #007782);
+  border-left-color: var(--vinted-teal, var(--ap-color-primary));
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -256,9 +256,9 @@ input:checked + .slider:before {
 }
 
 /* Utilidades */
-.required-asterisk { color: var(--danger, #e74c3c); }
-.required-web-asterisk { color: var(--vinted-teal, #007782); font-weight: bold; }
-.text-muted { color: var(--text-muted, #7f8c8d); font-size: 0.85rem; }
+.required-asterisk { color: var(--danger, var(--ap-color-danger)); }
+.required-web-asterisk { color: var(--vinted-teal, var(--ap-color-primary)); font-weight: bold; }
+.text-muted { color: var(--text-muted, var(--text-muted)); font-size: 0.85rem; }
 .mt-2 { margin-top: 0.5rem; }
 
 /* Responsive */
@@ -276,7 +276,7 @@ input:checked + .slider:before {
 /* Sección de Identidad */
 .identity-section {
   background-color: var(--ap-bg-variant, #fafbfc) !important; /* Un tono ligeramente distinto */
-  border-bottom: 2px solid var(--vinted-teal, #007782);
+  border-bottom: 2px solid var(--vinted-teal, var(--ap-color-primary));
 }
 
 .display-pill {
@@ -285,7 +285,7 @@ input:checked + .slider:before {
   gap: 10px;
   background: white;
   padding: 5px 10px;
-  border: 1px solid var(--border-color, #e0e6ed);
+  border: 1px solid var(--border-color, var(--border-color));
   border-radius: var(--ap-radius-md, 8px);
 }
 
@@ -320,7 +320,7 @@ input:checked + .slider:before {
 /* Estilo para campos que solo muestran información */
 .readonly-field {
   background-color: var(--ap-bg-variant, #fafbfc);
-  border: 1px solid var(--ap-border-light, #eaedf1);
+  border: 1px solid var(--ap-border-light, var(--border-color));
   padding: 10px 14px;
   border-radius: var(--ap-radius-md, 8px);
   display: flex;
@@ -330,19 +330,19 @@ input:checked + .slider:before {
 
 .value-text {
   font-weight: 600;
-  color: var(--text-main, #2c3e50);
+  color: var(--text-main, var(--text-main));
   font-size: 0.95rem;
 }
 
 .sku-text {
   font-family: 'Courier New', Courier, monospace;
-  color: var(--text-muted, #7f8c8d);
+  color: var(--text-muted, var(--text-muted));
   font-size: 0.85rem;
 }
 
 /* Resaltado suave para la talla */
 .highlight-talla .value-text {
-  color: var(--vinted-teal, #007782);
+  color: var(--vinted-teal, var(--ap-color-primary));
   font-size: 1.1rem;
 }
 
@@ -353,12 +353,12 @@ input:checked + .slider:before {
 }
 
 .identity-section {
-  border-left: 5px solid var(--vinted-teal, #007782);
+  border-left: 5px solid var(--vinted-teal, var(--ap-color-primary));
 }
 
 .identity-bg {
   background-color: #f8fafc !important;
-  border-bottom: 2px solid var(--vinted-teal, #007782);
+  border-bottom: 2px solid var(--vinted-teal, var(--ap-color-primary));
 }
 
 .readonly-field {
@@ -373,11 +373,11 @@ input:checked + .slider:before {
 
 .value-text {
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-main);
 }
 
 .highlight-talla .value-text {
-  color: var(--vinted-teal, #007782);
+  color: var(--vinted-teal, var(--ap-color-primary));
   font-size: 1.1rem;
 }
 
@@ -386,7 +386,7 @@ input:checked + .slider:before {
   height: 16px;
   border-radius: 50%;
   margin-right: 8px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--border-color);
 }
 
 .grid-4 {

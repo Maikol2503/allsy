@@ -48,6 +48,20 @@ def ordenar_tallas_logicamente(tallas):
 
     return sorted(list(tallas), key=obtener_peso)
 
+def verificar_vinculo_devolucion(db: Session, stock_unit_id: Optional[int], nuevo_estado: str):
+    if nuevo_estado == 'en_camino_devolucion':
+        if not stock_unit_id:
+            raise HTTPException(
+                status_code=400,
+                detail="No se puede cambiar el estado a 'En Tránsito (Devolución)' porque esta prenda es nueva y no está vinculada a ninguna venta."
+            )
+        en_venta = db.query(DetalleVenta).filter(DetalleVenta.stock_unit_id == stock_unit_id).first()
+        if not en_venta:
+            raise HTTPException(
+                status_code=400,
+                detail=f"No se puede cambiar el estado de la prenda #{stock_unit_id} a 'En Tránsito (Devolución)' porque esta prenda no está vinculada a ninguna venta."
+            )
+
 def generar_sku(tipo: str, id_unico: int) -> str:
     prefijo = tipo[:3].upper() if tipo else "GEN"
     rand = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
@@ -184,6 +198,7 @@ def crear_producto(
             # ✨ CORRECCIÓN: Procesamos las unidades físicas (StockUnits) desde su propio array
             if hasattr(config_data, 'stock_units') and config_data.stock_units:
                 for u_data in config_data.stock_units:
+                    verificar_vinculo_devolucion(db, None, u_data.estado_gestion)
                     unit = StockUnit(
                         stock_config_id=config_obj.id, 
                         estado_gestion=u_data.estado_gestion,
@@ -286,10 +301,55 @@ def editar_producto_completo(
         except json.JSONDecodeError:
             variantes_data = []
 
+    # --- DETECCION DE DESACTIVACIONES EN EDICION ---
+    unidades_a_desactivar = []
     ids_variantes_vienen = [v.get("id") for v in variantes_data if v.get("id")]
     
+    # 1. Variantes enteras removidas
     for v_old in producto.variantes:
-        if v_old.id not in ids_variantes_vienen: v_old.activo = False 
+        if v_old.id not in ids_variantes_vienen:
+            for c in v_old.stock_configs:
+                for u in c.stock_units:
+                    if u.activo:
+                        unidades_a_desactivar.append(u.id)
+                        
+    # 2. Configs o Stock Units individuales removidos dentro de las variantes que siguen
+    for v_data in variantes_data:
+        v_id = v_data.get("id")
+        if v_id:
+            nv = db.query(Variante).filter(Variante.id == v_id).first()
+            if nv:
+                configs_data = v_data.get("stock_configs", [])
+                ids_configs_vienen = [int(c.get("id")) for c in configs_data if c.get("id")]
+                
+                # Configs removidos de esta variante
+                for co_old in nv.stock_configs:
+                    if co_old.id not in ids_configs_vienen:
+                        for u in co_old.stock_units:
+                            if u.activo:
+                                unidades_a_desactivar.append(u.id)
+                                
+                # Stock units individuales removidos de los configs que siguen
+                for c_data in configs_data:
+                    c_id = c_data.get("id")
+                    if c_id:
+                        units_data = c_data.get("stock_units", [])
+                        ids_units_originales = [int(u.get("id_original", u.get("id"))) for u in units_data if u.get("id_original", u.get("id"))]
+                        if ids_units_originales:
+                            # Buscar unidades activas de este config que no vienen en el payload
+                            unidades_omitidas = db.query(StockUnit.id).filter(
+                                StockUnit.stock_config_id == c_id,
+                                StockUnit.id.notin_(ids_units_originales),
+                                StockUnit.activo == True
+                            ).all()
+                            for (uid,) in unidades_omitidas:
+                                unidades_a_desactivar.append(uid)
+
+    validar_unidades_en_proceso(db, unidades_a_desactivar)
+
+    for v_old in producto.variantes:
+        if v_old.id not in ids_variantes_vienen: 
+            v_old.activo = False 
 
     for indice_v, v_data in enumerate(variantes_data):
         v_id = v_data.get("id")
@@ -407,12 +467,14 @@ def editar_producto_completo(
                             unit_obj.activo = True
                             
                             nuevo_est = u_data.get("estado_gestion", "en_stock")
+                            verificar_vinculo_devolucion(db, unit_obj.id, nuevo_est)
                             # 🛡️ PROTECCIÓN FINANCIERA: No permitir revertir 'vendido' si hay ticket activo
                             if unit_obj.estado_gestion == 'vendido' and nuevo_est != 'vendido':
                                 venta_activa = db.query(Venta).join(DetalleVenta).filter(
                                     DetalleVenta.stock_unit_id == unit_obj.id,
                                     Venta.estado_envio != 'cancelado',
-                                    Venta.estado_pago != 'reembolsado'
+                                    Venta.estado_pago != 'reembolsado',
+                                    DetalleVenta.devuelto == False
                                 ).first()
                                 if venta_activa:
                                     raise HTTPException(
@@ -606,12 +668,14 @@ def actualizar_stock_config_individual(db: Session, stock_config_id: int, datos_
                 unit_obj = db.query(StockUnit).filter(StockUnit.id == int(u_id_original)).first()
                 if unit_obj:
                     nuevo_est = u_data.get("estado_gestion", unit_obj.estado_gestion)
+                    verificar_vinculo_devolucion(db, unit_obj.id, nuevo_est)
                     # 🛡️ PROTECCIÓN FINANCIERA: No permitir revertir 'vendido' si hay ticket activo
                     if unit_obj.estado_gestion == 'vendido' and nuevo_est != 'vendido':
                         venta_activa = db.query(Venta).join(DetalleVenta).filter(
                             DetalleVenta.stock_unit_id == unit_obj.id,
                             Venta.estado_envio != 'cancelado',
-                            Venta.estado_pago != 'reembolsado'
+                            Venta.estado_pago != 'reembolsado',
+                            DetalleVenta.devuelto == False
                             ).first()
                         if venta_activa:
                             raise HTTPException(
@@ -688,7 +752,8 @@ def cambiar_estado_stock_unit(db: Session, stock_unit_id: int, nuevo_estado: str
         venta_activa = db.query(Venta).join(DetalleVenta).filter(
             DetalleVenta.stock_unit_id == stock_unit_id,
             Venta.estado_envio != 'cancelado',
-            Venta.estado_pago != 'reembolsado'
+            Venta.estado_pago != 'reembolsado',
+            DetalleVenta.devuelto == False
             ).first()
         if venta_activa:
             raise HTTPException(
@@ -749,13 +814,15 @@ def actualizar_stock_unit_individual(db: Session, stock_unit_id: int, datos_nuev
 
     if "estado_gestion" in datos_nuevos:
         nuevo_estado = datos_nuevos["estado_gestion"]
+        verificar_vinculo_devolucion(db, stock_unit_id, nuevo_estado)
         
         # 🛡️ PROTECCIÓN FINANCIERA: No permitir revertir 'vendido' si hay ticket activo
         if unidad.estado_gestion == 'vendido' and nuevo_estado != 'vendido':
             venta_activa = db.query(Venta).join(DetalleVenta).filter(
                 DetalleVenta.stock_unit_id == stock_unit_id,
                 Venta.estado_envio != 'cancelado',
-                Venta.estado_pago != 'reembolsado'
+                Venta.estado_pago != 'reembolsado',
+                DetalleVenta.devuelto == False
                 ).first()
             if venta_activa:
                 raise HTTPException(
@@ -1270,9 +1337,41 @@ def obtener_stock_config_detalle(db: Session, stock_config_id: int):
 # PAPELERA (SOFT DELETE)
 # =====================================================
 
+def validar_unidades_en_proceso(db: Session, unit_ids: List[int]):
+    """
+    Verifica si alguna de las unidades de stock está en un proceso activo de venta/envío/devolución.
+    Si es así, lanza una excepción HTTP 400.
+    """
+    if not unit_ids:
+        return
+        
+    # Procesos activos son aquellos que NO han finalizado
+    estados_finalizados = ['cancelado', 'devuelto', 'entregado', 'completado', 'extraviado_envio', 'extraviado_devolucion']
+    
+    venta_activa = db.query(Venta).join(DetalleVenta).filter(
+        DetalleVenta.stock_unit_id.in_(unit_ids),
+        ~Venta.estado_envio.in_(estados_finalizados),
+        DetalleVenta.devuelto == False
+    ).first()
+    
+    if venta_activa:
+        raise HTTPException(
+            status_code=400,
+            detail=f"⛔ No se puede realizar esta acción: Hay prendas en proceso de venta, envío o devolución activo (Venta {venta_activa.codigo_venta}, Estado envío: '{venta_activa.estado_envio}')."
+        )
+
 def mover_producto_papelera(db: Session, p_id: int):
     producto = db.query(Producto).filter(Producto.id == p_id).first()
     if not producto: return {"success": False, "mensaje": "Producto no encontrado."}
+    
+    unit_ids = []
+    for v in producto.variantes:
+        for c in v.stock_configs:
+            for u in c.stock_units:
+                if u.activo:
+                    unit_ids.append(u.id)
+                    
+    validar_unidades_en_proceso(db, unit_ids)
     
     producto.activo = False
     for v in producto.variantes:
@@ -1293,6 +1392,9 @@ def mover_variante_papelera(db: Session, v_id: int):
     variante = db.query(Variante).filter(Variante.id == v_id).first()
     if not variante: return {"success": False, "mensaje": "Variante no encontrada."}
     
+    unit_ids = [u.id for c in variante.stock_configs for u in c.stock_units if u.activo]
+    validar_unidades_en_proceso(db, unit_ids)
+    
     variante.activo = False
     optimizar_imagenes_variante(db, variante)
     
@@ -1311,6 +1413,9 @@ def mover_stock_config_papelera(db: Session, stock_config_id: int):
     config = db.query(StockConfig).filter(StockConfig.id == stock_config_id).first()
     if not config: return {"success": False, "mensaje": "Configuración de stock no encontrada."}
     
+    unit_ids = [u.id for u in config.stock_units if u.activo]
+    validar_unidades_en_proceso(db, unit_ids)
+    
     config.activo = False
     for u in config.stock_units:
         u.activo = False
@@ -1324,6 +1429,8 @@ def mover_stock_config_papelera(db: Session, stock_config_id: int):
 def mover_stock_unit_papelera(db: Session, stock_unit_id: int):
     unidad = db.query(StockUnit).filter(StockUnit.id == stock_unit_id).first()
     if not unidad: return {"success": False, "mensaje": "Unidad no encontrada."}
+    
+    validar_unidades_en_proceso(db, [unidad.id])
     
     unidad.activo = False
     unidad.publicar_web = False

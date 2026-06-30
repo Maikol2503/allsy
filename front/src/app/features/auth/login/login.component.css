@@ -4,7 +4,7 @@
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+  background: linear-gradient(135deg, var(--ap-color-primary), var(--ap-color-primary));
 }
 
 /* Tarjeta de login */
@@ -33,7 +33,7 @@
 
 /* Título */
 h2 {
-  color: #1e3a8a;
+  color: var(--ap-color-primary);
   margin-bottom: 1.5rem;
 }
 
@@ -48,13 +48,13 @@ h2 {
 label {
   font-weight: 600;
   margin-bottom: 0.5rem;
-  color: #1e293b;
+  color: var(--text-main);
 }
 
 /* Inputs */
 input {
   padding: 0.7rem;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   font-size: 1rem;
   transition: border 0.3s;
@@ -62,14 +62,14 @@ input {
 
 input:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--ap-color-primary);
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
 /* Botón */
 button {
   width: 100%;
-  background-color: #1e3a8a;
+  background-color: var(--ap-color-primary);
   color: white;
   padding: 0.8rem;
   border: none;
@@ -80,22 +80,22 @@ button {
 }
 
 button:hover:not(:disabled) {
-  background-color: #2563eb;
+  background-color: var(--ap-color-primary);
 }
 
 button:disabled {
-  background-color: #93c5fd;
+  background-color: var(--ap-color-primary-hover);
   cursor: not-allowed;
 }
 
 /* Enlace de registro */
 .register-link {
   margin-top: 1.5rem;
-  color: #475569;
+  color: var(--text-muted);
 }
 
 .register-link a {
-  color: #2563eb;
+  color: var(--ap-color-primary);
   text-decoration: none;
   font-weight: 600;
 }

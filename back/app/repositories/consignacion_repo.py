@@ -11,7 +11,7 @@ from app.models.lotes_model import StockConfig, StockUnit
 from app.models.variantes_model import Variante
 from app.models.producto_model import Producto
 from app.models.clientes_model import Cliente
-from app.models.gastos_model import Gasto
+from app.models.egresos_model import Egreso
 from app.models.pagos_consignacion_model import PagoConsignacion
 from app.schemas.ventas_schema import VentaCreate
 from app.schemas.consignacion_schema import PagoCreate
@@ -272,8 +272,20 @@ def listar_prendas_detalle_cliente(db: Session, cliente_id: int, page: int = 1, 
             item_data["estado"] = venta.estado_envio # ✨ INYECTAR EL ESTADO REAL DE LA VENTA LOGÍSTICA
             item_data["canal_venta"] = venta.canal
             item_data["fecha_venta"] = venta.fecha
-            item_data["estado_pago"] = venta.estado_pago
-            item_data["monto_reembolsado"] = float(venta.monto_reembolsado or 0.0)
+            
+            # Lógica de estado de pago desde la perspectiva del ítem individual de consignación:
+            if detalle.devuelto:
+                item_data["estado_pago"] = "reembolsado"
+                item_data["monto_reembolsado"] = float(detalle.precio_unitario_en_venta or 0.0)
+            elif venta.estado_pago == 'reembolsado':
+                item_data["estado_pago"] = "reembolsado"
+                item_data["monto_reembolsado"] = float(detalle.precio_unitario_en_venta or 0.0)
+            elif venta.estado_pago in ['pagado', 'reembolso_parcial']:
+                item_data["estado_pago"] = "pagado"
+                item_data["monto_reembolsado"] = 0.0
+            else:
+                item_data["estado_pago"] = venta.estado_pago
+                item_data["monto_reembolsado"] = 0.0
 
             # Lógica de validez deducida para finanzas
             es_cancelada = (venta.estado_envio == 'cancelado' or venta.estado_pago == 'reembolsado')
@@ -309,9 +321,22 @@ def registrar_pago(db: Session, cliente_id: int, data: PagoCreate):
     if not cliente:
         raise HTTPException(status_code=404, detail="Cliente no encontrado")
         
+    stats = obtener_estadisticas_cliente(db, cliente_id)
+    saldo_pendiente = stats["saldo_pendiente"]
+    monto_pago = round(float(data.monto), 2)
+    
+    if monto_pago <= 0:
+        raise HTTPException(status_code=400, detail="El monto a pagar debe ser mayor a 0.")
+        
+    if monto_pago > saldo_pendiente:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Operación denegada. El monto a pagar ({monto_pago}€) supera el saldo pendiente real del cliente ({saldo_pendiente}€)."
+        )
+        
     nuevo_pago = PagoConsignacion(
         cliente_id=cliente_id,
-        monto=data.monto,
+        monto=monto_pago,
         metodo_pago=data.metodo_pago,
         referencia=data.referencia,
         notas=data.notas
@@ -337,7 +362,7 @@ def registrar_pago(db: Session, cliente_id: int, data: PagoCreate):
                 monto_extraviado += precio_base
 
         if monto_extraviado > 0:
-            db.add(Gasto(
+            db.add(Egreso(
                 concepto=f"Compensación por prendas extraviadas en almacén (Pago Consignación #{nuevo_pago.id})",
                 categoria="Pérdidas y Mermas",
                 monto=round(monto_extraviado, 2),
@@ -377,16 +402,24 @@ def obtener_prendas_pendientes_pago(db: Session, cliente_id: int):
 
     # Pre-cargamos las ventas para calcular el desglose financiero
     unidad_ids = [u.id for u in unidades]
-    ventas_dict = {}
+    todas_ventas_dict = {}
+    ventas_pagadas_dict = {}
     if unidad_ids:
-        # ✨ RESTRICCIÓN CLAVE: Solo ventas que ya hemos cobrado (estado_pago == 'pagado')
-        # Esto excluye prendas que están en tránsito o con dinero retenido por la plataforma.
+        # Buscamos todos los detalles de venta asociados a estas prendas
         ventas = db.query(DetalleVenta, Venta).join(Venta, DetalleVenta.venta_id == Venta.id).filter(
-            DetalleVenta.stock_unit_id.in_(unidad_ids),
-            Venta.estado_pago == 'pagado', 
-            ~Venta.estado_envio.in_(['cancelado', 'devuelto', 'en_devolucion'])
+            DetalleVenta.stock_unit_id.in_(unidad_ids)
         ).all()
-        ventas_dict = {detalle.stock_unit_id: (detalle, venta) for detalle, venta in ventas}
+        for detalle, venta in ventas:
+            todas_ventas_dict[detalle.stock_unit_id] = (detalle, venta)
+            
+            # Solo ventas que ya hemos cobrado (estado_pago == 'pagado' o 'reembolso_parcial')
+            es_pagada_y_valida = (
+                venta.estado_pago in ['pagado', 'reembolso_parcial'] and
+                venta.estado_envio not in ['cancelado', 'devuelto', 'en_devolucion'] and
+                detalle.devuelto == False
+            )
+            if es_pagada_y_valida:
+                ventas_pagadas_dict[detalle.stock_unit_id] = (detalle, venta)
 
     cliente_db = db.query(Cliente).filter(Cliente.id == cliente_id).first()
     exento_tarifa_fija = getattr(cliente_db, 'exento_tarifa_fija', False)
@@ -394,9 +427,6 @@ def obtener_prendas_pendientes_pago(db: Session, cliente_id: int):
 
     resultados = []
     for u in unidades:
-        # Si está vendido, DEBE tener una venta válida
-        if u.estado_gestion == 'vendido' and u.id not in ventas_dict: continue 
-
         config = u.stock_config
         variante = config.variante
         producto = variante.producto
@@ -406,9 +436,14 @@ def obtener_prendas_pendientes_pago(db: Session, cliente_id: int):
             img_sorted = sorted(variante.imagenes, key=lambda x: x.orden or 0)
             img_url = img_sorted[0].url if img_sorted else None
 
-        # Si hay venta, tomamos el precio real. Si es extravío, tomamos el precio de configuración.
-        if u.id in ventas_dict:
-            detalle, venta = ventas_dict[u.id]
+        tiene_venta = u.id in todas_ventas_dict
+        
+        if tiene_venta:
+            # Si tiene venta, SOLO se puede pagar si esa venta está completamente cobrada/pagada.
+            if u.id not in ventas_pagadas_dict:
+                continue
+                
+            detalle, venta = ventas_pagadas_dict[u.id]
             precio_base = float(detalle.precio_unitario_en_venta or config.precio_venta)
             fecha_ref = venta.fecha
             desglose = calcular_desglose_venta(
@@ -419,6 +454,10 @@ def obtener_prendas_pendientes_pago(db: Session, cliente_id: int):
             )
             pago_cliente = desglose["pago_cliente"]
         else:
+            # Si NO tiene venta (extravío en almacén puro), solo se permite si el estado es extraviado
+            if u.estado_gestion != 'extraviado':
+                continue
+                
             precio_base = float(config.precio_venta or 0.0)
             fecha_ref = datetime.utcnow() # Fecha simulada para el extravío
             pago_cliente = precio_base # ✨ Allsys asume la pérdida total, el dueño cobra el 100% sin comisiones

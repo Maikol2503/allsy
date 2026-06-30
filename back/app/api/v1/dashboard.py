@@ -18,12 +18,16 @@ def get_resumen(
 ):
     return dashboard_repo.obtener_resumen_financiero(db, fecha_inicio, fecha_fin)
 
-@dashboard_router.get("/grafica-mensual")
-def get_datos_grafica(db: Session = Depends(get_session)):
+@dashboard_router.get("/grafica-tendencia")
+def get_datos_grafica(
+    fecha_inicio: Optional[str] = None,
+    fecha_fin: Optional[str] = None,
+    db: Session = Depends(get_session)
+):
     """
-    Devuelve las ventas vs gastos de los últimos 6 meses para la gráfica.
+    Devuelve las ventas vs gastos agrupadas por día o mes según el rango.
     """
     try:
-        return dashboard_repo.obtener_datos_grafica_mensual(db)
+        return dashboard_repo.obtener_datos_grafica_tendencia(db, fecha_inicio, fecha_fin)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al generar gráfica: {str(e)}")

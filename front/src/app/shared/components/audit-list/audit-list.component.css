@@ -1,21 +1,21 @@
 .audit-container {
   font-family: 'Inter', system-ui, sans-serif;
-  color: #2c3e50;
+  color: var(--text-main);
   max-width: 100%;
 }
 
 .audit-header h3 {
   font-size: 1.1rem;
   margin-bottom: 1.5rem;
-  color: #007782;
-  border-bottom: 2px solid #e0e6ed;
+  color: var(--ap-color-primary);
+  border-bottom: 2px solid var(--border-color);
   padding-bottom: 0.5rem;
 }
 
 .audit-timeline {
   position: relative;
   padding-left: 30px;
-  border-left: 2px solid #e0e6ed;
+  border-left: 2px solid var(--border-color);
   margin-left: 10px;
 }
 
@@ -31,9 +31,9 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #007782;
+  background: var(--ap-color-primary);
   border: 3px solid white;
-  box-shadow: 0 0 0 2px #e0e6ed;
+  box-shadow: 0 0 0 2px var(--border-color);
 }
 
 .audit-content {
@@ -58,24 +58,24 @@
 
 .audit-date {
   font-size: 0.75rem;
-  color: #7f8c8d;
+  color: var(--text-muted);
 }
 
 .audit-entity {
   font-size: 0.8rem;
   margin-bottom: 0.5rem;
-  color: #34495e;
+  color: var(--text-main);
 }
 
 .audit-details {
   font-size: 0.9rem;
   line-height: 1.4;
   margin-bottom: 0.8rem;
-  color: #2c3e50;
+  color: var(--text-main);
   background: white;
   padding: 8px;
   border-radius: 4px;
-  border: 1px dashed #cbd5e1;
+  border: 1px dashed var(--border-color);
   word-break: break-all;
 }
 
@@ -83,7 +83,7 @@
   display: flex;
   gap: 1rem;
   font-size: 0.8rem;
-  color: #7f8c8d;
+  color: var(--text-muted);
 }
 
 .audit-user { font-weight: 600; }
@@ -91,7 +91,7 @@
 .loading-state, .empty-state {
   text-align: center;
   padding: 2rem;
-  color: #7f8c8d;
+  color: var(--text-muted);
 }
 
 /* Spinner small */
@@ -99,7 +99,7 @@
   width: 20px;
   height: 20px;
   border: 2px solid rgba(0, 119, 130, 0.1);
-  border-left-color: #007782;
+  border-left-color: var(--ap-color-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   display: inline-block;

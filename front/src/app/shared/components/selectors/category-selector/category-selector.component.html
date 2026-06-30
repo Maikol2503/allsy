@@ -16,7 +16,7 @@
   <div class="category-item option-select-all" 
        *ngIf="permitirSeleccionarTodo && getCategoriaNavegacion()" 
        (click)="confirmarSeleccionTodo()">
-    <span class="category-name" style="color: var(--ap-color-success, #27ae60); font-weight: bold;">
+    <span class="category-name" style="color: var(--ap-color-success, var(--ap-color-success)); font-weight: bold;">
       ✓ Todo en {{ getCategoriaNavegacion()?.nombre }}
     </span>
   </div>

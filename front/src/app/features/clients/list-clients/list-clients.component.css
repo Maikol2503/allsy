@@ -13,13 +13,13 @@
 
 .header-section h2 {
   margin: 0 0 5px 0;
-  color: var(--ap-text-main, #2c3e50);
+  color: var(--ap-text-main, var(--text-main));
   font-size: 1.8rem;
 }
 
 .header-section p {
   margin: 0;
-  color: var(--ap-text-muted, #7f8c8d);
+  color: var(--ap-text-muted, var(--text-muted));
   font-size: 0.95rem;
 }
 
@@ -29,30 +29,30 @@
   padding: 15px 20px;
   border-radius: var(--ap-radius-lg, 12px);
   box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.04));
-  border: 1px solid var(--border-color, #e0e6ed);
+  border: 1px solid var(--border-color, var(--border-color));
   margin-bottom: 20px;
 }
 
 .search-box input {
   font-family: inherit;
   font-size: 0.95rem;
-  color: var(--ap-text-main, #2c3e50);
+  color: var(--ap-text-main, var(--text-main));
   width: 100%;
 }
 
 .filter-group select {
   padding: 8px 12px;
   border-radius: var(--ap-radius-md, 8px);
-  border: 1px solid var(--ap-border-base, #e0e6ed);
+  border: 1px solid var(--ap-border-base, var(--border-color));
   background: var(--card-bg, #ffffff);
   font-family: inherit;
-  color: var(--ap-text-main, #2c3e50);
+  color: var(--ap-text-main, var(--text-main));
   outline: none;
   cursor: pointer;
 }
 
 .btn-clear:hover {
-  background: var(--bg-body, #f4f6f8) !important;
+  background: var(--bg-body, var(--bg-body)) !important;
 }
 
 /* TABLA */
@@ -60,7 +60,7 @@
   background: var(--card-bg, #ffffff);
   border-radius: var(--ap-radius-lg, 12px);
   box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.04));
-  border: 1px solid var(--border-color, #e0e6ed);
+  border: 1px solid var(--border-color, var(--border-color));
   overflow-x: auto;
   margin-bottom: 20px;
 }
@@ -76,17 +76,17 @@
   padding: 15px;
   font-size: 0.85rem;
   text-transform: uppercase;
-  color: var(--ap-text-muted, #7f8c8d);
+  color: var(--ap-text-muted, var(--text-muted));
   font-weight: 600;
-  border-bottom: 2px solid var(--border-color, #e0e6ed);
+  border-bottom: 2px solid var(--border-color, var(--border-color));
   white-space: nowrap;
 }
 
 .ap-table td {
   padding: 15px;
   vertical-align: middle;
-  border-bottom: 1px solid var(--border-color, #e0e6ed);
-  color: var(--ap-text-main, #2c3e50);
+  border-bottom: 1px solid var(--border-color, var(--border-color));
+  color: var(--ap-text-main, var(--text-main));
 }
 
 .ap-table tbody tr {
@@ -94,11 +94,11 @@
 }
 
 .ap-table tbody tr:hover {
-  background: var(--bg-body, #f4f6f8);
+  background: var(--bg-body, var(--bg-body));
 }
 
 .text-muted {
-  color: var(--ap-text-muted, #7f8c8d);
+  color: var(--ap-text-muted, var(--text-muted));
 }
 
 /* ACCIONES (BOTONES DE LA TABLA) */
@@ -115,8 +115,8 @@
 }
 
 .btn-icon {
-  background: var(--bg-body, #f4f6f8);
-  border: 1px solid var(--border-color, #e0e6ed);
+  background: var(--bg-body, var(--bg-body));
+  border: 1px solid var(--border-color, var(--border-color));
   border-radius: 6px;
   width: 34px;
   height: 34px;
@@ -136,7 +136,7 @@
 /* Color específico al pasar el ratón por el botón de Ver */
 .view-btn:hover {
   background: var(--vinted-teal-light, #e6f2f3);
-  border-color: var(--vinted-teal, #007782);
+  border-color: var(--vinted-teal, var(--ap-color-primary));
 }
 
 /* Color específico al pasar el ratón por el botón de Editar */
@@ -151,13 +151,13 @@
   padding: 50px 20px;
   background: var(--card-bg, #ffffff);
   border-radius: var(--ap-radius-lg, 12px);
-  border: 1px solid var(--border-color, #e0e6ed);
-  color: var(--ap-text-muted, #7f8c8d);
+  border: 1px solid var(--border-color, var(--border-color));
+  color: var(--ap-text-muted, var(--text-muted));
 }
 
 .empty-state h3 {
   margin: 0 0 10px 0;
-  color: var(--ap-text-main, #2c3e50);
+  color: var(--ap-text-main, var(--text-main));
 }
 
 .empty-state p {
@@ -177,28 +177,28 @@
 .pagination button {
   padding: 8px 16px;
   background: var(--card-bg, #ffffff);
-  border: 1px solid var(--border-color, #e0e6ed);
+  border: 1px solid var(--border-color, var(--border-color));
   border-radius: var(--ap-radius-md, 8px);
-  color: var(--ap-text-main, #2c3e50);
+  color: var(--ap-text-main, var(--text-main));
   cursor: pointer;
   font-weight: 500;
   transition: all 0.2s;
 }
 
 .pagination button:not(:disabled):hover {
-  background: var(--bg-body, #f4f6f8);
-  border-color: var(--primary, #007782);
-  color: var(--primary, #007782);
+  background: var(--bg-body, var(--bg-body));
+  border-color: var(--primary, var(--ap-color-primary));
+  color: var(--primary, var(--ap-color-primary));
 }
 
 .pagination button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  background: var(--bg-body, #f4f6f8);
+  background: var(--bg-body, var(--bg-body));
 }
 
 .pagination span {
-  color: var(--ap-text-muted, #7f8c8d);
+  color: var(--ap-text-muted, var(--text-muted));
   font-size: 0.95rem;
   font-weight: 500;
 }

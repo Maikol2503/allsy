@@ -14,7 +14,7 @@ from app.api.v1.marcas import marcas_router
 from app.api.v1.ventas import venta_router
 from app.api.v1.proveedores import proveedores_router
 # from app.api.v1.analilytics import analytics_router
-from app.api.v1.gastos import gastos_router
+from app.api.v1.egresos import egresos_router
 from app.api.v1.dashboard import dashboard_router
 # from app.api.v1.analilytics import analytics_router
 from app.api.v1.statistics import router_statistics
@@ -22,6 +22,8 @@ from app.api.v1.cliente import router as cliente_router
 from app.api.v1.consignacion import router as consignacion_router
 from app.api.v1.localizaciones import router as localizaciones_router
 from app.api.v1.auditoria import router as auditoria_router
+from app.api.deps import get_current_user
+from fastapi import Depends
 
 # from app.api.v1.analilytics import analytics_router  # Corregido el nombre
 # from app.api.v1.statistics import router as stats_router
@@ -40,7 +42,7 @@ from app.models.marcas_model import Marca
 from app.models.variante_imagen_model import Imagen
 from app.models.ventas_model import Venta, DetalleVenta
 from app.models.proveedores_model import Proveedor          
-from app.models.gastos_model import Gasto
+from app.models.egresos_model import Egreso
 from app.models.localizaciones_model import Localizacion
 from app.models.auditoria_model import Auditoria # ✨ AÑADIDO
 from app.models.clientes_model import Cliente  
@@ -83,18 +85,18 @@ app.add_middleware(
 # =========================
 # Nota: Si cambiaste los archivos de router, asegúrate que los nombres coincidan
 app.include_router(auth_routers, prefix="/api/v1")
-app.include_router(producto_routers, prefix="/api/v1/productos")
-app.include_router(categorias_routers, prefix="/api/v1")
-app.include_router(marcas_router, prefix="/api/v1")
-app.include_router(venta_router, prefix="/api/v1")
-app.include_router(proveedores_router, prefix="/api/v1")
-app.include_router(gastos_router, prefix="/api/v1")
-app.include_router(dashboard_router, prefix="/api/v1")
-app.include_router(router_statistics, prefix="/api/v1")
-app.include_router(cliente_router, prefix="/api/v1")
-app.include_router(consignacion_router, prefix="/api/v1")
-app.include_router(localizaciones_router, prefix="/api/v1")
-app.include_router(auditoria_router, prefix="/api/v1")
+app.include_router(producto_routers, prefix="/api/v1/productos", dependencies=[Depends(get_current_user)])
+app.include_router(categorias_routers, prefix="/api/v1", dependencies=[Depends(get_current_user)])
+app.include_router(marcas_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])
+app.include_router(venta_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])
+app.include_router(proveedores_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])
+app.include_router(egresos_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])
+app.include_router(dashboard_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])
+app.include_router(router_statistics, prefix="/api/v1", dependencies=[Depends(get_current_user)])
+app.include_router(cliente_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])
+app.include_router(consignacion_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])
+app.include_router(localizaciones_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])
+app.include_router(auditoria_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])
 
 
 

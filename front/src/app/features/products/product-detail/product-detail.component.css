@@ -459,7 +459,7 @@
 
 /* 🟢 Animación para Nuevos Stocks Agregados (Parpadeo Verde a Transparente) */
 @keyframes flash-creado {
-  0% { background-color: #eafaf1; border-left: 4px solid #27ae60; }
+  0% { background-color: var(--ap-color-success-bg); border-left: 4px solid var(--ap-color-success); }
   30% { background-color: #c2eed3; }
   100% { background-color: transparent; }
 }
@@ -470,7 +470,7 @@
 
 /* 🔵 Animación para Atributos/Medidas Modificados (Parpadeo Azul de Lote) */
 @keyframes flash-editado {
-  0% { background-color: #e6f2f3; border-left: 4px solid #007782; }
+  0% { background-color: #e6f2f3; border-left: 4px solid var(--ap-color-primary); }
   30% { background-color: #bce0e4; }
   100% { background-color: transparent; }
 }
@@ -517,7 +517,7 @@
   max-height: 180px; /* Límite de altura (unas 2-3 filas de etiquetas) */
   overflow-y: auto;  /* Activa el scroll vertical solo si es necesario */
   padding: 8px;
-  border: 1px solid #eaedf1;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   background-color: #fafbfc;
 }
@@ -528,14 +528,14 @@
 }
 
 .tags-scroll-container::-webkit-scrollbar-track {
-  background: #f4f6f8; 
+  background: var(--bg-body); 
   border-radius: 8px;
 }
 
 .tags-scroll-container::-webkit-scrollbar-thumb {
   background-color: #c1c9d2; 
   border-radius: 8px;
-  border: 2px solid #f4f6f8; /* Le da un efecto de margen interior */
+  border: 2px solid var(--bg-body); /* Le da un efecto de margen interior */
 }
 
 .tags-scroll-container::-webkit-scrollbar-thumb:hover {

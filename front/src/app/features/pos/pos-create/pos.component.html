@@ -30,7 +30,7 @@
         </div>
         
         <!-- ✨ LA CANTIDAD ES SIEMPRE 1 PORQUE CADA ÍTEM ES FÍSICAMENTE ÚNICO ✨ -->
-        <div class="item-quantity" style="background: #f4f6f8; padding: 5px 15px; border-radius: 8px; font-weight: bold; color: #2c3e50;">
+        <div class="item-quantity" style="background: var(--bg-body); padding: 5px 15px; border-radius: 8px; font-weight: bold; color: var(--text-main);">
           1 ud.
         </div>
         
@@ -52,11 +52,11 @@
     <div class="checkout-card">
       <div class="grid-2" style="margin-bottom: 12px;">
         <div class="field">
-          <label>Fecha de Venta <span style="color: #e74c3c; font-weight: bold;">*</span></label>
+          <label>Fecha de Venta <span style="color: var(--ap-color-danger); font-weight: bold;">*</span></label>
           <input type="date" [(ngModel)]="datosVenta.fecha">
         </div>
         <div class="field">
-          <label>Vendedor <span style="color: #e74c3c; font-weight: bold;">*</span></label>
+          <label>Vendedor <span style="color: var(--ap-color-danger); font-weight: bold;">*</span></label>
           <select [(ngModel)]="datosVenta.vendedor">
             <option value="">Selecciona...</option>
             <option value="Yenny">Yenny</option>
@@ -101,9 +101,9 @@
 
     <div class="checkout-card">
       <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        <h4 style="margin: 0; font-size: 0.9rem; color: #7f8c8d;">👤 Identificación de Cliente</h4>
+        <h4 style="margin: 0; font-size: 0.9rem; color: var(--text-muted);">👤 Identificación de Cliente</h4>
         <span *ngIf="comprasPreviasCliente !== null && comprasPreviasCliente > 0" 
-              style="background: #eafaf1; color: #27ae60; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; border: 1px solid #27ae60;">
+              style="background: var(--ap-color-success-bg); color: var(--ap-color-success); padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; border: 1px solid var(--ap-color-success);">
           ⭐ Recurrente: {{ comprasPreviasCliente }} compras
         </span>
       </div>
@@ -121,7 +121,7 @@
           </div>
 
           <div class="field" *ngIf="datosVenta.tipo_identificador === 'telefono'">
-            <label>Teléfono <span style="color: #e74c3c; font-weight: bold;">*</span></label>
+            <label>Teléfono <span style="color: var(--ap-color-danger); font-weight: bold;">*</span></label>
             <div style="display: flex; gap: 5px;">
               <select [(ngModel)]="datosVenta.prefijo_telefono" style="width: 80px;">
                 <option *ngFor="let p of prefijosPaises" [value]="p.codigo">{{ p.codigo }}</option>
@@ -131,17 +131,17 @@
           </div>
 
           <div class="field" *ngIf="datosVenta.tipo_identificador === 'email'">
-            <label>Email <span style="color: #e74c3c; font-weight: bold;">*</span></label>
+            <label>Email <span style="color: var(--ap-color-danger); font-weight: bold;">*</span></label>
             <input type="email" [(ngModel)]="datosVenta.identificador_cliente" (blur)="buscarHistorialCliente()" placeholder="correo@ejemplo.com">
           </div>
           
           <div class="field" *ngIf="datosVenta.tipo_identificador === 'documento'">
-            <label>Documento <span style="color: #e74c3c; font-weight: bold;">*</span></label>
+            <label>Documento <span style="color: var(--ap-color-danger); font-weight: bold;">*</span></label>
             <input type="text" [(ngModel)]="datosVenta.identificador_cliente" (blur)="buscarHistorialCliente()" placeholder="12345678X">
           </div>
 
           <div class="field" *ngIf="datosVenta.tipo_identificador === 'nombre_anonimo'">
-            <label>Identificador <span style="color: #e74c3c; font-weight: bold;">*</span></label>
+            <label>Identificador <span style="color: var(--ap-color-danger); font-weight: bold;">*</span></label>
             <input type="text" [(ngModel)]="datosVenta.identificador_cliente" (blur)="buscarHistorialCliente()" placeholder="Ej: Anónimo o Cliente Mostrador">
           </div>
         </div>
@@ -152,7 +152,7 @@
           <label>
             <span *ngIf="datosVenta.canal === 'vinted' || datosVenta.canal === 'wallapop'">Usuario de la App (&#64;usuario)</span>
             <span *ngIf="datosVenta.canal === 'web'">Email del Cliente</span>
-            <span style="color: #e74c3c; font-weight: bold;"> *</span>
+            <span style="color: var(--ap-color-danger); font-weight: bold;"> *</span>
           </label>
           <input 
             type="text" 
@@ -163,7 +163,7 @@
       </ng-container>
 
       <div class="field">
-        <label>País de Compra <span style="color: #e74c3c; font-weight: bold;">*</span></label>
+        <label>País de Compra <span style="color: var(--ap-color-danger); font-weight: bold;">*</span></label>
         <select [(ngModel)]="datosVenta.pais">
           <option value="">Selecciona el país...</option>
           <option *ngFor="let p of listaPaises" [value]="p.nombre">
@@ -181,7 +181,7 @@
         
         <div style="margin-top: 10px;">
           <div *ngIf="comprasPreviasCliente !== null && comprasPreviasCliente > 0" 
-              style="background: #eafaf1; color: #27ae60; padding: 8px; border-radius: 8px; border: 1px solid #27ae60; display: flex; align-items: center; gap: 8px;">
+              style="background: var(--ap-color-success-bg); color: var(--ap-color-success); padding: 8px; border-radius: 8px; border: 1px solid var(--ap-color-success); display: flex; align-items: center; gap: 8px;">
             <span style="font-size: 1.2rem;">⭐</span>
             <div>
               <strong style="display: block;">¡CLIENTE RECONOCIDO!</strong>
@@ -190,7 +190,7 @@
           </div>
 
           <div *ngIf="comprasPreviasCliente === 0" 
-              style="background: #f4f6f8; color: #7f8c8d; padding: 8px; border-radius: 8px; border: 1px solid #e0e6ed; display: flex; align-items: center; gap: 8px;">
+              style="background: var(--bg-body); color: var(--text-muted); padding: 8px; border-radius: 8px; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 8px;">
             <span style="font-size: 1.2rem;">🆕</span>
             <div>
               <strong style="display: block;">CLIENTE NUEVO</strong>
@@ -202,7 +202,7 @@
     </div>
 
     <div class="checkout-card" *ngIf="datosVenta.canal !== 'tienda_fisica'">
-      <h4 style="margin: 0 0 10px 0; font-size: 0.9rem; color: #7f8c8d;">📦 Logística y Etiqueta</h4>
+      <h4 style="margin: 0 0 10px 0; font-size: 0.9rem; color: var(--text-muted);">📦 Logística y Etiqueta</h4>
       <div class="grid-2">
         <div class="field">
           <label>Transportista</label>
@@ -232,14 +232,14 @@
         <div *ngIf="estadoEtiqueta === 'cargando'" style="margin-top: 8px; font-size: 0.85rem; color: #f39c12;">
           ⏳ Verificando enlace...
         </div>
-        <div *ngIf="estadoEtiqueta === 'invalida'" style="margin-top: 8px; font-size: 0.85rem; color: #e74c3c; font-weight: bold; background: #fadbd8; padding: 8px; border-radius: 6px; border: 1px solid #e74c3c;">
+        <div *ngIf="estadoEtiqueta === 'invalida'" style="margin-top: 8px; font-size: 0.85rem; color: var(--ap-color-danger); font-weight: bold; background: #fadbd8; padding: 8px; border-radius: 6px; border: 1px solid var(--ap-color-danger);">
           ❌ El enlace introducido está roto, caducado o no es un documento válido.
         </div>
         <div *ngIf="estadoEtiqueta === 'valida'" style="margin-top: 15px;">
-          <div style="font-size: 0.85rem; color: #27ae60; font-weight: bold; margin-bottom: 8px;">
+          <div style="font-size: 0.85rem; color: var(--ap-color-success); font-weight: bold; margin-bottom: 8px;">
             ✅ Enlace correcto. Previsualización de la etiqueta:
           </div>
-          <div style="height: 250px; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; background: #f8fafc; position: relative;">
+          <div style="height: 250px; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; background: #f8fafc; position: relative;">
              <embed [src]="fixUrl(datosVenta.etiqueta_url) | safeUrl" type="application/pdf" width="100%" height="100%" />
           </div>
         </div>

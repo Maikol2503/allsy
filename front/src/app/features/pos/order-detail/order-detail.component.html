@@ -2,11 +2,11 @@
   <div class="header">
     <div>
       <h2>📄 Detalle del Pedido #{{ venta.codigo_venta }}</h2>
-      <p>Registrado el: {{ venta.fecha | date:'dd/MM/yyyy HH:mm' }} | Canal: <strong style="color: #007782; text-transform: uppercase;">{{ venta.canal }}</strong></p>
+      <p>Registrado el: {{ venta.fecha | date:'dd/MM/yyyy HH:mm' }} | Canal: <strong style="color: var(--ap-color-primary); text-transform: uppercase;">{{ venta.canal }}</strong></p>
     </div>
     <div style="display: flex; gap: 10px;">
       <button class="btn-back" (click)="volver()">← Volver</button>
-      <button class="btn-back" [routerLink]="['/edit-sale', venta.id]" style="background: #007782; color: white; border-color: #007782;">✏️ Editar Pedido</button>
+      <button class="btn-back" [routerLink]="['/edit-sale', venta.id]" style="background: var(--ap-color-primary); color: white; border-color: var(--ap-color-primary);">✏️ Editar Pedido</button>
     </div>
   </div>
 
@@ -56,7 +56,7 @@
       </div>
     </div>
 
-    <div class="info-card" style="border-top: 4px solid #007782;">
+    <div class="info-card" style="border-top: 4px solid var(--ap-color-primary);">
       <h3>💰 Finanzas</h3>
       <div class="info-row">
         <span class="info-label">Subtotal Prendas:</span>
@@ -68,11 +68,25 @@
       </div>
       <div class="info-row">
         <span class="info-label">Descuentos:</span>
-        <span class="info-value" style="color: #e74c3c;">-{{ venta.descuento_total | currency:'EUR':'symbol' }}</span>
+        <span class="info-value" style="color: var(--ap-color-danger);">-{{ venta.descuento_total | currency:'EUR':'symbol' }}</span>
+      </div>
+      <div class="info-row" *ngIf="venta.monto_reembolsado > 0">
+        <span class="info-label">Total Original:</span>
+        <span class="info-value" style="text-decoration: line-through; color: #64748b;">
+          {{ venta.total | currency:'EUR':'symbol' }}
+        </span>
+      </div>
+      <div class="info-row" *ngIf="venta.monto_reembolsado > 0">
+        <span class="info-label" style="color: var(--ap-color-danger);">Total Reembolsado:</span>
+        <span class="info-value" style="color: var(--ap-color-danger); font-weight: 500;">
+          -{{ venta.monto_reembolsado | currency:'EUR':'symbol' }}
+        </span>
       </div>
       <div class="info-row" style="border-top: 1px solid #e2e8f0; padding-top: 8px; margin-top: 8px; font-size: 1.1rem;">
-        <span class="info-label" style="color: #1e293b;">Total Final:</span>
-        <span class="info-value" style="color: #007782;">{{ venta.total | currency:'EUR':'symbol' }}</span>
+        <span class="info-label" style="color: var(--text-main);">{{ venta.monto_reembolsado > 0 ? 'Total Neto:' : 'Total Final:' }}</span>
+        <span class="info-value" style="color: var(--ap-color-primary); font-weight: bold;">
+          {{ (venta.monto_reembolsado > 0 ? (venta.total - venta.monto_reembolsado) : venta.total) | currency:'EUR':'symbol' }}
+        </span>
       </div>
 
       <!-- ✨ LISTA DE COMPENSACIONES -->
@@ -132,7 +146,7 @@
               <span class="status-pill" [ngClass]="item.devuelto ? 'returned' : 'active'">
                 {{ item.devuelto ? '↩️ DEVUELTO' : '✅ ENVIADO' }}
               </span>
-              <div *ngIf="item.pago_consignacion_id" style="font-size: 0.75rem; color: #007782; font-weight: bold; margin-top: 4px;">
+              <div *ngIf="item.pago_consignacion_id" style="font-size: 0.75rem; color: var(--ap-color-primary); font-weight: bold; margin-top: 4px;">
                 🔒 Liquidada al dueño
               </div>
             </td>

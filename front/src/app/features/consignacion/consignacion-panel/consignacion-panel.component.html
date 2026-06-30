@@ -68,7 +68,7 @@
 
         <div style="display: flex; justify-content: space-between; font-weight: bold;">
           <span>🟢 En Almacén (Disponibles):</span>
-          <strong style="color: #27ae60; font-size: 1.1em;">
+          <strong style="color: var(--ap-color-success); font-size: 1.1em;">
             {{ stats.prendas_en_stock + stats.prendas_devueltas_tienda }}
           </strong>
         </div>
@@ -86,7 +86,7 @@
 
         <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dotted rgba(255,255,255,0.2); font-size: 0.95em; color: #94a3b8;"
              *ngIf="stats.prendas_devueltas_dueno > 0 || stats.prendas_donado_a_ong > 0 || stats.prendas_extraviadas > 0">
-          <span style="font-size: 0.85em; text-transform: uppercase; display: block; margin-bottom: 4px; color: #cbd5e1; font-weight: bold;">
+          <span style="font-size: 0.85em; text-transform: uppercase; display: block; margin-bottom: 4px; color: var(--border-color); font-weight: bold;">
             Salidas fuera de venta:
           </span>
           
@@ -139,12 +139,12 @@
             <img [src]="p.imagen || 'assets/img/default-product.png'" style="width: 30px; height: 30px; border-radius: 4px; object-fit: cover;">
             <div style="flex: 1; font-size: 0.85rem;">
               <div style="font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">
-                <span *ngIf="p.nombre_producto.includes('(Extraviado en Almacén)')" style="color: #e74c3c; font-weight: bold; font-size: 0.8rem; background: #fceceb; padding: 2px 4px; border-radius: 4px; margin-right: 4px;">⚠️ EXTRAVIADA</span>
+                <span *ngIf="p.nombre_producto.includes('(Extraviado en Almacén)')" style="color: var(--ap-color-danger); font-weight: bold; font-size: 0.8rem; background: var(--ap-color-danger-bg); padding: 2px 4px; border-radius: 4px; margin-right: 4px;">⚠️ EXTRAVIADA</span>
                 {{ p.nombre_producto.replace(' (Extraviado en Almacén)', '') }}
               </div>
               <small class="text-muted">{{ p.sku }}</small>
             </div>
-            <div style="text-align: right; font-weight: bold; color: #27ae60; font-size: 0.9rem;">
+            <div style="text-align: right; font-weight: bold; color: var(--ap-color-success); font-size: 0.9rem;">
               {{ p.pago_cliente | currency:'EUR' }}
             </div>
           </div>
@@ -224,7 +224,7 @@
               <div class="payment-ref" *ngIf="p.referencia || p.notas" [style.text-decoration]="p.estado === 'anulado' ? 'line-through' : 'none'">
                 {{ p.referencia }} <span *ngIf="p.referencia && p.notas">-</span> {{ p.notas }}
               </div>
-              <div *ngIf="p.estado === 'anulado'" style="color: #e74c3c; font-size: 0.8rem; font-weight: bold; margin-top: 4px;">
+              <div *ngIf="p.estado === 'anulado'" style="color: var(--ap-color-danger); font-size: 0.8rem; font-weight: bold; margin-top: 4px;">
                 🚫 PAGO ANULADO: {{ p.motivo_anulacion }}
               </div>
             </div>
@@ -258,8 +258,8 @@
                   <td style="padding: 4px; font-weight: 500;">{{ item.nombre_producto }}</td>
                   <td style="padding: 4px; color: #94a3b8; font-family: monospace;">{{ item.sku }}</td>
                   <td style="padding: 4px; text-align: right;">{{ item.precio_venta | currency:'EUR' }}</td>
-                  <td style="padding: 4px; text-align: right; color: #7f8c8d;">{{ item.comision_allsys | currency:'EUR' }}</td>
-                  <td style="padding: 4px; text-align: right; color: #27ae60; font-weight: bold;">
+                  <td style="padding: 4px; text-align: right; color: var(--text-muted);">{{ item.comision_allsys | currency:'EUR' }}</td>
+                  <td style="padding: 4px; text-align: right; color: var(--ap-color-success); font-weight: bold;">
                     {{ p.estado === 'anulado' ? 0 : item.pago_cliente | currency:'EUR' }}
                   </td>
                   <td style="padding: 4px; text-align: center;">
@@ -271,7 +271,7 @@
                       title="Quitar esta prenda de este pago (Corrige error)">
                       🗑️ Anular
                     </button>
-                    <span *ngIf="p.estado === 'anulado'" style="color: #e74c3c; font-weight: bold;">🚫 Pago Anulado</span>
+                    <span *ngIf="p.estado === 'anulado'" style="color: var(--ap-color-danger); font-weight: bold;">🚫 Pago Anulado</span>
                   </td>
                 </tr>
                 <!-- ✨ ÍTEMS FANTASMA (ANULADOS INDIVIDUALMENTE) -->
@@ -280,10 +280,10 @@
                     <td style="padding: 4px; font-weight: 500; text-decoration: line-through;">{{ item.nombre_producto }}</td>
                     <td style="padding: 4px; color: #94a3b8; font-family: monospace; text-decoration: line-through;">{{ item.sku }}</td>
                     <td style="padding: 4px; text-align: right; text-decoration: line-through;">{{ item.precio_venta | currency:'EUR' }}</td>
-                    <td style="padding: 4px; text-align: right; color: #7f8c8d; text-decoration: line-through;">{{ item.comision_allsys | currency:'EUR' }}</td>
-                    <td style="padding: 4px; text-align: right; color: #e74c3c; font-weight: bold;">0,00 €</td>
+                    <td style="padding: 4px; text-align: right; color: var(--text-muted); text-decoration: line-through;">{{ item.comision_allsys | currency:'EUR' }}</td>
+                    <td style="padding: 4px; text-align: right; color: var(--ap-color-danger); font-weight: bold;">0,00 €</td>
                     <td style="padding: 4px; text-align: center;">
-                      <span style="font-size: 0.7rem; color: #e74c3c; font-weight: bold; background: #fceceb; padding: 2px 4px; border-radius: 4px;">
+                      <span style="font-size: 0.7rem; color: var(--ap-color-danger); font-weight: bold; background: var(--ap-color-danger-bg); padding: 2px 4px; border-radius: 4px;">
                         ⚠️ Anulado
                       </span>
                     </td>
@@ -391,7 +391,7 @@
                   💸 Reembolso Total ({{ item.monto_reembolsado | currency:'EUR' }})
                 </span>
 
-                <span *ngIf="item.estado_pago === 'no_aplica'" style="background-color: #f4f6f8; color: #7f8c8d; border: 1px solid #e0e6ed;">
+                <span *ngIf="item.estado_pago === 'no_aplica'" style="background-color: var(--bg-body); color: var(--text-muted); border: 1px solid var(--border-color);">
                   🚫 No Aplica (Sin Venta)
                 </span>
               </span>
@@ -400,7 +400,7 @@
 
             <td>
               <span class="platform-badge" *ngIf="item.canal_venta">
-                <span *ngIf="item.canal_venta === 'Vinted'" style="color: #007782; font-weight: bold;">Vinted</span>
+                <span *ngIf="item.canal_venta === 'Vinted'" style="color: var(--ap-color-primary); font-weight: bold;">Vinted</span>
                 <span *ngIf="item.canal_venta === 'Wallapop'" style="color: #13d2ab; font-weight: bold;">Wallapop</span>
                 <span *ngIf="item.canal_venta !== 'Vinted' && item.canal_venta !== 'Wallapop'">{{ item.canal_venta }}</span>
               </span>
@@ -424,7 +424,7 @@
               <small *ngIf="item.estado_pago === 'pendiente'" style="display: block; color: #e67e22; font-size: 0.8em; font-weight: bold; margin-top: 2px;">
                 ⏳ En tránsito
               </small>
-              <small *ngIf="item.estado_pago === 'pagado'" style="display: block; color: #27ae60; font-size: 0.8em; font-weight: bold; margin-top: 2px;">
+              <small *ngIf="item.estado_pago === 'pagado'" style="display: block; color: var(--ap-color-success); font-size: 0.8em; font-weight: bold; margin-top: 2px;">
                 💵 Disponible
               </small>
               <small *ngIf="item.estado_pago === 'reembolso_parcial'" style="display: block; color: #8e44ad; font-size: 0.8em; font-weight: bold; margin-top: 2px;">

@@ -15,12 +15,12 @@
 .title {
   font-size: 1.8rem;
   font-weight: 700;
-  color: var(--text-main, #2c3e50);
+  color: var(--text-main, var(--text-main));
   margin: 0;
 }
 
 .results-count {
-  color: var(--text-muted, #7f8c8d);
+  color: var(--text-muted, var(--text-muted));
   font-size: 0.95rem;
 }
 
@@ -99,7 +99,7 @@
 }
 
 .btn-search:hover {
-  background: var(--ap-color-primary-hover, #005c65);
+  background: var(--ap-color-primary-hover, var(--ap-color-primary-hover));
 }
 
 .clear-input-icon {
@@ -129,7 +129,7 @@
 .btn-clear-all {
   background: none;
   border: none;
-  color: var(--danger, #e74c3c);
+  color: var(--danger, var(--ap-color-danger));
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
@@ -207,10 +207,10 @@
 
 .segmented-control {
   display: flex;
-  background: var(--bg-body, #f4f6f8);
+  background: var(--bg-body, var(--bg-body));
   padding: 4px;
   border-radius: 10px;
-  border: 1px solid var(--border-color, #e0e6ed);
+  border: 1px solid var(--border-color, var(--border-color));
 }
 
 .segmented-control button {
@@ -223,13 +223,13 @@
   cursor: pointer;
   border-radius: 8px;
   transition: all 0.2s ease;
-  color: var(--text-muted, #7f8c8d);
+  color: var(--text-muted, var(--text-muted));
   white-space: nowrap;
 }
 
 .segmented-control button.active {
   background: white;
-  color: var(--vinted-teal, #007782);
+  color: var(--vinted-teal, var(--ap-color-primary));
   box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.04));
 }
 

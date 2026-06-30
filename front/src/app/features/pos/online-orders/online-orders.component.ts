@@ -27,6 +27,7 @@ export class OnlineOrdersComponent implements OnInit {
   search = '';
   tipoBusqueda = 'codigo_venta'; // Puede ser codigo_venta, numero_seguimiento, stock_unit_id
   filtro_estado = ''; // Combinación lógica: pendiente, empaquetado, listo_envio, enviado, entregado, cancelado, devolucion
+  filtro_pago = '';
   fecha_inicio: string | null = null;
   fecha_fin: string | null = null;
   tipo_fecha = 'creacion'; // ✨ NUEVO: creacion, envio, entrega, finalizado, cancelado, devuelta
@@ -72,7 +73,7 @@ export class OnlineOrdersComponent implements OnInit {
       this.tipoBusqueda === 'codigo_venta' ? this.search : undefined,
       undefined, undefined, // searchCliente, tipoBusquedaCliente
       this.cliente_id || undefined,
-      undefined, // estado_pago
+      this.filtro_pago || undefined, // ✨ PASAMOS ESTADO DE PAGO
       backend_estado_envio, 
       undefined, // canal
       this.fecha_inicio || undefined, 
@@ -81,8 +82,8 @@ export class OnlineOrdersComponent implements OnInit {
       this.tipo_fecha,
       true, // solo_online
       true, // include_details
-      backend_estado_legado, // ✨ Pasamos el estado legado (Posición 20)
-      this.localizacion_id || undefined // ✨ localizacion_id (Posición 21)
+      backend_estado_legado, 
+      this.localizacion_id || undefined
     ).subscribe({
       next: (res: any) => {
         this.totalItems = res.total;
@@ -121,6 +122,7 @@ export class OnlineOrdersComponent implements OnInit {
     this.search = '';
     this.tipoBusqueda = 'codigo_venta';
     this.filtro_estado = '';
+    this.filtro_pago = '';
     this.fecha_inicio = null;
     this.fecha_fin = null;
     this.tipo_fecha = 'creacion';
@@ -131,6 +133,7 @@ export class OnlineOrdersComponent implements OnInit {
   removerFiltro(tipo: string) {
     if (tipo === 'search') this.search = '';
     if (tipo === 'estado') this.filtro_estado = '';
+    if (tipo === 'pago') this.filtro_pago = '';
     if (tipo === 'fechas') {
       this.fecha_inicio = null;
       this.fecha_fin = null;
@@ -141,7 +144,18 @@ export class OnlineOrdersComponent implements OnInit {
   }
 
   get hasActiveFilters(): boolean {
-    return !!(this.search || this.filtro_estado || this.fecha_inicio || this.fecha_fin || this.cliente_id);
+    return !!(this.search || this.filtro_estado || this.filtro_pago || this.fecha_inicio || this.fecha_fin || this.cliente_id);
+  }
+
+  getLabelPago(valor: string): string {
+    const mapa: any = {
+      'pendiente': 'Pendiente',
+      'in_transit': 'En tránsito',
+      'en_transito': 'En tránsito',
+      'pagado': 'Pagado',
+      'reembolsado': 'Reembolsado'
+    };
+    return mapa[valor] || valor;
   }
 
   getLabelEstado(valor: string): string {
@@ -185,10 +199,23 @@ export class OnlineOrdersComponent implements OnInit {
     if (env === 'enviado') return '🚚 Enviado (En tránsito)';
     if (env === 'listo_envio') return '📤 Listo para enviar';
     if (env === 'empaquetado') return '📦 Empaquetado (En almacén)';
+    
+    // Filtros de pago en transito/pendientes
+    if (pag === 'pending' || pag === 'pendiente' || pag === 'in_transit' || pag === 'en_transito') {
+      return '🕒 Pago Pendiente / En Tránsito';
+    }
+
     if (env === 'pendiente_envio' || !env) return '🕒 Pendiente de enviar';
     
     if (pag === 'reembolso_parcial') return '⚠️ Devolución parcial procesada';
 
-    return env || 'Procesando';
+    // ✨ LIMPIEZA INTELIGENTE PARA ESTADOS EN INGLÉS O CON PUNTOS
+    if (env) {
+      let limpio = env.replace(/[._]/g, ' ');
+      limpio = limpio.charAt(0).toUpperCase() + limpio.slice(1);
+      return `🔄 ${limpio}`;
+    }
+
+    return 'Procesando';
   }
 }

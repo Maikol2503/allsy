@@ -1,198 +1,333 @@
 <div class="dashboard-wrapper">
   
-  <div class="filter-toolbar">
-    <div class="toolbar-left">
-      <h2>Dashboard Financiero</h2>
+
+
+  <!-- BLOQUE PRINCIPAL (Top) -->
+  <div class="top-summary-block">
+    <div class="section-header">
+      <h3>Resumen Financiero</h3>
     </div>
 
-    <div class="toolbar-actions">
-      <div class="quick-filters">
-        <button (click)="setFiltroRapido('hoy')" [class.active]="filtros.fecha_inicio === getFechaHoy()">Hoy</button>
-        <button (click)="setFiltroRapido('mes')" [class.active]="filtros.fecha_inicio === getPrimerDiaMes()">Mes</button>
-        <button (click)="setFiltroRapido('año')">Año</button>
-      </div>
-
-      <div class="date-inputs">
-        <input type="date" [(ngModel)]="filtros.fecha_inicio" (change)="cargarTodo()" title="Desde">
-        <span style="color:#94a3b8;">→</span>
-        <input type="date" [(ngModel)]="filtros.fecha_fin" (change)="cargarTodo()" title="Hasta">
-      </div>
-    </div>
-  </div>
-
-  <div class="section-header">
-    <h3>Rendimiento del Periodo</h3>
-    <span class="badge badge-dynamic">📅 Cambia con el filtro</span>
-  </div>
-
-  <div class="dashboard-grid">
-    
-    <div class="kpi-card">
-      <div class="kpi-top">
-        <span class="kpi-label">Ingresos Brutos Líquidos</span>
-        <div class="icon-box icon-teal">💰</div>
-      </div>
-      <div class="kpi-value">{{ resumen.ingresos_totales | currency:'EUR' }}</div>
-      
-      <div class="kpi-breakdown">
-        <div class="breakdown-item">
-          <span><span class="dot own"></span> Ventas Propias</span>
-          <strong>{{ resumen.ingresos_propios | currency:'EUR' }}</strong>
+    <div class="filter-toolbar">
+      <div class="toolbar-actions">
+        <div class="quick-filters">
+          <button (click)="setFiltroRapido('hoy')" [class.active]="filtros.fecha_inicio === getFechaHoy()">Hoy</button>
+          <button (click)="setFiltroRapido('mes')" [class.active]="filtros.fecha_inicio === getPrimerDiaMes()">Mes</button>
+          <button (click)="setFiltroRapido('año')">Año</button>
         </div>
-        <div class="breakdown-item">
-          <span><span class="dot consig"></span> Consignación</span>
-          <strong>{{ resumen.ingresos_consignacion | currency:'EUR' }}</strong>
+
+        <div class="date-inputs-wrapper" style="position: relative;">
+          <button class="date-range-btn" (click)="toggleDateModal()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            {{ formattedDateRange }}
+          </button>
+
+          <!-- Floating Date Modal -->
+          <div class="date-modal-overlay" *ngIf="isDateModalOpen" (click)="toggleDateModal()"></div>
+          <div class="date-modal" *ngIf="isDateModalOpen">
+            <div class="date-modal-header">
+              <h4>Filtrar por rango</h4>
+              <button class="close-btn-small" (click)="toggleDateModal()">✕</button>
+            </div>
+            <div class="date-modal-body">
+              <div class="input-group">
+                <label>Desde</label>
+                <input type="date" [(ngModel)]="filtros.fecha_inicio">
+              </div>
+              <div class="input-group">
+                <label>Hasta</label>
+                <input type="date" [(ngModel)]="filtros.fecha_fin">
+              </div>
+            </div>
+            <div class="date-modal-footer">
+              <button class="btn-action primary" style="width: 100%; justify-content: center;" (click)="aplicarFiltroFechas()">Aplicar Fechas</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-grid top-cards-grid">
+      <div class="kpi-card bg-teal-light">
+        <div class="kpi-top">
+          <span class="kpi-label">Ingresos Brutos Líquidos</span>
+          <button class="info-btn-corner" (click)="toggleInfo('ingresos')" title="Ver info">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          </button>
+          <div class="floating-tooltip" *ngIf="activeInfo === 'ingresos'">
+            <button class="close-btn-small" (click)="toggleInfo('ingresos')">✕</button>
+            <p [innerHTML]="getModalText('ingresos')"></p>
+          </div>
+        </div>
+        <div class="kpi-body">
+          <div class="kpi-value">{{ resumen.ingresos_totales | currency:'EUR' }}</div>
+          <div style="height: 45px; width: 100px; flex-shrink: 0;"><canvas #canvasIngresos></canvas></div>
         </div>
         
-        <div class="breakdown-item" style="margin-top: 5px; padding-top: 5px; border-top: 1px dotted #e0e6ed;" *ngIf="resumen.ingresos_retenidos > 0">
-          <span style="color: #f39c12;">⏳ En Tránsito (Apps)</span>
-          <strong style="color: #f39c12;">+{{ resumen.ingresos_retenidos | currency:'EUR' }}</strong>
+        <div class="kpi-breakdown">
+          <div class="breakdown-item">
+            <span><span class="dot own"></span> Ventas Propias</span>
+            <strong>{{ resumen.ingresos_propios | currency:'EUR' }}</strong>
+          </div>
+          <div class="breakdown-item">
+            <span><span class="dot consig"></span> Consignación</span>
+            <strong>{{ resumen.ingresos_consignacion | currency:'EUR' }}</strong>
+          </div>
+          
+          <div class="breakdown-item breakdown-separator" *ngIf="resumen.ingresos_retenidos > 0">
+            <span class="text-warning">⏳ En Tránsito (Apps)</span>
+            <strong class="text-warning">+{{ resumen.ingresos_retenidos | currency:'EUR' }}</strong>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="kpi-card">
-      <div class="kpi-top">
-        <span class="kpi-label">Gastos Operativos</span>
-        <div class="icon-box icon-danger">💸</div>
-      </div>
-      <div class="kpi-value">{{ resumen.gastos_operativos | currency:'EUR' }}</div>
-      <p class="kpi-subtext" style="margin-top: 14px;">Facturas, envíos y sueldos</p>
-    </div>
-
-    <div class="kpi-card">
-      <div class="kpi-top">
-        <span class="kpi-label">Beneficio Real Neto</span>
-        <div class="icon-box icon-success">📈</div>
-      </div>
-      <div class="kpi-value">{{ resumen.ganancia_real | currency:'EUR' }}</div>
-      
-      <div class="kpi-breakdown">
-        <div class="breakdown-item">
-          <span><span class="dot own"></span> Margen Ropa Propia</span>
-          <strong style="color: #27ae60;">{{ resumen.margen_propio | currency:'EUR' }}</strong>
+      <div class="kpi-card bg-red-light">
+        <div class="kpi-top">
+          <span class="kpi-label">Egresos Operativos</span>
+          <button class="info-btn-corner" (click)="toggleInfo('egresos')" title="Ver info">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          </button>
+          <div class="floating-tooltip" *ngIf="activeInfo === 'egresos'">
+            <button class="close-btn-small" (click)="toggleInfo('egresos')">✕</button>
+            <p [innerHTML]="getModalText('egresos')"></p>
+          </div>
         </div>
-        <div class="breakdown-item">
-          <span><span class="dot consig"></span> Margen Consignación</span>
-          <strong style="color: #27ae60;">{{ resumen.margen_consignacion | currency:'EUR' }}</strong>
+        <div class="kpi-body">
+          <div class="kpi-value">{{ resumen.egresos_operativos | currency:'EUR' }}</div>
+          <div style="height: 45px; width: 100px; flex-shrink: 0;"><canvas #canvasEgresos></canvas></div>
         </div>
-        
-        <div class="breakdown-item" style="margin-top: 5px; padding-top: 5px; border-top: 1px dotted #e0e6ed;" *ngIf="resumen.beneficio_retenido > 0">
-          <span style="color: #f39c12;">⏳ Margen en Tránsito</span>
-          <strong style="color: #f39c12;">+{{ resumen.beneficio_retenido | currency:'EUR' }}</strong>
+        <p class="kpi-subtext mt-4">Facturas, reembolsos y sueldos</p>
+        <button routerLink="/egresos" style="width: 100%; margin-top: auto; padding: 10px; border-radius: var(--ap-radius-md); border: none; background-color: #fca5a5; color: #991b1b; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: background 0.2s;">
+          Ver Lista de Egresos
+        </button>
+      </div>
+
+      <div class="kpi-card bg-green-light">
+        <div class="kpi-top">
+          <span class="kpi-label">Beneficio Real Neto</span>
+          <button class="info-btn-corner" (click)="toggleInfo('beneficio')" title="Ver info">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          </button>
+          <div class="floating-tooltip" *ngIf="activeInfo === 'beneficio'">
+            <button class="close-btn-small" (click)="toggleInfo('beneficio')">✕</button>
+            <p [innerHTML]="getModalText('beneficio')"></p>
+          </div>
         </div>
-      </div>
-    </div>
-
-    <div class="kpi-card">
-      <div class="kpi-top">
-        <span class="kpi-label">Deuda Generada (Líquida)</span>
-        <div class="icon-box icon-warning">🤝</div>
-      </div>
-      <div class="kpi-value">{{ resumen.deuda_generada_periodo | currency:'EUR' }}</div>
-      
-      <div class="kpi-breakdown">
-        <div class="breakdown-item">
-          <span><span class="dot consig"></span> Nueva deuda (Caja)</span>
-          <strong style="color: #f39c12;">+{{ resumen.deuda_generada_periodo | currency:'EUR' }}</strong>
-        </div>
-        <div class="breakdown-item">
-          <span><span class="dot" style="background-color: #27ae60;"></span> Pagos realizados</span>
-          <strong style="color: #27ae60;">-{{ resumen.pagos_clientes_periodo | currency:'EUR' }}</strong>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <div class="section-header" style="margin-top: 2rem;">
-    <h3>Estado General de la Empresa</h3>
-    <span class="badge badge-static">🏛️ Acumulado hasta hoy</span>
-  </div>
-
-  <div class="dashboard-grid">
-
-    <div class="kpi-card">
-      <div class="kpi-top">
-        <span class="kpi-label">Saldo Teórico Banco</span>
-        <div class="icon-box icon-teal">🏦</div>
-      </div>
-      <div class="kpi-value">{{ resumen.saldo_teorico_banco | currency:'EUR' }}</div>
-      <p class="kpi-subtext" style="margin-top: 14px;">Liquidez total tras compras y pagos</p>
-    </div>
-
-    <div class="kpi-card">
-      <div class="kpi-top">
-        <span class="kpi-label">Deuda Total Real (Caja)</span>
-        <div class="icon-box icon-warning">🤝</div>
-      </div>
-      <div class="kpi-value">{{ resumen.deuda_absoluta | currency:'EUR' }}</div>
-      
-      <div class="kpi-breakdown">
-        <div class="breakdown-item">
-          <span>A pagar (Dinero en Banco):</span>
-          <strong style="color: #e74c3c;">{{ resumen.deuda_absoluta | currency:'EUR' }}</strong>
+        <div class="kpi-body">
+          <div class="kpi-value">{{ resumen.ganancia_real | currency:'EUR' }}</div>
+          <div style="height: 45px; width: 100px; flex-shrink: 0;"><canvas #canvasBeneficio></canvas></div>
         </div>
         
-        <div class="breakdown-item" style="margin-top: 5px; padding-top: 5px; border-top: 1px dotted #e0e6ed;" *ngIf="resumen.deuda_retenida_total > 0">
-          <span style="color: #f39c12;">⏳ Próximas deudas (Apps):</span>
-          <strong style="color: #f39c12;">+{{ resumen.deuda_retenida_total | currency:'EUR' }}</strong>
+        <div class="kpi-breakdown">
+          <div class="breakdown-item">
+            <span><span class="dot own"></span> Margen Propio</span>
+            <strong class="text-success">{{ resumen.margen_propio | currency:'EUR' }}</strong>
+          </div>
+          <div class="breakdown-item">
+            <span><span class="dot consig"></span> Margen Consig.</span>
+            <strong class="text-success">{{ resumen.margen_consignacion | currency:'EUR' }}</strong>
+          </div>
+          
+          <div class="breakdown-item breakdown-separator" *ngIf="resumen.beneficio_retenido > 0">
+            <span class="text-warning">⏳ Margen en Tránsito</span>
+            <strong class="text-warning">+{{ resumen.beneficio_retenido | currency:'EUR' }}</strong>
+          </div>
         </div>
+      </div>
+
+      <div class="kpi-card bg-orange-light">
+        <div class="kpi-top">
+          <span class="kpi-label">Deuda Generada (Líquida)</span>
+          <button class="info-btn-corner" (click)="toggleInfo('deuda-periodo')" title="Ver info">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          </button>
+          <div class="floating-tooltip" *ngIf="activeInfo === 'deuda-periodo'">
+            <button class="close-btn-small" (click)="toggleInfo('deuda-periodo')">✕</button>
+            <p [innerHTML]="getModalText('deuda-periodo')"></p>
+          </div>
+        </div>
+        <div class="kpi-body">
+          <div class="kpi-value">{{ resumen.deuda_generada_periodo | currency:'EUR' }}</div>
+          <div style="height: 45px; width: 100px; flex-shrink: 0;"><canvas #canvasDeuda></canvas></div>
+        </div>
+        
+        <div class="kpi-breakdown">
+          <div class="breakdown-item">
+            <span><span class="dot consig"></span> Nueva deuda</span>
+            <strong class="text-warning">+{{ resumen.deuda_generada_periodo | currency:'EUR' }}</strong>
+          </div>
+          <div class="breakdown-item">
+            <span><span class="dot success"></span> Pagos realizados</span>
+            <strong class="text-success">-{{ resumen.pagos_clientes_periodo | currency:'EUR' }}</strong>
+          </div>
+        </div>
+        <button (click)="verDeudores()" style="width: 100%; margin-top: auto; padding: 10px; border-radius: var(--ap-radius-md); border: none; background-color: #fdba74; color: #d05300; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: background 0.2s;">
+          Ver Clientes con Deuda
+        </button>
       </div>
     </div>
-
-    <div class="kpi-card">
-      <div class="kpi-top">
-        <span class="kpi-label">Inventario Total en Tienda</span>
-        <div class="icon-box icon-info">📦</div>
-      </div>
-      <div class="kpi-value" style="font-size: 1.4rem;">
-        {{ resumen.inversion_en_stock | currency:'EUR' }} <span style="font-size: 0.8rem; color:#64748b; font-weight: 500;">(Inv. Propia)</span>
-      </div>
-      
-      <div class="kpi-breakdown">
-        <div class="breakdown-item">
-          <span><span class="dot own"></span> Ropa Propia</span>
-          <strong>{{ resumen.unidades_propias }} unds.</strong>
-        </div>
-        <div class="breakdown-item">
-          <span><span class="dot consig"></span> Ropa Consignación</span>
-          <strong>{{ resumen.unidades_consignacion }} unds.</strong>
-        </div>
-      </div>
-    </div>
-
   </div>
-
-  <div class="dashboard-lower-grid">
+  
+  <!-- MIDDLE LAYOUT -->
+  <div class="dashboard-middle-grid">
     
     <div class="chart-container">
       <div class="chart-header">
         <h4>Tendencia Mensual</h4>
-        <div *ngIf="cargando" class="loader-dots">
-          <span></span><span></span><span></span>
+        
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <div *ngIf="cargando" class="loader-dots">
+            <span></span><span></span><span></span>
+          </div>
+          <!-- Filtro Visual para Gráficas -->
+          <select class="chart-filter">
+            <option>Últimos 6 meses</option>
+            <option>Este año</option>
+            <option>Histórico completo</option>
+          </select>
         </div>
       </div>
       <div class="canvas-wrapper">
-        <canvas #canvasGrafica></canvas>
+        <canvas #canvasGrafica [style.display]="tieneDatosGrafica ? 'block' : 'none'"></canvas>
+        <div *ngIf="!tieneDatosGrafica" style="text-align: center; color: #64748b; padding: 40px 20px;">
+          No hay datos disponibles para este periodo.
+        </div>
       </div>
     </div>
 
-    <div class="info-card">
-      <h4>💡 Guía Rápida</h4>
-      <div class="info-item">
-        <strong>Beneficio Neto</strong>
-        <p>Es tu ganancia libre total. Se calcula sumando los márgenes propios y de consignación, y restándole los Gastos Operativos del periodo.</p>
-      </div>
-      <div class="info-item">
-        <strong>Flujo y Deuda</strong>
-        <p>Arriba ves cuánto dinero les debes por las ventas <b>de estos días</b>. Abajo ves cuánto dinero les debes <b>en total en toda la historia</b> de la tienda.</p>
-      </div>
-      <div class="info-item">
-        <strong>Stock Propio</strong>
-        <p>El valor en euros solo refleja la inversión en ropa que compraste a mayoristas, ignorando prendas de consignación.</p>
+    <div class="recent-sales-container">
+      <h4>Últimas Ventas</h4>
+      <div class="sales-list">
+        
+        <div class="sale-item" *ngFor="let venta of ultimasVentas" [routerLink]="['/edit-sale', venta.id]">
+          
+          <!-- Si es prenda individual, mostrar foto -->
+          <div class="sale-img" *ngIf="venta.detalles?.length === 1">
+            <img [src]="getVentaImagen(venta)" alt="Prenda">
+          </div>
+          
+          <!-- Si es lote, mostrar ícono -->
+          <div class="sale-img lot-img" *ngIf="venta.detalles?.length !== 1">
+            📦
+            <span class="lot-count">x{{ venta.detalles?.length || 0 }}</span>
+          </div>
+
+          <div class="sale-info">
+            <span class="sale-title">{{ getVentaTitulo(venta) }}</span>
+            <span class="sale-date">{{ venta.fecha | date:'shortTime' }} • #{{ venta.codigo_venta }}</span>
+          </div>
+          <div class="sale-amount" [style.color]="(venta.total - (venta.monto_reembolsado || 0)) <= 0 ? '#94a3b8' : ''">
+            <ng-container *ngIf="(venta.total - (venta.monto_reembolsado || 0)) > 0">+ </ng-container>
+            {{ (venta.total - (venta.monto_reembolsado || 0)) | currency:'EUR' }}
+            <span *ngIf="venta.monto_reembolsado > 0" style="font-size: 0.75rem; color: #ef4444; display: block; text-align: right; font-weight: normal; margin-top: 2px;">
+              -{{ venta.monto_reembolsado | currency:'EUR' }} (Reembolso)
+            </span>
+          </div>
+        </div>
+
+        <div *ngIf="ultimasVentas.length === 0" style="text-align: center; color: #64748b; padding: 20px;">
+          No hay ventas recientes.
+        </div>
       </div>
     </div>
 
   </div>
+
+
+  <!-- ESTADO GLOBAL -->
+  <div class="global-status-section">
+    <div class="section-header">
+      <h3>Estado General de la Empresa</h3>
+      <span class="badge badge-static">🏛️ Acumulado hasta hoy</span>
+    </div>
+
+    <div class="dashboard-grid">
+      <div class="standalone-card kpi-card bg-blue-light">
+        <div class="kpi-top">
+          <span class="kpi-label">Saldo Teórico Banco</span>
+          <button class="info-btn-corner" (click)="toggleInfo('saldo-banco')" title="Ver info">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          </button>
+          <div class="floating-tooltip" *ngIf="activeInfo === 'saldo-banco'">
+            <button class="close-btn-small" (click)="toggleInfo('saldo-banco')">✕</button>
+            <p [innerHTML]="getModalText('saldo-banco')"></p>
+          </div>
+        </div>
+        <div class="kpi-body">
+          <div class="kpi-value">{{ resumen.saldo_teorico_banco | currency:'EUR' }}</div>
+          <div style="height: 45px; width: 100px; flex-shrink: 0;"><canvas #canvasSaldo></canvas></div>
+        </div>
+        <p class="kpi-subtext mt-4">Liquidez total tras compras y pagos</p>
+      </div>
+
+      <!-- <div class="standalone-card kpi-card bg-red-light">
+        <div class="kpi-top">
+          <span class="kpi-label">Deuda Total Real (Caja)</span>
+          <button class="info-btn-corner" (click)="toggleInfo('deuda-total')" title="Ver info">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          </button>
+          <div class="floating-tooltip" *ngIf="activeInfo === 'deuda-total'">
+            <button class="close-btn-small" (click)="toggleInfo('deuda-total')">✕</button>
+            <p [innerHTML]="getModalText('deuda-total')"></p>
+          </div>
+        </div>
+        <div class="kpi-value">{{ resumen.deuda_absoluta | currency:'EUR' }}</div>
+        
+        <div class="kpi-breakdown">
+          <div class="breakdown-item">
+            <span>A pagar (Dinero en Banco):</span>
+            <strong class="text-danger">{{ resumen.deuda_absoluta | currency:'EUR' }}</strong>
+          </div>
+          
+          <div class="breakdown-item breakdown-separator" *ngIf="resumen.deuda_retenida_total > 0">
+            <span class="text-warning">⏳ Próximas deudas (Apps):</span>
+            <strong class="text-warning">+{{ resumen.deuda_retenida_total | currency:'EUR' }}</strong>
+          </div>
+        </div>
+
+        
+      </div> -->
+
+      <div class="standalone-card kpi-card bg-indigo-light">
+        <div class="kpi-top">
+          <span class="kpi-label">Inventario Total en Tienda</span>
+          <button class="info-btn-corner" (click)="toggleInfo('inventario')" title="Ver info">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          </button>
+          <div class="floating-tooltip" *ngIf="activeInfo === 'inventario'">
+            <button class="close-btn-small" (click)="toggleInfo('inventario')">✕</button>
+            <p [innerHTML]="getModalText('inventario')"></p>
+          </div>
+        </div>
+        <div style="border: 1px solid rgba(255,255,255,0.7); border-radius: var(--ap-radius-lg); padding: 16px; margin-bottom: 20px; background-color: rgba(255, 255, 255, 0.5); backdrop-filter: blur(8px); box-shadow: 0 4px 15px rgba(0,0,0,0.02), inset 0 2px 10px rgba(255,255,255,1);">
+          <div class="kpi-body" style="margin-bottom: 0;">
+            <div class="kpi-value" style="font-size: 1.8rem; margin-bottom: 0;">
+              {{ resumen.inversion_en_stock | currency:'EUR' }}
+            </div>
+            <div style="height: 45px; width: 100px; flex-shrink: 0;"><canvas #canvasInventario></canvas></div>
+          </div>
+          <p class="kpi-subtext mb-2">Valor Actual en Tienda</p>
+          
+          <hr style="border: none; border-top: 1px dashed var(--border-color); margin: 10px 0;">
+          
+          <div class="kpi-value mt-2" style="font-size: 1.2rem; color: var(--text-muted);">
+            {{ resumen.inversion_historica | currency:'EUR' }}
+          </div>
+          <p class="kpi-subtext mb-0">Acumulado Histórico Comprado</p>
+        </div>
+        
+        <div class="kpi-breakdown">
+          <div class="breakdown-item">
+            <span><span class="dot own"></span> Ropa Propia</span>
+            <strong>{{ resumen.unidades_propias }} unds.</strong>
+          </div>
+          <div class="breakdown-item">
+            <span><span class="dot consig"></span> Ropa Consignación</span>
+            <strong>{{ resumen.unidades_consignacion }} unds.</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>

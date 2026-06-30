@@ -111,6 +111,6 @@
   background: transparent;
 }
 .dropdown-list::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--border-color);
   border-radius: 10px;
 }

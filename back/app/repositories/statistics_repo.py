@@ -5,7 +5,7 @@ from app.models.proveedores_model import Proveedor
 from app.models.ventas_model import Venta, DetalleVenta
 from app.models.lotes_model import StockConfig, StockUnit
 from app.models.variantes_model import Variante
-from app.models.gastos_model import Gasto
+from app.models.egresos_model import Egreso
 from app.models.producto_model import Producto
 from app.models.categorias_model import Categoria
 from app.models.clientes_model import Cliente
@@ -26,13 +26,13 @@ def obtener_inteligencia_negocio(db: Session, fecha_inicio: str = None, fecha_fi
 
     if fecha_inicio:
         f_ventas.append(Venta.fecha >= fecha_inicio)
-        f_gastos.append(Gasto.fecha >= fecha_inicio)
+        f_gastos.append(Egreso.fecha >= fecha_inicio)
         f_configs.append(StockUnit.fecha_registro >= fecha_inicio)
         
     if fecha_fin:
         fecha_fin_full = f"{fecha_fin} 23:59:59"
         f_ventas.append(Venta.fecha <= fecha_fin_full)
-        f_gastos.append(Gasto.fecha <= fecha_fin_full)
+        f_gastos.append(Egreso.fecha <= fecha_fin_full)
         f_configs.append(StockUnit.fecha_registro <= fecha_fin_full)
 
     detalles_query = db.query(
@@ -198,7 +198,8 @@ def obtener_rendimiento_compras(db: Session, fecha_inicio: str = None, fecha_fin
         filtros_ventas = [
             DetalleVenta.stock_unit_id.in_(unidad_ids),
             Venta.estado_envio != 'cancelado',
-            Venta.estado_pago != 'reembolsado'
+            Venta.estado_pago != 'reembolsado',
+            DetalleVenta.devuelto == False
         ]
         
         if fecha_inicio:

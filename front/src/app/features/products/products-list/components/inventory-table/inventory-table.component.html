@@ -65,8 +65,8 @@
       </tr>
 
       <tr *ngIf="lote.expandido" style="background: #f8fafc;">
-        <td colspan="10" style="padding: 15px 30px; border-bottom: 2px solid #cbd5e1;">
-          <div style="background: white; border: 1px solid #e0e6ed; border-radius: 8px; padding: 15px;">
+        <td colspan="10" style="padding: 15px 30px; border-bottom: 2px solid var(--border-color);">
+          <div style="background: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 15px;">
             
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
               <h5 style="margin: 0; color: #64748b; font-size: 0.9em; font-weight: 600;">
@@ -79,7 +79,7 @@
                         (click)="lote.pagina_interna = lote.pagina_interna - 1">
                   ◀ Ant
                 </button>
-                <span style="font-size: 0.85em; color: #7f8c8d; font-weight: 600;">
+                <span style="font-size: 0.85em; color: var(--text-muted); font-weight: 600;">
                   Pág {{ lote.pagina_interna }} de {{ Math.ceil(lote.stock_units.length / 10) }}
                 </span>
                 <button type="button" class="btn-outline-primary btn-sm" 
@@ -92,24 +92,24 @@
             
             <table class="ap-table" style="width: 100%; font-size: 0.85em;">
               <thead>
-                <tr style="background: #f4f6f8;">
-                  <th style="padding: 8px; border-bottom: 1px solid #e0e6ed;">ID Físico</th>
-                  <th style="padding: 8px; border-bottom: 1px solid #e0e6ed;">Código SKU</th>
-                  <th style="padding: 8px; border-bottom: 1px solid #e0e6ed;">Fecha Ingreso</th>
-                  <th style="padding: 8px; border-bottom: 1px solid #e0e6ed;">Canales Activos</th>
-                  <th style="padding: 8px; border-bottom: 1px solid #e0e6ed;">Gestión de Estado</th>
+                <tr style="background: var(--bg-body);">
+                  <th style="padding: 8px; border-bottom: 1px solid var(--border-color);">ID Físico</th>
+                  <th style="padding: 8px; border-bottom: 1px solid var(--border-color);">Código SKU</th>
+                  <th style="padding: 8px; border-bottom: 1px solid var(--border-color);">Fecha Ingreso</th>
+                  <th style="padding: 8px; border-bottom: 1px solid var(--border-color);">Canales Activos</th>
+                  <th style="padding: 8px; border-bottom: 1px solid var(--border-color);">Gestión de Estado</th>
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let u of lote.stock_units | slice:(lote.pagina_interna - 1) * 10 : lote.pagina_interna * 10" style="border-bottom: 1px solid #f4f6f8;">
+                <tr *ngFor="let u of lote.stock_units | slice:(lote.pagina_interna - 1) * 10 : lote.pagina_interna * 10" style="border-bottom: 1px solid var(--bg-body);">
                   <td style="padding: 8px;"><strong>#{{ u.id }}</strong></td>
-                  <td style="padding: 8px;"><span style="font-family: monospace; color: #7f8c8d;">{{ u.sku }}</span></td>
-                  <td style="padding: 8px; color: #7f8c8d;">{{ (u.fecha_compra | date:'dd/MM/yyyy') || '--' }}</td>
+                  <td style="padding: 8px;"><span style="font-family: monospace; color: var(--text-muted);">{{ u.sku }}</span></td>
+                  <td style="padding: 8px; color: var(--text-muted);">{{ (u.fecha_compra | date:'dd/MM/yyyy') || '--' }}</td>
                   <td style="padding: 8px; font-size: 1.2em;">
                     <span *ngIf="u.canales?.web" title="Tienda Online">🌐</span>
                     <span *ngIf="u.canales?.vinted" title="Vinted">🛍️</span>
                     <span *ngIf="u.canales?.wallapop" title="Wallapop">📦</span>
-                    <span *ngIf="!u.canales?.web && !u.canales?.vinted && !u.canales?.wallapop" style="font-size: 0.8em; color: #7f8c8d;">Ninguno</span>
+                    <span *ngIf="!u.canales?.web && !u.canales?.vinted && !u.canales?.wallapop" style="font-size: 0.8em; color: var(--text-muted);">Ninguno</span>
                   </td>
                   <td style="padding: 8px;">
                      <!-- ✨ COLUMNA ESTABILIZADA: Contenedor con ancho fijo para evitar saltos visuales -->

@@ -26,7 +26,11 @@ export class DashboardService {
   /**
    * Obtiene los datos para la gráfica de barras (Histórico 6 meses)
    */
-  getDatosGrafica(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/grafica-mensual`);
+  getDatosGrafica(filtros: any = {}): Observable<any[]> {
+    let params = new HttpParams();
+    if (filtros.fecha_inicio) params = params.set('fecha_inicio', filtros.fecha_inicio);
+    if (filtros.fecha_fin) params = params.set('fecha_fin', filtros.fecha_fin);
+
+    return this.http.get<any[]>(`${this.apiUrl}/grafica-tendencia`, { params });
   }
 }

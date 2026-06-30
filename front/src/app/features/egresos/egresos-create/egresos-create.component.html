@@ -1,0 +1,75 @@
+<div class="page-container">
+  <div class="header-section">
+    <span class="text-muted" (click)="cancelar()" style="cursor: pointer;">← Volver a Egresos</span>
+    <h2 class="mt-1">💸 Registrar Nuevo Egreso</h2>
+    <p>Añade facturas, compras de mercancía o pagos de servicios.</p>
+  </div>
+
+  <div class="card-section">
+    <div class="grid-2">
+      <div class="field">
+        <label>Fecha del Egreso</label>
+        <input type="date" [(ngModel)]="nuevoEgreso.fecha">
+      </div>
+      
+      <div class="field">
+        <label>Monto Total (€)</label>
+        <input type="number" [(ngModel)]="nuevoEgreso.monto" placeholder="0.00">
+      </div>
+    </div>
+
+    <div class="field mt-2">
+      <label>Concepto (¿Qué se pagó?)</label>
+      <input type="text" [(ngModel)]="nuevoEgreso.concepto" placeholder="Ej: Lote 50 camisetas vintage, Recibo de luz...">
+    </div>
+
+    <div class="grid-2 mt-2">
+      <div class="field">
+        <label>Categoría</label>
+        <select [(ngModel)]="nuevoEgreso.categoria">
+          <option value="mercancia">🛍️ Compra de Ropa/Mercancía</option>
+          <option value="envios">📦 Sobres, Empaques y Envíos</option>
+          <option value="regalos_clientes">🎁 Regalos y Detalles para Clientes</option>
+          <option value="local">🏠 Local y Servicios</option>
+          <option value="sueldos">👔 Sueldos / Pagos a Staff</option>
+          <option value="publicidad">📢 Publicidad (Ads)</option>
+          <option value="devoluciones_reembolsos">🔙 Devoluciones y Reembolsos</option>
+          <option value="oficina">📎 Suministros de Oficina</option>
+          <option value="otros">⚙️ Otros Egresos</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Proveedor / Beneficiario</label>
+
+        <app-supplier-selector 
+            tipoProveedor="egreso"
+            [proveedorInicialId]="nuevoEgreso.proveedor_id"
+            (supplierChanged)="onSupplierChanged($event)">
+        </app-supplier-selector>
+
+        </div>
+
+      <div class="field">
+        <label>Método de Pago</label>
+        <select [(ngModel)]="nuevoEgreso.metodo_pago">
+          <option value="cuenta_bancaria">🏦 Cuenta Bancaria (Transferencia)</option>
+          <option value="tarjeta_empresa">💳 Tarjeta de Empresa</option>
+          <option value="efectivo_caja">💵 Efectivo (Caja)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field mt-2">
+      <label>Notas adicionales (Opcional)</label>
+      <textarea [(ngModel)]="nuevoEgreso.notas" placeholder="Referencia de factura, nombre del proveedor..."></textarea>
+    </div>
+
+    <div class="form-actions mt-3">
+      <button class="btn-outline-primary" (click)="cancelar()">Cancelar</button>
+      <button class="btn-primary" [disabled]="guardando" (click)="guardarEgreso()">
+        {{ guardando ? 'Guardando...' : '💾 Registrar Egreso' }}
+      </button>
+    </div>
+  </div>
+</div>

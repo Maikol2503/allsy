@@ -32,6 +32,14 @@
       <option value="cancelado">Cancelado (Anulado)</option>
     </select>
 
+    <select [(ngModel)]="filtro_pago" (change)="aplicarFiltros()" class="filter-select">
+      <option value="">Estado de Pago (Todos)</option>
+      <option value="pagado">Pagado</option>
+      <option value="pendiente">Pendiente</option>
+      <option value="in_transit">En Tránsito</option>
+      <option value="reembolsado">Reembolsado</option>
+    </select>
+
     <div style="min-width: 250px;">
       <app-client-selector 
         [clienteInicialId]="cliente_id" 
@@ -47,8 +55,8 @@
       </app-location-selector>
     </div>
 
-    <div class="date-filter-group" style="display: flex; align-items: center; gap: 10px; background: #f8fafc; padding: 5px 15px; border-radius: 8px; border: 1px solid #cbd5e1;">
-      <select [(ngModel)]="tipo_fecha" (change)="aplicarFiltros()" class="filter-select" style="border: none; background: transparent; padding: 5px; font-weight: 600; color: #007782;">
+    <div class="date-filter-group" style="display: flex; align-items: center; gap: 10px; background: #f8fafc; padding: 5px 15px; border-radius: 8px; border: 1px solid var(--border-color);">
+      <select [(ngModel)]="tipo_fecha" (change)="aplicarFiltros()" class="filter-select" style="border: none; background: transparent; padding: 5px; font-weight: 600; color: var(--ap-color-primary);">
         <option value="creacion">Fecha Creación</option>
         <option value="envio">Fecha Envío</option>
         <option value="entrega">Fecha Entrega</option>
@@ -64,7 +72,7 @@
       </app-date-selector>
     </div>
 
-    <button class="btn-primary" (click)="aplicarFiltros()" style="padding: 10px 20px; border-radius: 8px; border: none; background: #007782; color: white; cursor: pointer; font-weight: bold;">
+    <button class="btn-primary" (click)="aplicarFiltros()" style="padding: 10px 20px; border-radius: 8px; border: none; background: var(--ap-color-primary); color: white; cursor: pointer; font-weight: bold;">
       Aplicar Filtros
     </button>
   </div>
@@ -79,6 +87,11 @@
     <div class="filter-pill" *ngIf="filtro_estado">
       <span>📌 <strong>Estado:</strong> {{ getLabelEstado(filtro_estado) }}</span>
       <span class="remove-btn" (click)="removerFiltro('estado')">×</span>
+    </div>
+
+    <div class="filter-pill" *ngIf="filtro_pago">
+      <span>💰 <strong>Pago:</strong> {{ getLabelPago(filtro_pago) }}</span>
+      <span class="remove-btn" (click)="removerFiltro('pago')">×</span>
     </div>
 
     <div class="filter-pill" *ngIf="cliente_id">
@@ -136,7 +149,7 @@
                       <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">#{{ $any(d).stock_unit_id }} - {{ $any(d).nombre_producto }}</span>
                       
                       <!-- Indicador de Devolución individual -->
-                      <span *ngIf="$any(d).devuelto" style="color: #e74c3c; font-weight: bold; background: #fceceb; padding: 1px 4px; border-radius: 3px; font-size: 0.7rem;">
+                      <span *ngIf="$any(d).devuelto" style="color: var(--ap-color-danger); font-weight: bold; background: var(--ap-color-danger-bg); padding: 1px 4px; border-radius: 3px; font-size: 0.7rem;">
                         ↩️ DEVUELTO
                       </span>
                    </div>
@@ -145,20 +158,26 @@
                    </div>
                 </div>
 
-                <div style="font-size: 0.8rem; color: #7f8c8d; margin-top: 8px; display: flex; justify-content: space-between; align-items: center;">
-                  <span>Canal: <strong style="color: #007782; text-transform: uppercase;">{{ p.canal }}</strong></span>
-                  <a [routerLink]="['/order-detail', p.id]" style="color: #007782; font-weight: bold; text-decoration: none; font-size: 0.85rem;">Ver Detalle 👁️</a>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 8px; display: flex; justify-content: space-between; align-items: center;">
+                  <span>Canal: <strong style="color: var(--ap-color-primary); text-transform: uppercase;">{{ p.canal }}</strong></span>
+                  <a [routerLink]="['/order-detail', p.id]" style="color: var(--ap-color-primary); font-weight: bold; text-decoration: none; font-size: 0.85rem;">Ver Detalle 👁️</a>
                 </div>
               </div>
             </div>
           </td>
 
           <td>
-            <strong>{{ p.total | currency:'EUR':'symbol' }}</strong>
+            <div *ngIf="p.monto_reembolsado && p.monto_reembolsado > 0" style="font-size: 0.85rem; color: #64748b; text-decoration: line-through;">
+              {{ p.total | currency:'EUR':'symbol' }}
+            </div>
+            <strong>{{ (p.total - (p.monto_reembolsado || 0)) | currency:'EUR':'symbol' }}</strong>
+            <div *ngIf="p.monto_reembolsado && p.monto_reembolsado > 0" style="font-size: 0.75rem; color: var(--ap-color-danger); font-weight: 500; margin-top: 2px;">
+              -{{ p.monto_reembolsado | currency:'EUR':'symbol' }} dev.
+            </div>
           </td>
 
           <td>
-            <div style="font-weight: 600; color: #1e293b;">{{ p.nombre_cliente || p.identificador_cliente || 'Desconocido' }}</div>
+            <div style="font-weight: 600; color: var(--text-main);">{{ p.nombre_cliente || p.identificador_cliente || 'Desconocido' }}</div>
             <div style="font-size: 0.8rem; color: #64748b;">Ticket: #{{ p.codigo_venta }}</div>
           </td>
 
@@ -197,8 +216,8 @@
 
   <!-- PAGINACIÓN SENCILLA -->
   <div style="display: flex; justify-content: center; gap: 15px; margin-top: 20px;" *ngIf="!cargando && (page > 1 || pedidos.length === limit)">
-    <button (click)="cambiarPagina(-1)" [disabled]="page === 1" style="padding: 8px 16px; border-radius: 8px; border: 1px solid #cbd5e1; background: white; cursor: pointer;">◀ Anterior</button>
-    <button (click)="cambiarPagina(1)" [disabled]="pedidos.length < limit" style="padding: 8px 16px; border-radius: 8px; border: 1px solid #cbd5e1; background: white; cursor: pointer;">Siguiente ▶</button>
+    <button (click)="cambiarPagina(-1)" [disabled]="page === 1" style="padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: white; cursor: pointer;">◀ Anterior</button>
+    <button (click)="cambiarPagina(1)" [disabled]="pedidos.length < limit" style="padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: white; cursor: pointer;">Siguiente ▶</button>
   </div>
 
 </div>

@@ -8,6 +8,23 @@
   background-color: var(--ap-bg-main);
 }
 
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.hamburger-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--ap-text-main);
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+}
+
 .nav-brand {
   display: flex;
   align-items: center;
@@ -15,4 +32,10 @@
   font-size: 1.25rem;
   font-weight: 700;
   color: var(--ap-text-main);
+}
+
+@media (max-width: 768px) {
+  .hamburger-btn {
+    display: flex;
+  }
 }

@@ -14,7 +14,7 @@ from app.models.producto_model import Producto
 from app.models.marcas_model import Marca
 from app.models.categorias_model import Categoria
 from app.models.clientes_model import Cliente
-from app.models.gastos_model import Gasto
+from app.models.egresos_model import Egreso
 from app.schemas.ventas_schema import VentaCreate
 from app.services.cliente_services import procesar_cliente_omnicanal
 from app.repositories.auditoria_repo import registrar_log
@@ -145,6 +145,7 @@ def actualizar_venta(db: Session, venta_id: int, datos: dict):
     total_anterior = venta.total
     estado_pago_anterior = venta.estado_pago
     estado_envio_anterior = venta.estado_envio
+    monto_reembolsado_anterior = float(venta.monto_reembolsado or 0.0)
 
     # ✨ SEGURIDAD LOGÍSTICA: Flujos desde 'entregado'
     if estado_envio_anterior == "entregado" and nuevo_est_envio:
@@ -186,6 +187,9 @@ def actualizar_venta(db: Session, venta_id: int, datos: dict):
             else:
                 setattr(venta, key, value)
 
+    if venta.monto_reembolsado is not None and venta.monto_reembolsado > venta.total:
+        raise HTTPException(status_code=400, detail="El monto reembolsado no puede ser mayor al total de la venta.")
+
     ahora = datetime.utcnow()
     es_anulacion_actual = (venta.estado_pago == "reembolsado" or venta.estado_envio in ["cancelado", "devuelto"])
     fue_anulacion = (estado_pago_anterior == "reembolsado" or estado_envio_anterior in ["cancelado", "devuelto"])
@@ -194,6 +198,12 @@ def actualizar_venta(db: Session, venta_id: int, datos: dict):
     if es_anulacion_actual and not fue_anulacion:
         venta.estado_pago = "reembolsado"
         venta.monto_reembolsado = venta.total
+
+    # Gestión de reversión de anulación/cancelación
+    if not es_anulacion_actual and fue_anulacion:
+        venta.monto_reembolsado = 0.0
+        if venta.estado_pago in ["reembolsado", "reembolso_parcial"]:
+            venta.estado_pago = "pagado"
 
     # Fechas hitos
     if venta.estado_pago == "pagado" and estado_pago_anterior != "pagado":
@@ -236,6 +246,13 @@ def actualizar_venta(db: Session, venta_id: int, datos: dict):
                 if unidad_db:
                     unidad_db.estado_gestion = 'en_camino_devolucion'
                     unidad_db.activo = True
+        elif venta.estado_envio == 'devuelto':
+            for detalle in venta.detalles:
+                detalle.devuelto = True
+                unidad_db = db.query(StockUnit).filter(StockUnit.id == detalle.stock_unit_id).first()
+                if unidad_db:
+                    unidad_db.estado_gestion = 'en_stock'
+                    unidad_db.activo = True
         elif venta.estado_envio in ['extraviado_envio', 'extraviado_devolucion']:
             for detalle in venta.detalles:
                 detalle.devuelto = False # Se cobra
@@ -243,23 +260,68 @@ def actualizar_venta(db: Session, venta_id: int, datos: dict):
                 if unidad_db:
                     unidad_db.estado_gestion = 'extraviado'
 
-    # Registro de gasto por compensación si hay monto_reembolsado manual
-    if float(venta.monto_reembolsado or 0) > 0 and not es_anulacion_actual:
-        concepto_gasto = f"Compensación Allsys Venta {venta.codigo_venta}"
-        gasto_existente = db.query(Gasto).filter(Gasto.concepto.like(f"%{concepto_gasto}%")).first()
-        if not gasto_existente:
-            db.add(Gasto(
-                concepto=concepto_gasto, categoria="Devoluciones y Reembolsos",
-                monto=float(venta.monto_reembolsado), metodo_pago=venta.metodo_pago,
-                fecha=ahora, notas="Error asumido por la tienda Allsys. El dueño de la prenda NO se ve afectado."
+    # Registro de gasto por compensación si hay monto_reembolsado manual (se incrementó el monto)
+    diferencia_reembolso = float(venta.monto_reembolsado or 0) - monto_reembolsado_anterior
+    if diferencia_reembolso > 0 and not es_anulacion_actual:
+        concepto_egreso = f"Compensación Allsys Venta {venta.codigo_venta}"
+        egreso_existente = db.query(Egreso).filter(Egreso.concepto.like(f"%{concepto_egreso}%")).first()
+        if egreso_existente:
+            egreso_existente.monto = round(float(egreso_existente.monto) + diferencia_reembolso, 2)
+        else:
+            db.add(Egreso(
+                concepto=concepto_egreso, categoria="Devoluciones y Reembolsos",
+                monto=diferencia_reembolso, metodo_pago=venta.metodo_pago,
+                fecha=ahora, notas="Error asumido por la tienda Allsys. El dueño de la prenda NO se ve afectado.",
+                venta_id=venta.id
             ))
+    elif diferencia_reembolso < 0 and not es_anulacion_actual:
+        concepto_egreso = f"Compensación Allsys Venta {venta.codigo_venta}"
+        egreso_existente = db.query(Egreso).filter(Egreso.concepto.like(f"%{concepto_egreso}%")).first()
+        if egreso_existente:
+            nuevo_monto = round(float(egreso_existente.monto) + diferencia_reembolso, 2)
+            if nuevo_monto <= 0:
+                db.delete(egreso_existente)
+            else:
+                egreso_existente.monto = nuevo_monto
+
+    # Sincronización automática de estado_venta (estado global de la venta)
+    if venta.estado_pago == "reembolsado" or venta.estado_envio == "cancelado":
+        venta.estado_venta = "cancelada"
+    elif venta.estado_envio == "devuelto":
+        venta.estado_venta = "devuelta_totalmente"
+    elif venta.estado_envio == "en_devolucion" or venta.estado_pago == "reembolso_parcial":
+        venta.estado_venta = "devuelta_parcialmente"
+    elif venta.estado_envio in ["entregado", "completado"] and venta.estado_pago == "pagado":
+        tiene_devueltos = any(d.devuelto for d in venta.detalles)
+        if tiene_devueltos:
+            venta.estado_venta = "devuelta_parcialmente"
+        else:
+            venta.estado_venta = "completada"
+    else:
+        tiene_devueltos = any(d.devuelto for d in venta.detalles)
+        if tiene_devueltos:
+            venta.estado_venta = "devuelta_parcialmente"
+        else:
+            venta.estado_venta = "abierta"
 
     try:
         db.commit()
         db.refresh(venta)
+        
+        log_notas = None
+        if es_anulacion_actual and not fue_anulacion:
+            log_notas = f"Alerta Crítica: Venta anulada/cancelada. Se forzó reembolso de {venta.total}€ y devolución de ítems a stock."
+        elif not es_anulacion_actual and fue_anulacion:
+            log_notas = f"Alerta Crítica: Se revirtió la anulación/cancelación de la venta. Los ítems vuelven a estar marcados como vendidos."
+        elif quiere_revertir_pago:
+            log_notas = f"Alerta Crítica: Se revirtió el estado de pago de 'pagado' a '{nuevo_est_pago}'."
+        elif diferencia_reembolso != 0:
+            log_notas = f"Alerta: Se modificó el monto de reembolso manual en {diferencia_reembolso}€."
+
         registrar_log(
             db, accion="EDITAR", entidad_tipo="VENTA", entidad_id=venta.id,
-            valor_nuevo={"total": venta.total, "estado_pago": venta.estado_pago, "estado_envio": venta.estado_envio}
+            valor_nuevo={"total": venta.total, "estado_pago": venta.estado_pago, "estado_envio": venta.estado_envio},
+            notas=log_notas
         )
         return {"venta": venta, "mensaje": "Venta actualizada correctamente."}
     except Exception as e:
@@ -379,6 +441,8 @@ def obtener_ventas_paginadas(
             "pais": v.cliente.pais if v.cliente else "", "canal": v.canal, "metodo_pago": v.metodo_pago,
             "estado_venta": v.estado_venta,
             "estado_pago": v.estado_pago, "estado_envio": v.estado_envio, "total": float(v.total),
+            "monto_reembolsado": float(v.monto_reembolsado or 0.0),
+            "numero_seguimiento": v.numero_seguimiento,
             "resumen_productos": ", ".join(resumen), "imagen_cover": img_cover, "detalles": detalles_full if include_details else None
         })
 
@@ -406,22 +470,32 @@ def registrar_devolucion_fisica_item(db: Session, venta_id: int, detalle_id: int
             detalle.stock_unit.publicar_vinted = False
             detalle.stock_unit.publicar_wallapop = False
 
-    detalle.devuelto = True
     monto = float(detalle.precio_unitario_en_venta)
-    venta.subtotal = round(venta.subtotal - monto, 2)
-    venta.total = round(venta.total - monto, 2)
+    
+    if detalle.cantidad > 1:
+        # Decrementar cantidad en el registro original (sigue sin ser devuelto)
+        detalle.cantidad -= 1
+        
+        # Crear un nuevo detalle de venta con cantidad=1 marcado como devuelto
+        detalle_devuelto = DetalleVenta(
+            venta_id=venta_id,
+            stock_unit_id=detalle.stock_unit_id,
+            cantidad=1,
+            precio_unitario_en_venta=detalle.precio_unitario_en_venta,
+            precio_compra_snapshot=detalle.precio_compra_snapshot,
+            nombre_producto_snapshot=detalle.nombre_producto_snapshot,
+            talla_snapshot=detalle.talla_snapshot,
+            color_snapshot=detalle.color_snapshot,
+            devuelto=True
+        )
+        db.add(detalle_devuelto)
+        db.flush()
+    else:
+        detalle.devuelto = True
 
-    if venta.estado_pago == "pagado":
+    if venta.estado_pago in ["pagado", "reembolso_parcial"]:
         venta.estado_pago = "reembolso_parcial"
         venta.monto_reembolsado = round(float(venta.monto_reembolsado or 0) + monto, 2)
-        # Importamos Gasto localmente para evitar circulares si no está arriba
-        from app.models.gastos_model import Gasto
-        db.add(Gasto(
-            concepto=f"Reembolso devolución #{detalle.stock_unit_id} - Venta {venta.codigo_venta}",
-            categoria="Devoluciones y Reembolsos",
-            monto=monto, metodo_pago=venta.metodo_pago, fecha=datetime.utcnow(),
-            notas=f"Dinero devuelto al cliente. Prenda #{detalle.stock_unit_id} en estado: {estado_stock}."
-        ))
 
     # ✨ LÓGICA DE CANCELACIÓN TOTAL
     # Verificamos si TODOS los ítems de esta venta han sido devueltos.
@@ -437,6 +511,7 @@ def registrar_devolucion_fisica_item(db: Session, venta_id: int, detalle_id: int
             pass
 
         venta.estado_pago = "reembolsado"
+        venta.monto_reembolsado = venta.total
     else:
         venta.estado_venta = "devuelta_parcialmente"
 
@@ -466,20 +541,16 @@ def resolver_retorno_transito(db: Session, venta_id: int, detalle_id: int, resol
         # ✨ REVERTIR LA DEVOLUCIÓN: Como se perdió, Vinted paga, así que el dueño cobra.
         detalle.devuelto = False
         monto = float(detalle.precio_unitario_en_venta)
-        venta.subtotal = round(venta.subtotal + monto, 2)
-        venta.total = round(venta.total + monto, 2)
         
         # Restar del reembolso si lo hubo
         if venta.monto_reembolsado and venta.monto_reembolsado >= monto:
             venta.monto_reembolsado = round(float(venta.monto_reembolsado) - monto, 2)
             if venta.monto_reembolsado == 0:
                 venta.estado_pago = "pagado"
+            else:
+                venta.estado_pago = "reembolso_parcial"
         
-        # Eliminar el gasto que se creó automáticamente por la devolución
-        from app.models.gastos_model import Gasto
-        gasto = db.query(Gasto).filter(Gasto.concepto.like(f"%Reembolso devolución #{detalle.stock_unit_id}%")).first()
-        if gasto:
-            db.delete(gasto)
+        # (El egreso ya no se crea, por lo que no hay que eliminarlo)
             
         # Si la venta entera se había cancelado/devuelto, la restauramos a extraviado_devolucion
         if venta.estado_envio in ["cancelado", "devuelto", "en_devolucion"]:
@@ -494,13 +565,25 @@ def resolver_retorno_transito(db: Session, venta_id: int, detalle_id: int, resol
 def registrar_compensacion_allsys(db: Session, venta_id: int, monto: float, motivo: str):
     venta = db.query(Venta).filter(Venta.id == venta_id).first()
     if not venta: raise HTTPException(status_code=404, detail="No encontrada")
-    
     monto = round(float(monto), 2)
+    saldo_restante = round(venta.total - float(venta.monto_reembolsado or 0), 2)
+    if monto > saldo_restante:
+        raise HTTPException(status_code=400, detail=f"No se puede compensar {monto}€. El saldo restante de la venta es {saldo_restante}€.")
+
     venta.monto_reembolsado = round(float(venta.monto_reembolsado or 0) + monto, 2)
-    db.add(Gasto(
+    
+    # Ajustar el estado de pago
+    if venta.monto_reembolsado >= venta.total:
+        venta.estado_pago = "reembolsado"
+    else:
+        if venta.estado_pago in ["pagado", "reembolso_parcial"]:
+            venta.estado_pago = "reembolso_parcial"
+            
+    db.add(Egreso(
         concepto=f"Compensación Allsys {venta.codigo_venta}: {motivo}", categoria="Devoluciones y Reembolsos",
         monto=monto, metodo_pago=venta.metodo_pago, fecha=datetime.utcnow(),
-        notas="Asumido por la tienda. El dueño de la prenda cobra lo pactado."
+        notas="Asumido por la tienda. El dueño de la prenda cobra lo pactado.",
+        venta_id=venta_id
     ))
     db.commit()
     return venta
@@ -550,10 +633,15 @@ def obtener_venta_por_id(db: Session, venta_id: int):
             "estado_gestion": estado_gestion, # ✨ AÑADIDO PARA SEGUIMIENTO
             "stock_config_id": d.stock_unit.stock_config_id if d.stock_unit else None 
         })
-    # ✨ AÑADIDO: Obtener ajustes financieros/compensaciones ligados a esta venta
-    gastos_relacionados = db.query(Gasto).filter(Gasto.concepto.ilike(f"%{venta.codigo_venta}%")).all()
+    # ✨ AÑADIDO: Obtener ajustes financieros/compensaciones ligados a esta venta de forma segura por FK con fallback a texto
+    egresos_relacionados = db.query(Egreso).filter(
+        or_(
+            Egreso.venta_id == venta.id,
+            Egreso.concepto.ilike(f"%{venta.codigo_venta}%")
+        )
+    ).all()
     ajustes = []
-    for g in gastos_relacionados:
+    for g in egresos_relacionados:
         ajustes.append({
             "id": g.id,
             "concepto": g.concepto,
@@ -650,6 +738,12 @@ def cambiar_id_item_venta(db: Session, venta_id: int, detalle_id: int, nuevo_sto
     detalle = db.query(DetalleVenta).filter(DetalleVenta.id == detalle_id, DetalleVenta.venta_id == venta_id).first()
     if not detalle: raise HTTPException(status_code=404, detail="Ítem no encontrado")
     
+    if detalle.stock_unit and detalle.stock_unit.pago_consignacion_id is not None:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Operación denegada. La prenda antigua #{detalle.stock_unit_id} ya ha sido liquidada al dueño. No puedes cambiarla."
+        )
+        
     nueva_unidad = db.query(StockUnit).filter(StockUnit.id == nuevo_stock_id).first()
     if not nueva_unidad or nueva_unidad.estado_gestion != 'en_stock':
         raise HTTPException(status_code=400, detail="Unidad no disponible")
@@ -661,3 +755,67 @@ def cambiar_id_item_venta(db: Session, venta_id: int, detalle_id: int, nuevo_sto
     
     db.commit()
     return {"mensaje": f"Trueque exitoso: {old_id} por {nuevo_stock_id}"}
+
+def procesar_smart_scan(db: Session, venta_id: int, scanned_unit_id: int):
+    venta = db.query(Venta).filter(Venta.id == venta_id).first()
+    if not venta:
+        raise HTTPException(status_code=404, detail="Venta no encontrada.")
+        
+    scanned_unit = db.query(StockUnit).filter(StockUnit.id == scanned_unit_id).first()
+    if not scanned_unit:
+        raise HTTPException(status_code=404, detail="La prenda escaneada no existe en el inventario.")
+
+    # 1. Verificar si ya pertenece a la venta
+    for detalle in venta.detalles:
+        if detalle.stock_unit_id == scanned_unit_id:
+            return {
+                "success": True,
+                "status": "match",
+                "mensaje": "La prenda escaneada pertenece a este pedido.",
+                "detalle_id": detalle.id
+            }
+
+    # 2. Intentar trueque inteligente
+    # Buscamos un detalle en la venta que tenga la misma configuración de stock (mismo modelo, talla, color)
+    for detalle in venta.detalles:
+        if detalle.stock_unit and detalle.stock_unit.stock_config_id == scanned_unit.stock_config_id and not detalle.devuelto:
+            # Validaciones de seguridad
+            if detalle.stock_unit.pago_consignacion_id is not None:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Operación denegada. La prenda original #{detalle.stock_unit_id} ya ha sido liquidada al dueño. No puedes hacer trueque."
+                )
+            if scanned_unit.estado_gestion != 'en_stock' or not scanned_unit.activo:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"La prenda escaneada #{scanned_unit.id} no está disponible (Estado: {scanned_unit.estado_gestion})."
+                )
+
+            old_id = detalle.stock_unit_id
+            
+            # Liberamos la prenda antigua
+            detalle.stock_unit.estado_gestion = 'en_stock'
+            
+            # Asignamos la nueva prenda
+            detalle.stock_unit_id = scanned_unit.id
+            scanned_unit.estado_gestion = 'vendido'
+            
+            db.commit()
+            
+            registrar_log(
+                db, accion="TRUEQUE_SMART", entidad_tipo="VENTA", entidad_id=venta_id,
+                valor_nuevo={"old_stock_id": old_id, "new_stock_id": scanned_unit.id},
+                notas=f"Trueque inteligente en preparación: {old_id} reemplazado por {scanned_unit.id}."
+            )
+            
+            return {
+                "success": True,
+                "status": "swap",
+                "mensaje": f"Trueque inteligente exitoso: Se reemplazó la prenda #{old_id} por la prenda #{scanned_unit.id}.",
+                "detalle_id": detalle.id
+            }
+
+    raise HTTPException(
+        status_code=400,
+        detail="La prenda escaneada no pertenece a este pedido y no coincide con el modelo/talla de ningún ítem para hacer un trueque inteligente."
+    )

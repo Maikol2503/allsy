@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { NavbarComponent } from "./layout/components/navbar/navbar.component";
-import { LayoutComponent } from "./layout/layout.component";
+import { TranslateService } from '@ngx-translate/core';
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -11,4 +11,14 @@ import { LayoutComponent } from "./layout/layout.component";
 })
 export class AppComponent {
   title = 'front';
+
+  constructor(private translate: TranslateService) {
+    this.translate.addLangs(['en', 'es']);
+    this.translate.setFallbackLang('es'); // Español por defecto
+
+    // Detectar el idioma del navegador
+    const browserLang = this.translate.getBrowserLang();
+    // Usar el del navegador si está soportado, si no 'es'
+    this.translate.use(browserLang?.match(/en|es/) ? browserLang : 'es');
+  }
 }

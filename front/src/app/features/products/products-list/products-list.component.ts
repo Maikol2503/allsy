@@ -83,7 +83,7 @@ export class ProductsListComponent implements OnInit {
     const savedView = localStorage.getItem('vinted_pref_vista');
     if (savedView === 'inventario' || savedView === 'catalogo') {
       this.vistaActual = savedView;
-      this.limite = this.vistaActual === 'catalogo' ? 10 : 20;
+      // this.limite = this.vistaActual === 'catalogo' ? 10 : 20;
       this.filtros.tipo_busqueda = this.vistaActual === 'catalogo' ? 'producto_id' : 'stock_unit_id';
     }
 
@@ -104,14 +104,16 @@ export class ProductsListComponent implements OnInit {
   cargarLocalizaciones(): void {
     this.localizacionesService.obtenerLocalizaciones().subscribe({
       next: (data) => {
-        let flat: Localizacion[] = [];
-        data.forEach(root => {
-          if (root.hijos && root.hijos.length > 0) {
-            root.hijos.forEach(h => flat.push(h));
-          } else {
-            flat.push(root);
-          }
-        });
+        const flat: Localizacion[] = [];
+        const flatten = (nodes: Localizacion[]) => {
+          nodes.forEach(n => {
+            flat.push(n);
+            if (n.hijos && n.hijos.length > 0) {
+              flatten(n.hijos);
+            }
+          });
+        };
+        flatten(data);
         this.listaLocalizaciones = flat;
       }
     });

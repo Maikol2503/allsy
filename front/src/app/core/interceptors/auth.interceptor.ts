@@ -27,6 +27,10 @@ export class AuthInterceptor implements HttpInterceptor {
     return next.handle(request).pipe(
       catchError((error) => {
         if (error instanceof HttpErrorResponse && error.status === 401) {
+          // Evitar bucle infinito si la petición que falló fue precisamente el refresh
+          if (request.url.includes('/refresh')) {
+            return throwError(() => error);
+          }
           console.warn('⚠️ [Interceptor] ¡Token expirado (401)! Iniciando recuperación...');
           return this.handle401Error(request, next);
         }

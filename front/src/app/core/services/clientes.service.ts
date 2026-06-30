@@ -21,6 +21,7 @@ export interface ClienteData {
   exento_comision?: boolean;
   exento_tarifa_fija?: boolean;
   total_ventas?: number;
+  deuda_pendiente?: number;
   fecha_registro?: string;
 }
 
@@ -71,6 +72,7 @@ export class ClientesService {
     if (filtros.pais) params = params.set('pais', filtros.pais);
     if (filtros.fecha_inicio) params = params.set('fecha_inicio', filtros.fecha_inicio);
     if (filtros.fecha_fin) params = params.set('fecha_fin', filtros.fecha_fin);
+    if (filtros.con_deuda) params = params.set('con_deuda', 'true');
 
     return this.http.get<any>(`${this.apiUrl}/`, { params });
   }

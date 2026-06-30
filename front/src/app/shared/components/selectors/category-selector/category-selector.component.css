@@ -29,7 +29,7 @@
 /* La flechita de la derecha */
 .arrow {
   font-size: 12px;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 /* El menú desplegable flotante */
@@ -39,7 +39,7 @@
   left: 0;
   right: 0;
   background-color: #ffffff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   z-index: 1000; /* Super importante: asegura que flote por encima de TODO */
@@ -50,8 +50,8 @@
 /* El botón de "⬅ Volver" */
 .category-back {
   padding: 10px 14px;
-  background-color: #f3f4f6;
-  border-bottom: 1px solid #e5e7eb;
+  background-color: var(--bg-body);
+  border-bottom: 1px solid var(--border-color);
   font-weight: 600;
   color: #4f46e5; /* Un tono azul/índigo para destacar que es un enlace */
   cursor: pointer;
@@ -62,7 +62,7 @@
 }
 
 .category-back:hover {
-  background-color: #e5e7eb;
+  background-color: var(--border-color);
 }
 
 /* Cada opción de la lista */
@@ -76,7 +76,7 @@
 }
 
 .category-item:hover {
-  background-color: #f3f4f6;
+  background-color: var(--bg-body);
 }
 
 .sub-arrow {

@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, desc, func
+from sqlalchemy import or_, and_, desc, func
 from fastapi import HTTPException
 from datetime import datetime
 
@@ -90,17 +90,22 @@ def obtener_clientes_paginados(
     search_type: str = "todos",
     pais: str = None, 
     fecha_inicio: str = None, 
-    fecha_fin: str = None
+    fecha_fin: str = None,
+    con_deuda: bool = False
 ):
     offset = (page - 1) * limit
 
-    # ✨ MAGIA SQL: Seleccionamos al Cliente Y contamos sus Ventas
-    query = db.query(
-        Cliente, 
+    # ✨ MAGIA SQL: Subconsulta para contar las ventas por cliente de manera segura para MySQL ONLY_FULL_GROUP_BY
+    subquery = db.query(
+        Venta.cliente_id,
         func.count(Venta.id).label("total_ventas")
-    ).outerjoin(Venta, Cliente.id == Venta.cliente_id) \
-     .filter(Cliente.activo == True) \
-     .group_by(Cliente.id)
+    ).group_by(Venta.cliente_id).subquery()
+
+    query = db.query(
+        Cliente,
+        func.coalesce(subquery.c.total_ventas, 0).label("total_ventas")
+    ).outerjoin(subquery, Cliente.id == subquery.c.cliente_id) \
+     .filter(Cliente.activo == True)
 
     # 1. Filtro de Búsqueda General (Email, Usuario, Teléfono, Nombre, DNI)
     if search and search.strip():
@@ -139,6 +144,30 @@ def obtener_clientes_paginados(
     if fecha_fin:
         query = query.filter(Cliente.fecha_registro <= f"{fecha_fin} 23:59:59")
 
+    # 4. Filtro de deuda pendiente
+    if con_deuda:
+        from app.models.lotes_model import StockUnit, StockConfig
+        from app.models.ventas_model import DetalleVenta
+        
+        stmt = db.query(StockConfig.propietario_id)\
+            .join(StockUnit, StockConfig.id == StockUnit.stock_config_id)\
+            .outerjoin(DetalleVenta, StockUnit.id == DetalleVenta.stock_unit_id)\
+            .outerjoin(Venta, DetalleVenta.venta_id == Venta.id)\
+            .filter(
+                StockUnit.pago_consignacion_id.is_(None),
+                or_(
+                    StockUnit.estado_gestion == 'extraviado',
+                    and_(
+                        StockUnit.estado_gestion == 'vendido',
+                        DetalleVenta.devuelto == False,
+                        Venta.estado_pago.in_(['pagado', 'reembolso_parcial']),
+                        Venta.estado_envio.notin_(['cancelado', 'devuelto', 'en_devolucion'])
+                    )
+                )
+            ).subquery()
+            
+        query = query.filter(Cliente.id.in_(stmt))
+
     # Contar totales para la paginación
     total_count = query.count()
 
@@ -146,11 +175,16 @@ def obtener_clientes_paginados(
     resultados_db = query.order_by(desc(Cliente.fecha_registro)).offset(offset).limit(limit).all()
 
     # Formatear la salida combinando el objeto Cliente y la columna calculada total_ventas
+    from app.repositories.consignacion_repo import obtener_prendas_pendientes_pago
     items = []
     for cliente, total_ventas in resultados_db:
         cliente_dict = cliente.__dict__.copy()
         cliente_dict.pop("_sa_instance_state", None) # Limpieza interna de SQLAlchemy
         cliente_dict["total_ventas"] = total_ventas
+        
+        prendas = obtener_prendas_pendientes_pago(db, cliente.id)
+        cliente_dict["deuda_pendiente"] = sum(p["pago_cliente"] for p in prendas) if prendas else 0.0
+        
         items.append(cliente_dict)
 
     return {

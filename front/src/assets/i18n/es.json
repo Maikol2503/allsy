@@ -1,0 +1,46 @@
+{
+  "SALES": {
+    "TITLE": "Ventas",
+    "SEARCH_PLACEHOLDER": "Buscar venta, cliente o prenda...",
+    "FILTERS": "Filtros",
+    "NEW_SALE": "+ Nueva Venta",
+    "SEARCH_TYPE_PROD": "Buscar Producto (SKU/ID)",
+    "SEARCH_TYPE_CLIENT": "Buscar Cliente",
+    "DATE_RANGE": "Rango de Fechas",
+    "BRAND": "Marca",
+    "CATEGORY": "Categoría",
+    "SELLER": "Vendedor",
+    "PAYMENT_STATUS": "Estado del Pago",
+    "SALES_CHANNEL": "Canal de Venta",
+    "LOCATION": "Localización (Sede)",
+    "CLEAR_FILTERS": "Limpiar Filtros",
+    "APPLY_SEARCH": "Aplicar Búsqueda",
+    
+    "TABLE": {
+      "ORDER": "ORDEN",
+      "CREATED": "CREADO",
+      "FROM_VENDOR": "CLIENTE",
+      "STATUS": "ESTADO",
+      "PAYMENT": "MÉTODO PAGO",
+      "AMOUNT": "TOTAL",
+      "RECEIVE": "RECIBIR",
+      "ITEMS": "artículos",
+      "DEV": "dev."
+    },
+
+    "STATUS": {
+      "COMPLETE": "COBRADO",
+      "PENDING": "PENDIENTE",
+      "PARTIALLY_REFUNDED": "REEMBOLSO PARCIAL",
+      "REFUNDED": "REEMBOLSADO"
+    },
+
+    "EMPTY_STATE_TITLE": "No se encontraron ventas",
+    "EMPTY_STATE_DESC": "Prueba cambiando los filtros de búsqueda.",
+    "LOADING": "Cargando listado de ventas...",
+    "PAGE": "Página",
+    "OF": "de",
+    "PREV": "« Anterior",
+    "NEXT": "Siguiente »"
+  }
+}

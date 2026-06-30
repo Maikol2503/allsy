@@ -1,50 +1,50 @@
 .page-container { padding: 30px; max-width: 950px; margin: 0 auto; animation: slideUp 0.3s ease-out; }
 
-.form-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #e0e6ed; }
+.form-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color); }
 .header-left { display: flex; align-items: center; gap: 15px; }
 
-.btn-back { background: none; border: none; font-size: 1.8rem; cursor: pointer; color: #2c3e50; transition: 0.2s; }
-.btn-back:hover { transform: translateX(-4px); color: #007782; }
+.btn-back { background: none; border: none; font-size: 1.8rem; cursor: pointer; color: var(--text-main); transition: 0.2s; }
+.btn-back:hover { transform: translateX(-4px); color: var(--ap-color-primary); }
 
-.title { font-size: 1.6rem; font-weight: 700; color: #2c3e50; }
-.vip-badge { background: #f1c40f; color: white; padding: 6px 15px; border-radius: 20px; font-weight: bold; font-size: 0.8rem; }
+.title { font-size: 1.6rem; font-weight: 700; color: var(--text-main); }
+.vip-badge { background: var(--text-muted); color: white; padding: 6px 15px; border-radius: 20px; font-weight: bold; font-size: 0.8rem; }
 
-.card-section { background: #fff; border-radius: 12px; padding: 25px; margin-bottom: 25px; border: 1px solid #e0e6ed; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
-.section-title { margin-bottom: 20px; border-bottom: 1px dashed #e0e6ed; padding-bottom: 10px; }
-.section-title h3 { margin: 0; font-size: 1.1rem; color: #34495e; }
+.card-section { background: #fff; border-radius: 12px; padding: 25px; margin-bottom: 25px; border: 1px solid var(--border-color); box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+.section-title { margin-bottom: 20px; border-bottom: 1px dashed var(--border-color); padding-bottom: 10px; }
+.section-title h3 { margin: 0; font-size: 1.1rem; color: var(--text-main); }
 
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
 
 .field { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
-.field label { font-weight: 600; font-size: 0.9rem; color: #7f8c8d; }
+.field label { font-weight: 600; font-size: 0.9rem; color: var(--text-muted); }
 
-input, select, textarea { padding: 12px; border: 1px solid #e0e6ed; border-radius: 8px; font-size: 1rem; outline: none; transition: 0.2s; }
-input:focus, select:focus, textarea:focus { border-color: #007782; box-shadow: 0 0 0 3px rgba(0, 119, 130, 0.1); }
+input, select, textarea { padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1rem; outline: none; transition: 0.2s; }
+input:focus, select:focus, textarea:focus { border-color: var(--ap-color-primary); box-shadow: 0 0 0 3px rgba(0, 119, 130, 0.1); }
 
-.input-addon { display: flex; border: 1px solid #e0e6ed; border-radius: 8px; overflow: hidden; }
-.input-addon .addon { background: #f8f9fa; padding: 12px; color: #95a5a6; border-right: 1px solid #e0e6ed; font-weight: bold; }
+.input-addon { display: flex; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; }
+.input-addon .addon { background: var(--bg-body); padding: 12px; color: var(--text-muted); border-right: 1px solid var(--border-color); font-weight: bold; }
 .input-addon input { border: none !important; flex: 1; }
 
 .toggle-switch { display: flex; align-items: center; gap: 10px; cursor: pointer; margin-top: 15px; }
 .slider { width: 44px; height: 22px; background: #ccd1d1; border-radius: 20px; position: relative; transition: 0.3s; }
 .slider:before { content: ""; position: absolute; width: 18px; height: 18px; left: 2px; top: 2px; background: white; border-radius: 50%; transition: 0.3s; }
-input:checked + .slider { background: #27ae60; }
+input:checked + .slider { background: var(--ap-color-success); }
 input:checked + .slider:before { transform: translateX(22px); }
 .toggle-switch input { display: none; }
-.label-text { font-weight: bold; color: #27ae60; }
+.label-text { font-weight: bold; color: var(--ap-color-success); }
 
 .footer-actions { display: flex; justify-content: space-between; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; }
 .right-actions { display: flex; gap: 12px; }
 
-.btn-save { background: #007782; color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-.btn-save:hover { background: #005c65; transform: translateY(-2px); }
+.btn-save { background: var(--ap-color-primary); color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+.btn-save:hover { background: var(--ap-color-primary-hover); transform: translateY(-2px); }
 
-.btn-cancel { background: white; border: 1px solid #e0e6ed; padding: 12px 25px; border-radius: 8px; cursor: pointer; }
-.btn-cancel:hover { background: #f4f6f8; }
+.btn-cancel { background: white; border: 1px solid var(--border-color); padding: 12px 25px; border-radius: 8px; cursor: pointer; }
+.btn-cancel:hover { background: var(--bg-body); }
 
-.btn-delete { background: transparent; border: 1px solid #e74c3c; color: #e74c3c; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-.btn-delete:hover { background: #fceceb; }
+.btn-delete { background: transparent; border: 1px solid var(--ap-color-danger); color: var(--ap-color-danger); padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+.btn-delete:hover { background: var(--ap-color-danger-bg); }
 
 @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -71,15 +71,15 @@ input:checked + .slider:before { transform: translateX(22px); }
 }
 
 .alert-box.error {
-  background-color: var(--ap-color-danger-bg, #fceceb);
-  color: var(--ap-color-danger, #c0392b);
-  border-left: 5px solid var(--ap-color-danger, #e74c3c);
+  background-color: var(--ap-color-danger-bg, var(--ap-color-danger-bg));
+  color: var(--ap-color-danger, var(--ap-color-danger));
+  border-left: 5px solid var(--ap-color-danger, var(--ap-color-danger));
 }
 
 .alert-box.success {
-  background-color: var(--ap-color-success-bg, #eafaf1);
-  color: var(--ap-color-success, #27ae60);
-  border-left: 5px solid var(--ap-color-success, #27ae60);
+  background-color: var(--ap-color-success-bg, var(--ap-color-success-bg));
+  color: var(--ap-color-success, var(--ap-color-success));
+  border-left: 5px solid var(--ap-color-success, var(--ap-color-success));
 }
 
 @keyframes slideDownFade {

@@ -20,8 +20,8 @@ def buscar_o_crear(db: Session, nombre: str, contexto: str = "inventario"):
     # 🧠 Lógica inteligente: Si ya existía, simplemente le activamos la bandera extra
     if contexto == "inventario":
         proveedor.es_inventario = True
-    elif contexto == "gasto":
-        proveedor.es_gasto = True
+    elif contexto == "egreso":
+        proveedor.es_egreso = True
         
     db.commit()
     return proveedor

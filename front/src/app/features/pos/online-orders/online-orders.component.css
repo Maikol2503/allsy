@@ -3,16 +3,16 @@
   max-width: 1400px;
   margin: 0 auto;
   font-family: 'Inter', system-ui, sans-serif;
-  color: #2c3e50;
+  color: var(--text-main);
 }
 
 .header h2 {
   font-size: 1.8rem;
-  color: #007782;
+  color: var(--ap-color-primary);
   margin: 0 0 5px 0;
 }
 .header p {
-  color: #7f8c8d;
+  color: var(--text-muted);
   margin: 0 0 20px 0;
   font-size: 0.95rem;
 }
@@ -26,13 +26,13 @@
   padding: 15px;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  border: 1px solid #e0e6ed;
+  border: 1px solid var(--border-color);
   align-items: center;
 }
 
 .search-box {
   display: flex;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   overflow: hidden;
   flex: 1;
@@ -42,10 +42,10 @@
 .search-box select {
   background: #f1f5f9;
   border: none;
-  border-right: 1px solid #cbd5e1;
+  border-right: 1px solid var(--border-color);
   padding: 10px;
   font-weight: 600;
-  color: #475569;
+  color: var(--text-muted);
   outline: none;
 }
 
@@ -59,7 +59,7 @@
 .filter-select {
   padding: 10px 15px;
   border-radius: 8px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--border-color);
   outline: none;
   background: white;
   color: #334155;
@@ -70,7 +70,7 @@
   background: white;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  border: 1px solid #e0e6ed;
+  border: 1px solid var(--border-color);
   overflow-x: auto;
 }
 
@@ -116,7 +116,7 @@
 }
 .prod-title {
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-main);
 }
 
 /* Estatus */
@@ -127,13 +127,13 @@
   font-weight: 600;
   display: inline-block;
   background: #f1f5f9;
-  color: #475569;
-  border: 1px solid #cbd5e1;
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
 }
-.status-pill.finalizado { background: #eafaf1; color: #27ae60; border-color: #27ae60; }
-.status-pill.cancelado { background: #fceceb; color: #e74c3c; border-color: #e74c3c; }
+.status-pill.finalizado { background: var(--ap-color-success-bg); color: var(--ap-color-success); border-color: var(--ap-color-success); }
+.status-pill.cancelado { background: var(--ap-color-danger-bg); color: var(--ap-color-danger); border-color: var(--ap-color-danger); }
 .status-pill.devolucion { background: #fef3c7; color: #b91c1c; border-color: #ef4444; }
-.status-pill.en_curso { background: #eff6ff; color: #1d4ed8; border-color: #3b82f6; }
+.status-pill.en_curso { background: #eff6ff; color: #1d4ed8; border-color: var(--ap-color-primary); }
 .status-pill.pendiente { background: #fff8e1; color: #d97706; border-color: #f59e0b; }
 .status-pill.empaquetado { background: #f3e8ff; color: #6d28d9; border-color: #a855f7; }
 .status-pill.listo_envio { background: #e0e7ff; color: #4338ca; border-color: #6366f1; }
@@ -144,7 +144,7 @@
   width: 20px;
   height: 20px;
   border: 2px solid rgba(0, 119, 130, 0.2);
-  border-top-color: #007782;
+  border-top-color: var(--ap-color-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   display: inline-block;

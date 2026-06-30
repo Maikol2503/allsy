@@ -5,7 +5,7 @@ from .auditoria_model import Auditoria
 from .categorias_model import Categoria
 from .clientes_model import Cliente
 from .cupon_model import Cupon
-from .gastos_model import Gasto
+from .egresos_model import Egreso
 from .localizaciones_model import Localizacion
 from .lotes_model import StockConfig, StockUnit
 from .marcas_model import Marca

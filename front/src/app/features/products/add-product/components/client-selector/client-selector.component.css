@@ -12,14 +12,14 @@
 .search-icon { 
   position: absolute; 
   left: 10px; 
-  color: #7f8c8d; 
+  color: var(--text-muted); 
   font-size: 0.9rem; 
 }
 
 .autocomplete-input { 
   flex-grow: 1;
   padding: 0.75rem 30px 0.75rem 10px; 
-  border: 3px solid var(--border-color, #e0e6ed); 
+  border: 3px solid var(--border-color, var(--border-color)); 
   border-radius: 0 var(--border-radius-md, 8px) var(--border-radius-md, 8px) 0; 
   border-left: none;
   font-size: 0.95rem; 
@@ -30,11 +30,11 @@
 
 .search-type-select {
   padding: 0.75rem 10px;
-  background: #f4f6f8;
-  border: 3px solid var(--border-color, #e0e6ed);
+  background: var(--bg-body);
+  border: 3px solid var(--border-color, var(--border-color));
   border-right: 1px solid #ccc;
   border-radius: var(--border-radius-md, 8px) 0 0 var(--border-radius-md, 8px);
-  color: #2c3e50;
+  color: var(--text-main);
   font-weight: 600;
   font-size: 0.85rem;
   outline: none;
@@ -42,13 +42,13 @@
 }
 
 .search-type-select:focus, .autocomplete-input:focus { 
-  border-color: var(--vinted-teal, #007782); 
+  border-color: var(--vinted-teal, var(--ap-color-primary)); 
 }
 
 .autocomplete-input.has-value { 
   background-color: var(--vinted-teal-light, #e6f2f3); 
-  border-color: var(--vinted-teal, #007782); 
-  color: var(--vinted-teal-hover, #005c65); 
+  border-color: var(--vinted-teal, var(--ap-color-primary)); 
+  color: var(--vinted-teal-hover, var(--ap-color-primary-hover)); 
   font-weight: 500; 
 }
 
@@ -58,7 +58,7 @@
   background: none; 
   border: none; 
   cursor: pointer; 
-  color: var(--danger, #e74c3c); 
+  color: var(--danger, var(--ap-color-danger)); 
   font-weight: bold; 
   font-size: 1rem;
   padding: 0 5px;
@@ -70,7 +70,7 @@
   left: 0; 
   right: 0; 
   background: white; 
-  border: 1px solid var(--border-color, #e0e6ed);
+  border: 1px solid var(--border-color, var(--border-color));
   border-radius: var(--border-radius-md, 8px); 
   margin-top: 4px; 
   box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
@@ -86,35 +86,35 @@
 }
 
 .dropdown-item:hover { 
-  background: #f4f6f8; 
+  background: var(--bg-body); 
 }
 
 .default-item { 
   font-weight: 600; 
-  color: var(--text-main, #2c3e50); 
+  color: var(--text-main, var(--text-main)); 
 }
 
 .dropdown-divider { 
   height: 1px; 
-  background: var(--border-color, #e0e6ed); 
+  background: var(--border-color, var(--border-color)); 
   margin: 0; 
 }
 
 .client-name { 
   font-weight: 500; 
-  color: var(--text-main, #2c3e50); 
+  color: var(--text-main, var(--text-main)); 
   font-size: 0.95rem; 
 }
 
 .client-details { 
   font-size: 0.8rem; 
-  color: var(--text-muted, #7f8c8d); 
+  color: var(--text-muted, var(--text-muted)); 
   margin-top: 2px; 
 }
 
 .loading-state, .empty-state { 
   padding: 10px 15px; 
-  color: var(--text-muted, #7f8c8d); 
+  color: var(--text-muted, var(--text-muted)); 
   font-size: 0.9rem; 
   text-align: center; 
 }

@@ -5,7 +5,7 @@
       <button type="button" class="btn-back" (click)="volver()">←</button>
       <h2 class="title">{{ isEditMode ? '✏️ Editar Cliente' : '✨ Nuevo Cliente' }}</h2>
     </div>
-   <span *ngIf="cliente.exento_comision || cliente.exento_tarifa_fija" class="vip-badge" style="background: #27ae60; color: white;">⭐ Exento de Tarifas (VIP)</span>
+   <span *ngIf="cliente.exento_comision || cliente.exento_tarifa_fija" class="vip-badge" style="background: var(--ap-color-success); color: white;">⭐ Exento de Tarifas (VIP)</span>
   </header>
 
   <div *ngIf="errorMessage" class="alert-box error">
@@ -87,7 +87,7 @@
       </div>
     </section>
 
-    <section class="card-section" style="border: 2px solid #e0e6ed; border-left: 4px solid #f1c40f;">
+    <section class="card-section" style="border: 2px solid var(--border-color); border-left: 4px solid var(--text-muted);">
       <div class="section-title"><h3>🤝 Acuerdos Financieros (VIP)</h3></div>
       
       <div class="grid-3">

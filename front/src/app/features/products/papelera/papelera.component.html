@@ -42,7 +42,7 @@
               <button class="btn-icon success" (click)="restaurar('producto', p.id)" title="Restaurar Producto Completo">♻️</button>
               <button class="btn-icon danger" (click)="destruir('producto', p.id)" title="Destruir Permanentemente">💥</button>
             </ng-container>
-            <span *ngIf="p.activo" class="badge-active" style="font-size: 0.75rem; color: #7f8c8d; font-weight: 600;">
+            <span *ngIf="p.activo" class="badge-active" style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">
               Contenedor Activo
             </span>
           </td>
@@ -63,7 +63,7 @@
                   <button class="btn-icon success outline" (click)="restaurar('variante', v.id)" title="Restaurar Variante">♻️</button>
                   <button class="btn-icon danger outline" (click)="destruir('variante', v.id)" title="Destruir Variante">💥</button>
                 </ng-container>
-                <span *ngIf="v.activo" class="badge-active" style="font-size: 0.75rem; color: #7f8c8d; font-weight: 600;">
+                <span *ngIf="v.activo" class="badge-active" style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">
                   Activa
                 </span>
               </td>
@@ -89,7 +89,7 @@
               <tr class="row-stock" *ngFor="let u of v.stock_units_borradas">
                 <td colspan="2" class="stock-cell">
                   <span class="indent-2"></span>
-                  <span style="font-family: monospace; font-size: 0.85em; color: #7f8c8d;">{{ u.sku }}</span>
+                  <span style="font-family: monospace; font-size: 0.85em; color: var(--text-muted);">{{ u.sku }}</span>
                   <small class="location">Estado: {{ getLabelEstadoGestion(u.estado_gestion) }}</small>
                 </td>
                 <td>1 ud. (Física)</td>

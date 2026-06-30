@@ -18,7 +18,7 @@
     >
       <span class="item-text">
         {{ marca.nombre }} 
-        <small *ngIf="marca.isNew" style="color:#2563eb;">(Nueva)</small>
+        <small *ngIf="marca.isNew" style="color:var(--ap-color-primary);">(Nueva)</small>
       </span>
       <input type="radio" [checked]="marcaSeleccionada?.nombre === marca.nombre" class="item-radio" />
     </div>

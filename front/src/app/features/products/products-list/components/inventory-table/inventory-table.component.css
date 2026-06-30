@@ -16,8 +16,8 @@
 }
 
 .custom-table th {
-  background-color: var(--bg-body, #f4f6f8);
-  color: var(--text-muted, #7f8c8d);
+  background-color: var(--bg-body, var(--bg-body));
+  color: var(--text-muted, var(--text-muted));
   font-weight: 600;
   font-size: 0.85rem;
   text-transform: uppercase;
@@ -30,7 +30,7 @@
   padding: 12px 10px; /* Reducido padding para ganar espacio */
   vertical-align: middle;
   border-bottom: 1px solid var(--border-color);
-  color: var(--text-main, #2c3e50);
+  color: var(--text-main, var(--text-main));
   font-size: 0.9rem;
 }
 
@@ -107,13 +107,13 @@
   font-weight: 700;
   padding: 4px 12px;
   border-radius: 12px;
-  background: var(--ap-color-success-bg, #eafaf1);
-  color: var(--ap-color-success, #27ae60);
+  background: var(--ap-color-success-bg, var(--ap-color-success-bg));
+  color: var(--ap-color-success, var(--ap-color-success));
 }
 
 .stock-number.low-stock {
-  background: var(--danger-light, #fceceb);
-  color: var(--danger, #e74c3c);
+  background: var(--danger-light, var(--ap-color-danger-bg));
+  color: var(--danger, var(--ap-color-danger));
 }
 
 .dot-status {

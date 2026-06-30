@@ -219,3 +219,52 @@
     text-align: center;
   }
 }
+
+/* =========================================================
+   ESTADO GLOBAL BADGE (READ-ONLY)
+   ========================================================= */
+.status-badge-read-only {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 6px 0;
+}
+
+.status-badge-text {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+.status-abierta {
+  background-color: var(--ap-color-success-bg);
+  color: #2e7d32;
+  border: 1px solid #c8e6c9;
+}
+
+.status-completada {
+  background-color: #e3f2fd;
+  color: #1565c0;
+  border: 1px solid #bbdefb;
+}
+
+.status-devuelta_parcialmente {
+  background-color: #fff3e0;
+  color: #ef6c00;
+  border: 1px solid #ffe0b2;
+}
+
+.status-devuelta_totalmente {
+  background-color: #f3e5f5;
+  color: #6a1b9a;
+  border: 1px solid #e1bee7;
+}
+
+.status-cancelada {
+  background-color: #ffebee;
+  color: #c62828;
+  border: 1px solid #ffcdd2;
+}

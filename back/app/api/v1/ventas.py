@@ -54,6 +54,8 @@ def listar_ventas(
     vendedor: Optional[str] = None, marca_id: Optional[int] = None, categoria_id: Optional[int] = None,
     solo_online: bool = False,
     include_details: bool = False,
+    estado_venta: Optional[str] = Query(None),
+    localizacion_id: Optional[int] = Query(None),
     db: Session = Depends(get_session)
 ):
     try:
@@ -69,7 +71,9 @@ def listar_ventas(
             tipo_fecha=tipo_fecha,
             vendedor=vendedor, marca_id=marca_id, categoria_id=categoria_id,
             solo_online=solo_online,
-            include_details=include_details
+            include_details=include_details,
+            estado_venta=estado_venta,
+            localizacion_id=localizacion_id
         )
         return resultados
     except Exception as e:

@@ -114,7 +114,7 @@
         </div>
 
         <div class="field full-width" style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 15px;">
-          <label style="font-weight: 600; font-size: 1.1rem; color: #2c3e50; margin-bottom: 10px;">
+          <label style="font-weight: 600; font-size: 1.1rem; color: var(--text-main); margin-bottom: 10px;">
             {{ ejeVariacion.label }} <span class="required-asterisk">*</span>
           </label>
           <app-color-selector *ngIf="ejeVariacion.tipo === 'color'" [initialHex]="v.hex_identidad" (colorChanged)="onVariantColorChanged(v, $event)"></app-color-selector>
@@ -215,20 +215,20 @@
                 </div>
           
                 <div class="field advanced-id-field" *ngIf="!s.id && (!s.unidades || s.unidades.length === 0)">
-                  <label style="color: #e74c3c; font-size: 0.8rem;">⚠️ ID Manual Inicial</label>
-                  <input type="number" [(ngModel)]="s.id_manual" (change)="marcarModificado(s)" [name]="'id_manual_' + s.temp_id" placeholder="Dejar vacío por defecto" style="border-color: #fceceb; background-color: #fceceb; font-size: 0.8rem;" />
+                  <label style="color: var(--ap-color-danger); font-size: 0.8rem;">⚠️ ID Manual Inicial</label>
+                  <input type="number" [(ngModel)]="s.id_manual" (change)="marcarModificado(s)" [name]="'id_manual_' + s.temp_id" placeholder="Dejar vacío por defecto" style="border-color: var(--ap-color-danger-bg); background-color: var(--ap-color-danger-bg); font-size: 0.8rem;" />
                 </div>
           
-                <div class="field full-width" *ngIf="s.proveedor_id" style="margin-top: 10px; background: #eafaf1; padding: 10px; border-radius: 8px;">
+                <div class="field full-width" *ngIf="s.proveedor_id" style="margin-top: 10px; background: var(--ap-color-success-bg); padding: 10px; border-radius: 8px;">
                   <label class="toggle-switch" style="margin: 0;">
                     <input type="checkbox" [(ngModel)]="s.donar_ganancias" (change)="marcarModificado(s)" [name]="'donar_' + s.temp_id" />
                     <span class="slider"></span>
-                    <span class="toggle-label" style="color: #27ae60; font-weight: bold;">🎁 El cliente dona el 100% de la venta a Allsys</span>
+                    <span class="toggle-label" style="color: var(--ap-color-success); font-weight: bold;">🎁 El cliente dona el 100% de la venta a Allsys</span>
                   </label>
                 </div>
                 </div>
 
-              <div class="field mt-3 mb-3" style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px dashed #cbd5e1; display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+              <div class="field mt-3 mb-3" style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px dashed var(--border-color); display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
                 <div style="flex-grow: 1; min-width: 200px;">
                   <label style="font-size: 0.85rem; color: var(--ap-color-primary); margin-bottom: 5px;">
                     {{ s.id ? 'Añadir MÁS prendas físicas a este lote existente' : 'Cantidad de prendas físicas iniciales a generar al guardar' }} 
@@ -259,11 +259,11 @@
                   <table class="ap-table" style="width: 100%; font-size: 0.9em; text-align: left; border-collapse: collapse; min-width: 600px;">
                     <thead>
                       <tr>
-                        <th style="padding-bottom: 8px; border-bottom: 2px solid #cbd5e1;">ID Físico (SKU)</th>
-                        <th style="padding-bottom: 8px; border-bottom: 2px solid #cbd5e1;">Fecha de Ingreso</th>
-                        <th style="padding-bottom: 8px; border-bottom: 2px solid #cbd5e1; text-align: center;">Venta Online</th>
-                        <th style="padding-bottom: 8px; border-bottom: 2px solid #cbd5e1;">Estado Gestión</th>
-                        <th style="padding-bottom: 8px; border-bottom: 2px solid #cbd5e1;">Acciones</th>
+                        <th style="padding-bottom: 8px; border-bottom: 2px solid var(--border-color);">ID Físico (SKU)</th>
+                        <th style="padding-bottom: 8px; border-bottom: 2px solid var(--border-color);">Fecha de Ingreso</th>
+                        <th style="padding-bottom: 8px; border-bottom: 2px solid var(--border-color); text-align: center;">Venta Online</th>
+                        <th style="padding-bottom: 8px; border-bottom: 2px solid var(--border-color);">Estado Gestión</th>
+                        <th style="padding-bottom: 8px; border-bottom: 2px solid var(--border-color);">Acciones</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -281,7 +281,7 @@
                             <!-- Modo Edición -->
                             <div *ngIf="u.editandoId" style="display: flex; align-items: center; gap: 4px;">
                               <input type="number" [(ngModel)]="u.id" [name]="'id_u_' + s.temp_id + '_' + uIdx" 
-                                     style="padding: 4px; font-weight: bold; font-size: 1em; width: 75px; border: 1px solid #007782; border-radius: 4px; background: #fff; outline: none;" 
+                                     style="padding: 4px; font-weight: bold; font-size: 1em; width: 75px; border: 1px solid var(--ap-color-primary); border-radius: 4px; background: #fff; outline: none;" 
                                      (change)="u.isDirty = true" />
                               <button type="button" (click)="u.editandoId = false" 
                                       style="border: none; background: none; cursor: pointer; color: #ef4444; font-size: 0.9rem; padding: 0;" 
@@ -327,7 +327,7 @@
                           </div>
                         </td>
                         <td style="padding: 10px 0; display: flex; gap: 10px; align-items: center; margin-top: 5px;">
-                          <button type="button" class="btn-text-primary" *ngIf="u.estado_gestion !== 'vendido'" (click)="guardarCambiosUnidad(s, uIdx)" style="font-weight: 600; color: #007782; cursor: pointer; border: none; background: none;">💾 Guardar</button>
+                          <button type="button" class="btn-text-primary" *ngIf="u.estado_gestion !== 'vendido'" (click)="guardarCambiosUnidad(s, uIdx)" style="font-weight: 600; color: var(--ap-color-primary); cursor: pointer; border: none; background: none;">💾 Guardar</button>
                           <button type="button" class="btn-text-danger" *ngIf="u.estado_gestion !== 'vendido'" (click)="enviarUnidadPapelera(s, uIdx, u.id)" style="font-weight: 600;">🗑️ Eliminar</button>
                         </td>
                       </tr>
@@ -336,7 +336,7 @@
                 </div>
               </div>
 
-              <!-- <div class="stock-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; border-top: 1px solid #eaedf1; padding-top: 15px;">
+              <!-- <div class="stock-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; border-top: 1px solid var(--border-color); padding-top: 15px;">
                 <div class="publish-options">
                   <label class="toggle-switch">
                     <input type="checkbox" [(ngModel)]="s.publicar_web" (change)="marcarModificado(s)" [name]="'w_' + s.temp_id" />

@@ -1,12 +1,12 @@
 <div class="page-container" *ngIf="!cargando && producto; else loading">
   
   <div *ngIf="afectadosIds.length > 0" class="alert-box-info mb-4" 
-       [ngStyle]="{'border-left': tipoAccion === 'creado' ? '4px solid #27ae60' : '4px solid #007782'}"
+       [ngStyle]="{'border-left': tipoAccion === 'creado' ? '4px solid var(--ap-color-success)' : '4px solid var(--ap-color-primary)'}"
        style="background: #ffffff; padding: 16px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 15px;">
     <div class="alert-content" style="display: flex; gap: 15px; align-items: center; width: 100%;">
       <span class="icon" style="font-size: 2rem;">{{ tipoAccion === 'creado' ? '🎉' : '✏️' }}</span>
       <div class="text">
-          <h4 [style.color]="tipoAccion === 'creado' ? '#27ae60' : '#007782'" style="margin: 0 0 4px 0; font-size: 1.1rem; font-weight: bold;">
+          <h4 [style.color]="tipoAccion === 'creado' ? 'var(--ap-color-success)' : 'var(--ap-color-primary)'" style="margin: 0 0 4px 0; font-size: 1.1rem; font-weight: bold;">
             {{ tipoAccion === 'creado' ? '¡Nuevas unidades agregadas correctamente!' : '¡Actualización masiva completada!' }}
           </h4>
           
@@ -100,7 +100,7 @@
             <thead>
               <tr>
                 <th>Ref. Lote</th>
-                <th style="color: #007782;">Cantidad</th>
+                <th style="color: var(--ap-color-primary);">Cantidad</th>
                 <th>Etiqueta / Talla</th>
                 <th>Estado General</th>
                 <th>Precio Venta</th>
@@ -116,8 +116,8 @@
                   }">
                 
                 <td class="text-muted" style="white-space: nowrap; position: relative;">
-                  <strong style="font-size: 1.1em; color: #2c3e50;">#{{ lote.id }}</strong>
-                  <div style="font-size: 0.75rem; color: #7f8c8d;">SKU Base: {{ lote.sku }}</div>
+                  <strong style="font-size: 1.1em; color: var(--text-main);">#{{ lote.id }}</strong>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">SKU Base: {{ lote.sku }}</div>
                   
                   <span *ngIf="tipoAccion === 'creado' && loteTieneAfectados(lote.ids_incluidos)" class="badge-nuevo-stock">
                     ✨ Nuevo
@@ -125,7 +125,7 @@
                 </td>
                 
                 <td>
-                  <span style="font-size: 1.2rem; font-weight: 800; color: #007782; background: #e6f2f3; padding: 4px 10px; border-radius: 8px;">
+                  <span style="font-size: 1.2rem; font-weight: 800; color: var(--ap-color-primary); background: #e6f2f3; padding: 4px 10px; border-radius: 8px;">
                     {{ lote.cantidad_agrupada }} unds.
                   </span>
                 </td>

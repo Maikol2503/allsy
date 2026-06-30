@@ -25,8 +25,8 @@ def login(login_data: LoginRequest, db: Session = Depends(get_session)):
     print(login_data)
     usuario = db.query(Usuario).filter(Usuario.email == login_data.email).first()
 
-    if not usuario:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuario no encontrado")
+    if not usuario or not verificar_password(login_data.password, usuario.hashed_password):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Email o contraseña incorrectos")
 
     access_token = crear_token_acceso({"sub": usuario.email, "id": usuario.id})
     refresh_token = crear_token_acceso(

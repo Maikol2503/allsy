@@ -46,6 +46,17 @@ export class EditSaleComponent implements OnInit {
   mostrarModalDevolucion = false;
   estadoEnvioPrevio = '';
 
+  // ✨ Getters para desglose financiero
+  get totalCompensacionesAllsys(): number {
+    if (!this.venta.ajustes_financieros || this.venta.ajustes_financieros.length === 0) return 0;
+    return this.venta.ajustes_financieros.reduce((acc: number, val: any) => acc + (val.monto || 0), 0);
+  }
+
+  get totalReembolsadoPrendas(): number {
+    const totalReembolsoGlobal = parseFloat(this.formData.monto_reembolsado) || 0;
+    return Math.max(0, totalReembolsoGlobal - this.totalCompensacionesAllsys);
+  }
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -70,6 +81,14 @@ export class EditSaleComponent implements OnInit {
       this.mostrarModalDevolucion = true;
     } else {
       this.estadoEnvioPrevio = nuevoEstado;
+
+      // ✨ AUTO-COMPLETAR FECHAS AL CAMBIAR ESTADO
+      if (['enviado', 'entregado', 'completado'].includes(nuevoEstado) && !this.formData.fecha_envio) {
+        this.formData.fecha_envio = this.obtenerFechaHoraLocalActual();
+      }
+      if (['entregado', 'completado'].includes(nuevoEstado) && !this.formData.fecha_entrega) {
+        this.formData.fecha_entrega = this.obtenerFechaHoraLocalActual();
+      }
     }
   }
 
@@ -128,6 +147,12 @@ export class EditSaleComponent implements OnInit {
 
   tieneItemsBloqueados = false;
 
+  obtenerFechaHoraLocalActual(): string {
+    const ahora = new Date();
+    const tzOffset = ahora.getTimezoneOffset() * 60000;
+    return new Date(ahora.getTime() - tzOffset).toISOString().slice(0, 16);
+  }
+
   cargarVenta() {
     this.ventasService.obtenerVenta(this.ventaId!).subscribe({
       next: (res) => {
@@ -148,10 +173,25 @@ export class EditSaleComponent implements OnInit {
           }
         }
         
+        let entregaDefault = '';
+        if (res.fecha_entrega) {
+          entregaDefault = this.formatDateForInput(res.fecha_entrega);
+        } else if (res.estado_envio === 'entregado' || res.estado_envio === 'completado') {
+          entregaDefault = this.obtenerFechaHoraLocalActual();
+        }
+
+        let envioDefault = '';
+        if (res.fecha_envio) {
+          envioDefault = this.formatDateForInput(res.fecha_envio);
+        } else if (['enviado', 'entregado', 'completado'].includes(res.estado_envio)) {
+          envioDefault = this.obtenerFechaHoraLocalActual();
+        }
+
         this.formData = {
           fecha: this.formatDateForInput(res.fecha), 
           fecha_pago: this.formatDateForInput(res.fecha_pago), 
-          fecha_envio: this.formatDateForInput(res.fecha_envio),
+          fecha_envio: envioDefault,
+          fecha_entrega: entregaDefault,
           estado_venta: (res.estado_venta || '').toLowerCase(),
           estado_pago: (res.estado_pago || '').toLowerCase(),
           monto_reembolsado: res.monto_reembolsado || 0,
@@ -165,6 +205,8 @@ export class EditSaleComponent implements OnInit {
           etiqueta_url: res.etiqueta_url || '',
           etiqueta_imprimida: res.etiqueta_imprimida || false
         };
+        this.estadoEnvioPrevio = this.formData.estado_envio;
+        this.actualizarEstadoVentaAutomatico();
         this.cargando = false;
         
         // ✨ Validamos la URL que vino de la base de datos (si existe)
@@ -184,6 +226,7 @@ export class EditSaleComponent implements OnInit {
     if (!dataToSend.fecha) dataToSend.fecha = null;
     if (!dataToSend.fecha_pago) dataToSend.fecha_pago = null;
     if (!dataToSend.fecha_envio) dataToSend.fecha_envio = null;
+    if (!dataToSend.fecha_entrega) dataToSend.fecha_entrega = null;
     return dataToSend;
   }
 
@@ -193,6 +236,43 @@ export class EditSaleComponent implements OnInit {
     } else if (nuevoEstado !== 'reembolso_parcial') {
       this.formData.monto_reembolsado = 0;
     }
+    this.actualizarEstadoVentaAutomatico();
+  }
+
+  actualizarEstadoVentaAutomatico() {
+    const pago = this.formData.estado_pago;
+    const envio = this.formData.estado_envio;
+
+    if (pago === 'reembolsado' || envio === 'cancelado') {
+      this.formData.estado_venta = 'cancelada';
+    } else if (envio === 'devuelto') {
+      this.formData.estado_venta = 'devuelta_totalmente';
+    } else if (envio === 'en_devolucion' || pago === 'reembolso_parcial') {
+      this.formData.estado_venta = 'devuelta_parcialmente';
+    } else if ((envio === 'entregado' || envio === 'completado') && pago === 'pagado') {
+      this.formData.estado_venta = 'completada';
+    } else {
+      const tieneDevueltos = this.venta.detalles?.some((d: any) => d.devuelto) || false;
+      const todosDevueltos = this.venta.detalles?.every((d: any) => d.devuelto) || false;
+      if (todosDevueltos && this.venta.detalles?.length > 0) {
+        this.formData.estado_venta = 'devuelta_totalmente';
+      } else if (tieneDevueltos) {
+        this.formData.estado_venta = 'devuelta_parcialmente';
+      } else {
+        this.formData.estado_venta = 'abierta';
+      }
+    }
+  }
+
+  getLabelEstadoVenta(estado: string): string {
+    const mapa: any = {
+      'abierta': '🟢 Abierta (En proceso)',
+      'completada': '🏁 Completada (Finalizada)',
+      'devuelta_parcialmente': '⚠️ Devuelta Parcialmente',
+      'devuelta_totalmente': '🔄 Devuelta Totalmente',
+      'cancelada': '❌ Cancelada'
+    };
+    return mapa[estado] || estado;
   }
 
 
@@ -246,7 +326,7 @@ export class EditSaleComponent implements OnInit {
 
   // ✨ FUNCIÓN PARA COMPENSACIÓN ALLSYS (Sin devolución física)
   darCompensacion() {
-    const input = prompt(`Introduce el monto (€) que Allsys reembolsará al cliente como compensación (Ej: por una mancha).\n\n- La prenda seguirá marcada como vendida.\n- El dueño de la prenda COBRARÁ lo pactado originalmente.\n- Allsys registrará un Gasto por este importe.`);
+    const input = prompt(`Introduce el monto (€) que Allsys reembolsará al cliente como compensación (Ej: por una mancha).\n\n- La prenda seguirá marcada como vendida.\n- El dueño de la prenda COBRARÁ lo pactado originalmente.\n- Allsys registrará un Egreso por este importe.`);
     
     if (!input) return;
     const monto = parseFloat(input);
@@ -255,8 +335,9 @@ export class EditSaleComponent implements OnInit {
       return;
     }
 
-    if (monto > this.formData.total) {
-      alert('⚠️ No puedes compensar más del total de la venta.');
+    const saldoRestante = this.formData.total - (this.formData.monto_reembolsado || 0);
+    if (monto > saldoRestante) {
+      alert(`⚠️ No puedes compensar más del saldo restante de la venta (${saldoRestante.toFixed(2)}€).`);
       return;
     }
 
@@ -265,7 +346,7 @@ export class EditSaleComponent implements OnInit {
 
     this.ventasService.registrarCompensacionAllsys(this.ventaId!, monto, motivo).subscribe({
       next: () => {
-        alert('✅ Compensación registrada con éxito como gasto de Allsys.');
+        alert('✅ Compensación registrada con éxito como egreso de Allsys.');
         this.cargarVenta();
       },
       error: (err) => {

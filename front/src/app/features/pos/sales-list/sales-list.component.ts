@@ -8,10 +8,12 @@ import { MarcaService } from '../../../core/services/marcas.service';
 import { CategorySelectorComponent, CategorySelectionEvent } from '../../../shared/components/selectors/category-selector/category-selector.component';
 import { LocationSelectorComponent } from '../../../shared/components/selectors/location-selector/location-selector.component';
 
+import { TranslatePipe } from '@ngx-translate/core';
+
 @Component({
   selector: 'app-sales-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, DateSelectorComponent, CategorySelectorComponent, LocationSelectorComponent],
+  imports: [CommonModule, FormsModule, DateSelectorComponent, CategorySelectorComponent, LocationSelectorComponent, TranslatePipe],
   templateUrl: './sales-list.component.html',
   styleUrls: ['./sales-list.component.css']
 })
@@ -39,6 +41,7 @@ export class SalesListComponent implements OnInit {
   filtroMarca: string = '';
   filtroCategoria: number | null = null; 
   localizacion_id: number | null | undefined = null; // ✨ NUEVO
+  showFilters: boolean = false;
 
   totalRecaudado = 0;
   totalBeneficio = 0;
@@ -107,6 +110,10 @@ export class SalesListComponent implements OnInit {
     this.buscar(); 
   }
 
+  toggleFilters(): void {
+    this.showFilters = !this.showFilters;
+  }
+
   buscar() {
     this.page = 1; 
     this.cargarVentas();
@@ -127,6 +134,41 @@ export class SalesListComponent implements OnInit {
     this.filtroMarca = '';
     this.filtroCategoria = null; 
     this.buscar();
+  }
+
+  get hasActiveFilters(): boolean {
+    return !!(this.searchProducto || this.searchCodigo || this.searchCliente || this.filtroEstadoPago || this.filtroCanal || this.filtroVendedor || this.fechaInicio || this.fechaFin || this.filtroMarca || this.filtroCategoria);
+  }
+
+  removerFiltro(tipo: string) {
+    if (tipo === 'producto') this.searchProducto = '';
+    if (tipo === 'codigo') this.searchCodigo = '';
+    if (tipo === 'cliente') this.searchCliente = '';
+    if (tipo === 'pago') this.filtroEstadoPago = '';
+    if (tipo === 'canal') this.filtroCanal = '';
+    if (tipo === 'vendedor') this.filtroVendedor = '';
+    if (tipo === 'marca') this.filtroMarca = '';
+    if (tipo === 'categoria') this.filtroCategoria = null;
+    if (tipo === 'fechas') {
+      this.fechaInicio = null;
+      this.fechaFin = null;
+    }
+    this.buscar();
+  }
+
+  getLabelPago(val: string): string {
+    const map: any = { 'pendiente': 'Pendiente', 'pagado': 'Pagados', 'reembolsado': 'Reembolsados' };
+    return map[val] || val;
+  }
+  
+  getLabelCanal(val: string): string {
+    const map: any = { 'tienda_fisica': 'Casa', 'web': 'Web', 'vinted': 'Vinted', 'wallapop': 'Wallapop' };
+    return map[val] || val;
+  }
+
+  getMarcaName(id: string): string {
+    const m = this.marcas.find(x => x.id.toString() === id.toString());
+    return m ? m.nombre : id;
   }
 
   generarDevolucion(venta: any) {

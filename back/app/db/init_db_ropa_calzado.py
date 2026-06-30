@@ -14,7 +14,7 @@ from app.models.atributo_model import Atributo, ValorAtributo
 from app.models.lotes_model import StockConfig, StockUnit
 from app.models.proveedores_model import Proveedor
 from app.models.pagos_consignacion_model import PagoConsignacion
-from app.models.gastos_model import Gasto
+from app.models.egresos_model import Egreso
 from app.models.atributo_categoria_model import AtributoCategoria
 
 # ==============================================================================

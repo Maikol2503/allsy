@@ -14,8 +14,8 @@ import { PosComponent } from './features/pos/pos-create/pos.component';
 import { EditSaleComponent } from './features/pos/edit-sale/edit-sale.component';
 import { SalesListComponent } from './features/pos/sales-list/sales-list.component';
 import { OrderFulfillmentComponent } from './features/pos/order-fulfillment/order-fulfillment.component';
-import { GastosListComponent } from './features/gastos/gastos-list/gastos-list.component';
-import { GastosCreateComponent } from './features/gastos/gastos-create/gastos-create.component';
+import { EgresosListComponent } from './features/egresos/egresos-list/egresos-list.component';
+import { EgresosCreateComponent } from './features/egresos/egresos-create/egresos-create.component';
 import { StatisticsComponent } from './features/statistics/statistics.component';
 
 import { ListClientsComponent } from './features/clients/list-clients/list-clients.component';
@@ -56,10 +56,10 @@ export const routes: Routes = [
       { path: 'edit-sale/:id', component: EditSaleComponent },
       { path: 'fulfillment', component: OrderFulfillmentComponent },
 
-      // --- GASTOS ---
-      { path: 'gastos', component: GastosListComponent },
-      { path: 'gastos/nuevo', component: GastosCreateComponent },
-      { path: 'gastos/editar/:id', component: GastosCreateComponent },
+      // --- EGRESOS ---
+      { path: 'egresos', component: EgresosListComponent },
+      { path: 'egresos/nuevo', component: EgresosCreateComponent },
+      { path: 'egresos/editar/:id', component: EgresosCreateComponent },
 
       // --- ESTADÍSTICAS ---
       { path: 'statistics', component: StatisticsComponent },

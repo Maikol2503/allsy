@@ -3,7 +3,7 @@
   max-width: 1200px;
   margin: 0 auto;
   font-family: 'Inter', system-ui, sans-serif;
-  color: #1e293b;
+  color: var(--text-main);
 }
 
 .header {
@@ -15,7 +15,7 @@
 
 .header h2 {
   font-size: 1.8rem;
-  color: #007782;
+  color: var(--ap-color-primary);
   margin: 0 0 5px 0;
 }
 
@@ -27,10 +27,10 @@
 
 .btn-back {
   background: white;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--border-color);
   padding: 8px 16px;
   border-radius: 8px;
-  color: #475569;
+  color: var(--text-muted);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
@@ -106,7 +106,7 @@
 
 .search-box {
   display: flex;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   overflow: hidden;
   width: 300px;
@@ -174,15 +174,15 @@
   display: inline-block;
 }
 
-.status-pill.returned { background: #fceceb; color: #e74c3c; border: 1px solid #f5b7b1; }
-.status-pill.active { background: #eafaf1; color: #27ae60; border: 1px solid #a9dfbf; }
+.status-pill.returned { background: var(--ap-color-danger-bg); color: var(--ap-color-danger); border: 1px solid #f5b7b1; }
+.status-pill.active { background: var(--ap-color-success-bg); color: var(--ap-color-success); border: 1px solid #a9dfbf; }
 .status-pill.paid { background: #e0f2f1; color: #00796b; border: 1px solid #b2dfdb; }
 
 /* Global Order Status Pills */
-.status-pill.finalizado { background: #eafaf1; color: #27ae60; border-color: #27ae60; }
-.status-pill.cancelado { background: #fceceb; color: #e74c3c; border-color: #e74c3c; }
+.status-pill.finalizado { background: var(--ap-color-success-bg); color: var(--ap-color-success); border-color: var(--ap-color-success); }
+.status-pill.cancelado { background: var(--ap-color-danger-bg); color: var(--ap-color-danger); border-color: var(--ap-color-danger); }
 .status-pill.devolucion { background: #fef3c7; color: #b91c1c; border-color: #ef4444; }
-.status-pill.en_curso { background: #eff6ff; color: #1d4ed8; border-color: #3b82f6; }
+.status-pill.en_curso { background: #eff6ff; color: #1d4ed8; border-color: var(--ap-color-primary); }
 .status-pill.pendiente { background: #fff8e1; color: #d97706; border-color: #f59e0b; }
 .status-pill.empaquetado { background: #f3e8ff; color: #6d28d9; border-color: #a855f7; }
 .status-pill.listo_envio { background: #e0e7ff; color: #4338ca; border-color: #6366f1; }
@@ -199,7 +199,7 @@
   width: 40px;
   height: 40px;
   border: 4px solid rgba(0, 119, 130, 0.2);
-  border-top-color: #007782;
+  border-top-color: var(--ap-color-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 15px auto;
@@ -219,11 +219,11 @@
 .btn-page {
   padding: 8px 16px;
   border-radius: 8px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--border-color);
   background: white;
   cursor: pointer;
   font-weight: 600;
-  color: #475569;
+  color: var(--text-muted);
 }
 
 .btn-page:disabled {

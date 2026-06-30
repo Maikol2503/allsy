@@ -7,56 +7,55 @@
 
 :root {
   /* =========================================
-     TUS VARIABLES ORIGINALES (Actualizadas)
+     PALETA DE DESARROLLO (Blanco, Negro, Gris)
      ========================================= */
      
-  --primary: #007782; /* Antes azul, ahora Vinted Teal */
-  --text-main: #2c3e50; /* Un tono oscuro más neutro y elegante */
-  --text-muted: #7f8c8d; /* Gris medio para lecturas secundarias */
-  --bg-body: #f4f6f8; /* El fondo gris muy claro típico de los SaaS */
-  --card-bg: #ffffff;
-  --border-color: #e0e6ed; /* Borde más sutil y limpio */
-  
-  /* Sombras "Soft & Diffuse" (Más amplias y transparentes) */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  /* Colores Principales (Antes Teal, ahora Negro/Gris oscuro) */
+  --primary: #111827; 
+  --ap-color-primary: #111827; 
+  --ap-color-primary-hover: #374151; 
+  --vinted-teal: #111827; 
+  --vinted-teal-hover: #374151;
+  --vinted-teal-light: #F3F4F6;
 
-  /* Colores de Marca/Acción */
-  --ap-color-primary: #007782; /* Vinted Teal */
-  --ap-color-primary-hover: #005c65; /* Teal oscuro para hovers */
-  --ap-color-success: #27ae60;
-  --ap-color-success-bg: #eafaf1;
-  --ap-color-danger: #e74c3c;
-  --ap-color-danger-bg: #fceceb;
-
-  /* Colores de Texto */
-  --ap-text-main: #2c3e50;
-  --ap-text-muted: #7f8c8d;
+  /* Textos */
+  --text-main: #111827; 
+  --ap-text-main: #111827;
+  --text-muted: #6B7280; 
+  --ap-text-muted: #6B7280;
   --ap-text-on-primary: #ffffff;
 
-  /* Colores de Fondo y Bordes */
+  /* Fondos */
+  --bg-body: #F3F4F6; 
+  --bg-app: #F3F4F6;
+  --card-bg: #ffffff;
   --ap-bg-main: #ffffff;
-  --ap-bg-variant: #fafbfc; /* Fondo muy sutil para destacar áreas internas (ej. upload) */
+  --ap-bg-variant: #F9FAFB; 
   --ap-bg-stock: #ffffff;
-  --ap-border-base: #e0e6ed;
-  --ap-border-light: #eaedf1;
+
+  /* Bordes */
+  --border-color: #E5E7EB; 
+  --ap-border-base: #E5E7EB;
+  --ap-border-light: #F3F4F6;
   
-  /* Sombras y Otros */
-  --ap-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  /* Colores Semánticos (Por ahora en escala de grises para desarrollo) */
+  --ap-color-success: #374151;
+  --ap-color-success-bg: #F9FAFB;
+  --ap-color-danger: #4B5563;
+  --ap-color-danger-bg: #F3F4F6;
+  --danger: #4B5563;
+  --danger-light: #F3F4F6;
+
+  /* Sombras "Soft & Diffuse" */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.05);
+  --ap-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  
+  /* Radios */
   --ap-radius-lg: 12px;
   --ap-radius-md: 8px;
 
-  /* =========================================
-     NUEVAS VARIABLES AGREGADAS (Para el nuevo diseño)
-     ========================================= */
-     
-  --vinted-teal: #007782; 
-  --vinted-teal-hover: #005c65;
-  --vinted-teal-light: #e6f2f3; /* Ideal para fondos de inputs activos o botones outline */
-  --danger: #e74c3c;
-  --danger-light: #fceceb;
-  --bg-app: #f4f6f8; /* Alias para el fondo general */
-  --transition: all 0.2s ease-in-out; /* Animación estándar para botones e inputs */
+  --transition: all 0.2s ease-in-out;
 }
 
 /* =========================================

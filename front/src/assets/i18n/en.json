@@ -1,0 +1,46 @@
+{
+  "SALES": {
+    "TITLE": "Sales",
+    "SEARCH_PLACEHOLDER": "Search sale, client or item...",
+    "FILTERS": "Filters",
+    "NEW_SALE": "+ New Sale",
+    "SEARCH_TYPE_PROD": "Search Product (SKU/ID)",
+    "SEARCH_TYPE_CLIENT": "Search Client",
+    "DATE_RANGE": "Date Range",
+    "BRAND": "Brand",
+    "CATEGORY": "Category",
+    "SELLER": "Seller",
+    "PAYMENT_STATUS": "Payment Status",
+    "SALES_CHANNEL": "Sales Channel",
+    "LOCATION": "Location (HQ)",
+    "CLEAR_FILTERS": "Clear Filters",
+    "APPLY_SEARCH": "Apply Search",
+    
+    "TABLE": {
+      "ORDER": "ORDER",
+      "CREATED": "CREATED",
+      "FROM_VENDOR": "CLIENT",
+      "STATUS": "STATUS",
+      "PAYMENT": "PAYMENT",
+      "AMOUNT": "AMOUNT",
+      "RECEIVE": "EDIT",
+      "ITEMS": "items",
+      "DEV": "ref."
+    },
+
+    "STATUS": {
+      "COMPLETE": "COMPLETE",
+      "PENDING": "PENDING",
+      "PARTIALLY_REFUNDED": "PARTIALLY REFUNDED",
+      "REFUNDED": "REFUNDED"
+    },
+
+    "EMPTY_STATE_TITLE": "No sales found",
+    "EMPTY_STATE_DESC": "Try changing your search filters.",
+    "LOADING": "Loading sales list...",
+    "PAGE": "Page",
+    "OF": "of",
+    "PREV": "« Previous",
+    "NEXT": "Next »"
+  }
+}

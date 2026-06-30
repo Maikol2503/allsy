@@ -27,6 +27,7 @@ def listar_clientes(
     pais: Optional[str] = None,
     fecha_inicio: Optional[str] = None,
     fecha_fin: Optional[str] = None,
+    con_deuda: Optional[bool] = False,
     db: Session = Depends(get_session)
 ):
     """Obtiene el listado de clientes con filtros y el total de compras de cada uno."""
@@ -39,7 +40,8 @@ def listar_clientes(
             search_type=search_type,
             pais=pais, 
             fecha_inicio=fecha_inicio, 
-            fecha_fin=fecha_fin
+            fecha_fin=fecha_fin,
+            con_deuda=con_deuda
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno al listar clientes: {str(e)}")

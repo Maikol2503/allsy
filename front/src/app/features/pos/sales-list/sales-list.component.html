@@ -1,76 +1,83 @@
 <div class="page-container">
   
   <div class="header-section">
-    <h2>📄 Historial de Ventas</h2>
-    <p>Gestiona los tickets, devoluciones y envíos de tu negocio.</p>
+    <div class="header-title">
+      <h2>Listado General de Ventas</h2>
+    </div>
+    
+    <!-- Top Bar: Search and Actions -->
+    <div class="top-bar">
+      <div class="search-pill">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="Buscar por código de ticket..." [(ngModel)]="searchCodigo" (keyup.enter)="buscar()">
+      </div>
+      
+      <div class="top-actions">
+        <button class="btn-outline" (click)="toggleFilters()">
+          <span class="icon">⚙️</span> Filtros Avanzados
+        </button>
+        <button class="btn-primary" routerLink="/pos">
+          + Nueva Venta
+        </button>
+      </div>
+    </div>
   </div>
 
-  <!-- <div class="summary-stats" *ngIf="!cargando">
-    <div class="stat-card recaudado">
-      <div class="stat-label">Total Recaudado (Filtro)</div>
-      <div class="stat-value">{{ totalRecaudado | currency:'EUR' }}</div>
-    </div>
-    <div class="stat-card beneficio">
-      <div class="stat-label">Beneficio Real (Filtro)</div>
-      <div class="stat-value">{{ totalBeneficio | currency:'EUR' }}</div>
-    </div>
-  </div> -->
+  <!-- Advanced Filters (Expandable) -->
+  <div class="filters-panel" *ngIf="showFilters">
+    <div class="filters-grid">
+      <div class="filter-item">
+        <label>Buscar por Prenda/Lote</label>
+        <div style="display: flex; gap: 8px;">
+          <select [(ngModel)]="tipoBusquedaProd" style="width: 140px;">
+            <option value="sku">SKU Prenda</option>
+            <option value="stock_unit_id">ID Físico</option>
+            <option value="id_producto">ID Padre</option>
+          </select>
+          <input type="text" [(ngModel)]="searchProducto" placeholder="Buscar..." (keyup.enter)="buscar()" style="flex: 1;">
+        </div>
+      </div>
 
-  <div class="filters-card">
-    
-    <div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: center; flex-wrap: wrap;">
-      
-      <div class="search-box" style="flex: 1; min-width: 250px; display: flex; background: white; border-radius: var(--ap-radius-md); border: 1px solid var(--ap-border-base); overflow: hidden;">
-        <select [(ngModel)]="tipoBusquedaProd" style="border: none; background-color: var(--ap-bg-variant); padding: 8px 12px; font-weight: bold; color: var(--ap-text-main); outline: none; border-radius: 0; border-right: 1px solid var(--ap-border-base);">
-          <option value="sku">🏷️ SKU Prenda</option>
-          <option value="stock_unit_id">🧵 ID Físico (Escáner)</option>
-          <option value="id_producto">🔢 ID Prod. Padre</option>
+      <div class="filter-item">
+        <label>Buscar Cliente</label>
+        <div style="display: flex; gap: 8px;">
+          <select [(ngModel)]="tipoBusquedaCliente" style="width: 140px;">
+            <option value="nombre">Nombre</option>
+            <option value="email">Email</option>
+            <option value="telefono">Teléfono</option>
+            <option value="documento">Documento</option>
+          </select>
+          <input type="text" [(ngModel)]="searchCliente" placeholder="Buscar..." (keyup.enter)="buscar()" style="flex: 1;">
+        </div>
+      </div>
+
+      <div class="filter-item">
+        <label>Rango de Fechas</label>
+        <app-date-selector
+          [fechaInicio]="fechaInicio"
+          [fechaFin]="fechaFin"
+          (fechasCambiadas)="onFechasCambiadas($event)">
+        </app-date-selector>
+      </div>
+
+      <div class="filter-item">
+        <label>Marca</label>
+        <select [(ngModel)]="filtroMarca">
+          <option value="">Todas las marcas</option>
+          <option *ngFor="let marca of marcas" [value]="marca.id">{{ marca.nombre }}</option>
         </select>
-        <input type="text" placeholder="Buscar prenda o producto..." [(ngModel)]="searchProducto" (keyup.enter)="buscar()" style="flex: 1; border: none; padding: 8px 12px; outline: none; background: transparent;">
       </div>
 
-      <div class="search-box" style="flex: 1; min-width: 180px; display: flex; background: white; border-radius: var(--ap-radius-md); border: 1px solid var(--ap-border-base); overflow: hidden;">
-        <span style="padding: 8px 12px; background: var(--ap-bg-variant); border-right: 1px solid var(--ap-border-base);" title="Código de Venta">📄</span>
-        <input type="text" placeholder="Código (VEN-...)" [(ngModel)]="searchCodigo" (keyup.enter)="buscar()" style="flex: 1; border: none; padding: 8px 12px; outline: none;">
-      </div>
-
-      <div class="search-box" style="flex: 1; min-width: 300px; display: flex; background: white; border-radius: var(--ap-radius-md); border: 1px solid var(--ap-border-base); overflow: hidden;">
-        <select [(ngModel)]="tipoBusquedaCliente" style="border: none; background-color: var(--ap-bg-variant); padding: 8px 12px; font-weight: bold; color: var(--ap-text-main); outline: none; border-radius: 0; border-right: 1px solid var(--ap-border-base);">
-          <option value="nombre">👤 Nombre / Usuario</option>
-          <option value="email">📧 Email</option>
-          <option value="telefono">📱 Teléfono</option>
-          <option value="documento">🪪 Documento (DNI/NIE)</option>
-        </select>
-        <input type="text" placeholder="Buscar cliente..." [(ngModel)]="searchCliente" (keyup.enter)="buscar()" style="flex: 1; border: none; padding: 8px 12px; outline: none;">
-      </div>
-
-      <button type="button" (click)="buscar()" style="padding: 8px 16px; background-color: var(--vinted-teal); color: white; border: none; border-radius: var(--ap-radius-md); cursor: pointer; font-weight: bold;">
-        🔍 Buscar
-      </button>
-
-      <app-date-selector
-        [fechaInicio]="fechaInicio"
-        [fechaFin]="fechaFin"
-        (fechasCambiadas)="onFechasCambiadas($event)">
-      </app-date-selector>
-    </div>
-
-    <div class="filter-group" style="margin-bottom: 12px;">
-      <select [(ngModel)]="filtroMarca" style="min-width: 150px;">
-        <option value="">Todas las marcas</option>
-        <option *ngFor="let marca of marcas" [value]="marca.id">{{ marca.nombre }}</option>
-      </select>
-      <div style="flex: 1; max-width: 300px;">
+      <div class="filter-item">
+        <label>Categoría</label>
         <app-category-selector 
           [value]="filtroCategoria" 
           [permitirSeleccionarTodo]="true"  (categorySelected)="onCategoriaSeleccionada($event)">
         </app-category-selector>
       </div>
-    </div>
 
-    <div class="filter-group">
       <div class="filter-item">
-        <label>Vendedor</label>
+        <label>Vendedor (Cajero)</label>
         <select [(ngModel)]="filtroVendedor" (change)="buscar()">
           <option value="">Todos...</option>
           <option value="Yenny">Yenny</option>
@@ -83,9 +90,9 @@
         <label>Estado del Pago</label>
         <select [(ngModel)]="filtroEstadoPago" (change)="buscar()">
           <option value="">Cualquier estado</option>
-          <option value="pendiente">⏳ Solo Pagos Pendientes</option>
-          <option value="pagado">💰 Pagados / Cobrados</option>
-          <option value="reembolsado">💸 Reembolsados (Anulados)</option>
+          <option value="pendiente">Solo Pagos Pendientes</option>
+          <option value="pagado">Pagados / Cobrados</option>
+          <option value="reembolsado">Reembolsados (Anulados)</option>
         </select>
       </div>
 
@@ -93,101 +100,129 @@
         <label>Canal de Venta</label>
         <select [(ngModel)]="filtroCanal" (change)="buscar()">
           <option value="">Todos los canales</option>
-          <option value="tienda_fisica">🏠 Casa (Tienda Física)</option>
-          <option value="web">🌐 Web Propia</option>
-          <option value="vinted">👗 Vinted</option>
-          <option value="wallapop">📦 Wallapop</option>
+          <option value="tienda_fisica">Casa (Tienda Física)</option>
+          <option value="web">Web Propia</option>
+          <option value="vinted">Vinted</option>
+          <option value="wallapop">Wallapop</option>
         </select>
       </div>
 
-      <div class="filter-item" style="min-width: 250px;">
-        <label>Localización (Sede)</label>
+      <div class="filter-item">
+        <label>Ubicación (Tienda)</label>
         <app-location-selector 
           [localizacionId]="localizacion_id" 
           (localizacionChange)="localizacion_id = $event; buscar()">
         </app-location-selector>
       </div>
-      
-      <button class="btn-clear" (click)="limpiarFiltros()" style="margin-top: 20px;">Limpiar Filtros</button>
+    </div>
+    
+    <div class="filters-actions">
+      <button class="btn-clear" (click)="limpiarFiltros()">Limpiar Filtros</button>
+      <button class="btn-primary" (click)="buscar()">Aplicar Búsqueda</button>
+    </div>
+  </div>
+
+  <div class="active-filters-bar" *ngIf="hasActiveFilters" style="margin: 15px 0; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+    <div class="filter-pill" *ngIf="searchCodigo" style="background: #f1f5f9; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
+      <span>🎟️ <strong>Código:</strong> {{ searchCodigo }}</span>
+      <span class="remove-btn" (click)="removerFiltro('codigo')" style="cursor: pointer; color: #94a3b8; font-weight: bold;">×</span>
     </div>
 
-   
+    <div class="filter-pill" *ngIf="searchProducto" style="background: #f1f5f9; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
+      <span>👕 <strong>Producto ({{ tipoBusquedaProd }}):</strong> {{ searchProducto }}</span>
+      <span class="remove-btn" (click)="removerFiltro('producto')" style="cursor: pointer; color: #94a3b8; font-weight: bold;">×</span>
+    </div>
+
+    <div class="filter-pill" *ngIf="searchCliente" style="background: #f1f5f9; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
+      <span>👤 <strong>Cliente ({{ tipoBusquedaCliente }}):</strong> {{ searchCliente }}</span>
+      <span class="remove-btn" (click)="removerFiltro('cliente')" style="cursor: pointer; color: #94a3b8; font-weight: bold;">×</span>
+    </div>
+
+    <div class="filter-pill" *ngIf="filtroEstadoPago" style="background: #f1f5f9; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
+      <span>💰 <strong>Pago:</strong> {{ getLabelPago(filtroEstadoPago) }}</span>
+      <span class="remove-btn" (click)="removerFiltro('pago')" style="cursor: pointer; color: #94a3b8; font-weight: bold;">×</span>
+    </div>
+
+    <div class="filter-pill" *ngIf="filtroCanal" style="background: #f1f5f9; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
+      <span>🌐 <strong>Canal:</strong> {{ getLabelCanal(filtroCanal) }}</span>
+      <span class="remove-btn" (click)="removerFiltro('canal')" style="cursor: pointer; color: #94a3b8; font-weight: bold;">×</span>
+    </div>
+
+    <div class="filter-pill" *ngIf="filtroVendedor" style="background: #f1f5f9; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
+      <span>🧑‍💼 <strong>Vendedor:</strong> {{ filtroVendedor }}</span>
+      <span class="remove-btn" (click)="removerFiltro('vendedor')" style="cursor: pointer; color: #94a3b8; font-weight: bold;">×</span>
+    </div>
+
+    <div class="filter-pill" *ngIf="filtroMarca" style="background: #f1f5f9; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
+      <span>🏷️ <strong>Marca:</strong> {{ getMarcaName(filtroMarca) }}</span>
+      <span class="remove-btn" (click)="removerFiltro('marca')" style="cursor: pointer; color: #94a3b8; font-weight: bold;">×</span>
+    </div>
+
+    <div class="filter-pill" *ngIf="filtroCategoria" style="background: #f1f5f9; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
+      <span>📂 <strong>Categoría:</strong> Activa</span>
+      <span class="remove-btn" (click)="removerFiltro('categoria')" style="cursor: pointer; color: #94a3b8; font-weight: bold;">×</span>
+    </div>
+
+    <div class="filter-pill" *ngIf="fechaInicio || fechaFin" style="background: #f1f5f9; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
+      <span>📅 <strong>Fechas:</strong> {{ fechaInicio | date:'dd/MM' }} - {{ fechaFin | date:'dd/MM' }}</span>
+      <span class="remove-btn" (click)="removerFiltro('fechas')" style="cursor: pointer; color: #94a3b8; font-weight: bold;">×</span>
+    </div>
+
+    <button (click)="limpiarFiltros()" style="background: none; border: none; color: var(--ap-color-primary); cursor: pointer; font-size: 0.85rem; font-weight: 600; padding: 6px 10px;">Limpiar todo</button>
   </div>
 
   <div class="table-container" *ngIf="!cargando && ventas.length > 0">
-    <table class="ap-table">
+    <table class="ap-table clean-table">
       <thead>
         <tr>
-          <th>Fecha de la Venta</th>
-          <th>ID / SKU Venta</th>
-          <th>Comprador</th>
-          <th>País</th>
-          <th>Canal de Venta</th>
-          <th>Estado del Pago</th>
-          <th>Vendedor</th>
-          <th>Total</th>
-          <th class="actions-col">Acciones</th>
+          <th>Ticket / Pedido ↕</th>
+          <th>Fecha ↕</th>
+          <th>Cliente ↕</th>
+          <th>Estado ↕</th>
+          <th>Pago ↕</th>
+          <th>Monto ↕</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let venta of ventas">
           <td>
-             <div style="font-weight: 600;">{{ venta.fecha | date:'dd/MM/yyyy' }}</div>
-             <small class="text-muted">{{ venta.fecha | date:'HH:mm' }}</small>
+            <div class="order-id">#{{ venta.codigo_venta }}</div>
+            <div class="order-meta">{{ venta.detalles?.length || 0 }} ítems · {{ (venta.total - venta.monto_reembolsado) | number:'1.2-2' }} €</div>
           </td>
 
           <td>
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <img [src]="venta.imagen_cover || 'assets/img/default-product.png'" alt="Imagen" 
-                   style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0;">
-              <div style="line-height: 1.2;">
-                <div style="color: var(--primary); font-weight: 800;">#{{ venta.codigo_venta }}</div>
-                <div *ngFor="let item of venta.detalles" style="font-size: 0.75rem; color: #64748b;">
-                  <span style="font-family: monospace;">[{{ item.stock_unit_id }}]</span> {{ item.sku }}
-                </div>
-              </div>
-            </div>
+             <div class="created-date">{{ venta.fecha | date:'MMMM d, yyyy' }}</div>
           </td>
           
           <td>
-            <div style="line-height: 1.3;">
-              <strong style="color: #2c3e50;">{{ venta.nombre_cliente || 'Anónimo' }}</strong>
-              <div style="font-size: 0.8rem; color: #7f8c8d;">{{ venta.identificador_cliente }}</div>
-              <div style="font-size: 0.75rem; color: #94a3b8;" *ngIf="venta.email_cliente">{{ venta.email_cliente }}</div>
+            <div class="vendor-cell">
+              <span class="icon">👤</span>
+              <span class="vendor-name">{{ venta.nombre_cliente || 'Anónimo' }}</span>
             </div>
           </td>
 
           <td>
-            <span *ngIf="venta.pais" style="font-size: 0.9rem;">📍 {{ venta.pais }}</span>
-            <span *ngIf="!venta.pais" class="text-muted">-</span>
-          </td>
-
-          <td>
-            <div class="channel-info">
-              <span class="badge-canal" 
-                    [style.background]="venta.canal === 'tienda_fisica' ? '#f1f5f9' : '#e0f2f1'"
-                    [style.color]="venta.canal === 'tienda_fisica' ? '#475569' : '#00796b'">
-                {{ venta.canal === 'tienda_fisica' ? '🏠 CASA' : (venta.canal | uppercase) }}
-              </span>
-              <small class="text-muted" style="text-transform: capitalize;">💳 {{ venta.metodo_pago }}</small>
-            </div>
-          </td>
-
-          <td>
-            <span class="status-badge" [ngClass]="venta.estado_pago" title="Estado del dinero"
-                  [style.background]="venta.estado_pago === 'pagado' ? '#eafaf1' : (venta.estado_pago === 'pendiente' ? '#fef5e7' : '#fceceb')"
-                  [style.color]="venta.estado_pago === 'pagado' ? '#27ae60' : (venta.estado_pago === 'pendiente' ? '#e67e22' : '#c0392b')">
-              {{ (venta.estado_pago === 'pagado' ? 'COBRADO' : (venta.estado_pago === 'pendiente' ? 'PENDIENTE' : 'REEMBOLSADO')) }}
+            <span class="pill-status" [ngClass]="venta.estado_pago">
+              {{ (venta.estado_pago === 'pagado' ? 'Completado' : (venta.estado_pago === 'pendiente' ? 'Pendiente' : (venta.estado_pago === 'reembolso_parcial' ? 'Reembolso Parcial' : 'Reembolsado'))) }}
             </span>
           </td>
 
-          <td><span style="font-weight: 500;">{{ venta.vendedor }}</span></td>
+          <td>
+            <div class="vendor-cell">
+              <span class="icon">💳</span>
+              <span class="vendor-name" style="text-transform: capitalize;">{{ venta.metodo_pago }}</span>
+            </div>
+          </td>
 
-          <td class="price-cell">{{ venta.total | number:'1.2-2' }} €</td>
+          <td class="amount-cell">
+            <span class="amount-val">{{ (venta.total - venta.monto_reembolsado) | number:'1.2-2' }} €</span>
+          </td>
 
           <td class="actions-cell">
-            <div style="display: flex; gap: 8px;">
-              <button class="btn-icon" (click)="irAEditar(venta.id)" title="Ver / Editar">✏️</button>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <button class="btn-action-outline" (click)="irAEditar(venta.id)">Ver Detalle / Editar</button>
+              <button class="btn-more">⋮</button>
             </div>
           </td>
         </tr>
@@ -196,19 +231,19 @@
   </div>
 
   <div class="empty-state" *ngIf="!cargando && ventas.length === 0">
-    <h3>No se encontraron ventas</h3>
-    <p>Prueba cambiando los filtros de búsqueda.</p>
+    <h3>No hay ventas que coincidan</h3>
+    <p>Prueba cambiando los filtros o las fechas para ver más resultados.</p>
   </div>
 
   <div class="ap-loader-container" *ngIf="cargando">
     <div class="ap-spinner"></div>
-    <p class="ap-loader-text">Cargando listado de ventas...</p>
+    <p class="ap-loader-text">Cargando ventas...</p>
   </div>
 
   <div class="pagination" *ngIf="!cargando && totalItems > limit">
-    <button [disabled]="page === 1" (click)="cambiarPagina(page - 1)">« Anterior</button>
+    <button [disabled]="page === 1" (click)="cambiarPagina(page - 1)">◀ Anterior</button>
     <span>Página {{ page }} de {{ totalPages }}</span>
-    <button [disabled]="page === totalPages" (click)="cambiarPagina(page + 1)">Siguiente »</button>
+    <button [disabled]="page === totalPages" (click)="cambiarPagina(page + 1)">Siguiente ▶</button>
   </div>
 
 </div>

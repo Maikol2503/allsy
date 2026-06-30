@@ -23,7 +23,7 @@
              [ngClass]="{'item-locked': item.pago_consignacion_id, 'item-returned': item.devuelto}"
              style="display: flex; align-items: center; gap: 15px; padding: 12px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 10px; background: white; transition: all 0.2s;"
              [style.opacity]="item.devuelto ? '0.6' : '1'"
-             [style.background]="item.devuelto ? '#f8f9fa' : 'white'">
+             [style.background]="item.devuelto ? 'var(--bg-body)' : 'white'">
           
           <img [src]="item.imagen_cover || 'assets/img/default-product.png'" style="width: 50px; height: 50px; border-radius: 6px; object-fit: cover; border: 1px solid #ddd;">
           
@@ -36,10 +36,10 @@
               Color: <span style="color: #333; font-weight: 500;">{{ item.color }}</span> | 
               ID: <span style="font-family: monospace;">#{{ item.stock_unit_id }}</span>
             </div>
-            <div *ngIf="item.pago_consignacion_id" style="font-size: 0.75rem; color: #007782; font-weight: bold; margin-top: 4px; display: flex; align-items: center; gap: 4px;">
+            <div *ngIf="item.pago_consignacion_id" style="font-size: 0.75rem; color: var(--ap-color-primary); font-weight: bold; margin-top: 4px; display: flex; align-items: center; gap: 4px;">
               🔒 Liquidado al dueño (Pago #{{item.pago_consignacion_id}})
             </div>
-            <div *ngIf="item.devuelto" style="font-size: 0.8rem; color: #e74c3c; font-weight: bold; margin-top: 4px;">
+            <div *ngIf="item.devuelto" style="font-size: 0.8rem; color: var(--ap-color-danger); font-weight: bold; margin-top: 4px;">
               <span *ngIf="item.estado_gestion !== 'en_camino_devolucion'">🔄 ARTÍCULO DEVUELTO (EN ALMACÉN)</span>
               <span *ngIf="item.estado_gestion === 'en_camino_devolucion'" style="color: #b45309;">📦 EN TRÁNSITO (DEVOLUCIÓN)</span>
             </div>
@@ -101,7 +101,7 @@
           <span>Logística (Envío):</span>
           <strong>+ {{ formData.costo_envio | number:'1.2-2' }} €</strong>
         </div>
-        <div style="display: flex; justify-content: space-between; color: #e74c3c;" *ngIf="formData.descuento_total > 0">
+        <div style="display: flex; justify-content: space-between; color: var(--ap-color-danger);" *ngIf="formData.descuento_total > 0">
           <span>Descuentos:</span>
           <strong>- {{ formData.descuento_total | number:'1.2-2' }} €</strong>
         </div>
@@ -132,7 +132,7 @@
 
           <!-- Si el sistema ya lo marcó como reembolso, bloqueamos el select visualmente -->
           <div *ngIf="formData.estado_pago.includes('reembolso')" 
-               style="background-color: #f8fafc; color: #475569; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; font-weight: 600;">
+               style="background-color: #f8fafc; color: var(--text-muted); padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; font-weight: 600;">
             <span *ngIf="formData.estado_pago === 'reembolso_parcial'">⚠️ Reembolso Parcial Automático</span>
             <span *ngIf="formData.estado_pago === 'reembolsado'">💸 Reembolsado (Venta Anulada)</span>
           </div>
@@ -161,7 +161,7 @@
 
         <div class="field" *ngIf="formData.estado_pago === 'reembolso_parcial'">
           <label>Monto a reembolsar al comprador (€)</label>
-          <div style="background-color: #f8fafc; color: #475569; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
+          <div style="background-color: #f8fafc; color: var(--text-muted); padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
             🤖 <i>El monto de los reembolsos parciales se calcula automáticamente al usar el botón <b>"🔄 Devolución Física"</b> en cada prenda.</i>
             <div style="font-weight: bold; margin-top: 5px; color: #0f172a;">
               Total reembolsado hasta ahora: {{ formData.monto_reembolsado | currency:'EUR' }}
@@ -171,7 +171,7 @@
 
         <div class="field" *ngIf="formData.estado_pago === 'reembolsado'">
           <label>Dinero a devolver (€)</label>
-          <div style="background-color: #fceceb; color: #c53030; padding: 10px; border-radius: 8px; font-weight: bold; border: 1px solid #feb2b2;">
+          <div style="background-color: var(--ap-color-danger-bg); color: #c53030; padding: 10px; border-radius: 8px; font-weight: bold; border: 1px solid #feb2b2;">
             💸 Se registra devolución de: {{ formData.total | currency:'EUR' }}
           </div>
         </div>
@@ -185,7 +185,7 @@
         
         <div class="field">
           <label>Fase del Paquete</label>
-          <select [(ngModel)]="formData.estado_envio">
+          <select [(ngModel)]="formData.estado_envio" (ngModelChange)="onEstadoEnvioChange($event); actualizarEstadoVentaAutomatico()">
             <option value="pendiente_envio">⏳ Pendiente de preparar</option>
             <option value="empaquetado">📦 Empaquetado (En almacén)</option>
             <option value="listo_envio">🚚 Listo para enviar</option>
@@ -201,13 +201,11 @@
 
         <div class="field">
           <label>Estado Global de la Venta</label>
-          <select [(ngModel)]="formData.estado_venta">
-            <option value="abierta">🟢 Abierta (En proceso)</option>
-            <option value="completada">🏁 Completada (Finalizada)</option>
-            <option value="devuelta_parcialmente">⚠️ Devuelta Parcialmente</option>
-            <option value="devuelta_totalmente">🔄 Devuelta Totalmente</option>
-            <option value="cancelada">❌ Cancelada</option>
-          </select>
+          <div class="status-badge-read-only">
+            <span class="status-badge-text" [ngClass]="'status-' + formData.estado_venta">
+              {{ getLabelEstadoVenta(formData.estado_venta) }}
+            </span>
+          </div>
         </div>
 
         <div class="field">
@@ -260,10 +258,10 @@
           <div *ngIf="estadoEtiqueta === 'cargando'" style="margin-top: 8px; font-size: 0.85rem; color: #f39c12;">
             ⏳ Verificando enlace...
           </div>
-          <div *ngIf="estadoEtiqueta === 'invalida'" style="margin-top: 8px; font-size: 0.85rem; color: #e74c3c; font-weight: bold; background: #fadbd8; padding: 8px; border-radius: 6px; border: 1px solid #e74c3c;">
+          <div *ngIf="estadoEtiqueta === 'invalida'" style="margin-top: 8px; font-size: 0.85rem; color: var(--ap-color-danger); font-weight: bold; background: #fadbd8; padding: 8px; border-radius: 6px; border: 1px solid var(--ap-color-danger);">
             ❌ El enlace introducido está roto, caducado o no es un documento válido.
           </div>
-          <div *ngIf="estadoEtiqueta === 'valida'" style="margin-top: 8px; font-size: 0.85rem; color: #27ae60; font-weight: bold;">
+          <div *ngIf="estadoEtiqueta === 'valida'" style="margin-top: 8px; font-size: 0.85rem; color: var(--ap-color-success); font-weight: bold;">
             ✅ Enlace de etiqueta correcto y listo para imprimir.
           </div>
 
@@ -326,24 +324,68 @@
           <div style="display: flex; gap: 10px; align-items: flex-start;">
             <div style="flex: 1;">
               <input type="number" step="0.01" min="0" [value]="formData.total" disabled
-                     style="font-weight: bold; border: 2px solid var(--vinted-teal); font-size: 1.1em; background-color: #f4f6f8; color: #2c3e50;">
+                     style="font-weight: bold; border: 2px solid var(--vinted-teal); font-size: 1.1em; background-color: var(--bg-body); color: var(--text-main);">
+              
+              <div *ngIf="formData.monto_reembolsado > 0" style="margin-top: 10px; background: #fffbeb; border: 1px solid #fde68a; padding: 10px; border-radius: 6px;">
+                <div style="font-size: 0.85rem; color: #92400e;">
+                  <b>Original:</b> {{ formData.total | number:'1.2-2' }} €
+                </div>
+                
+                <div *ngIf="totalReembolsadoPrendas > 0" style="font-size: 0.85rem; color: #c53030; display: flex; justify-content: space-between; border-bottom: 1px dotted #fcd34d; padding-bottom: 4px; margin-bottom: 4px;">
+                  <span><b>👕 Devoluciones de Prendas:</b></span>
+                  <span>-{{ totalReembolsadoPrendas | number:'1.2-2' }} €</span>
+                </div>
+                
+                <div *ngIf="totalCompensacionesAllsys > 0" style="font-size: 0.85rem; color: #d97706; display: flex; justify-content: space-between; border-bottom: 1px dotted #fcd34d; padding-bottom: 4px; margin-bottom: 4px;">
+                  <span><b>💸 Compensaciones Allsys (Gastos):</b></span>
+                  <span>-{{ totalCompensacionesAllsys | number:'1.2-2' }} €</span>
+                </div>
+
+                <div style="font-size: 1rem; color: #00796b; font-weight: bold; margin-top: 6px; display: flex; justify-content: space-between;">
+                  <span><b>Total Neto Real (Ingreso):</b></span>
+                  <span>{{ (formData.total - formData.monto_reembolsado) | number:'1.2-2' }} €</span>
+                </div>
+              </div>
+
               <small class="text-muted" style="display: block; margin-top: 4px;">
                 El total se calcula automáticamente sumando el precio de las prendas. Si necesitas corregirlo, usa el botón <b>✏️ Corregir Precio</b> en la prenda afectada.
               </small>
             </div>
             <button type="button" (click)="darCompensacion()" 
                     title="Registrar un reembolso asumido por la tienda Allsys sin afectar al dueño"
-                    style="background: #fdf2f2; border: 1px solid #f8d7da; color: #c53030; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem;">
+                    [disabled]="(formData.total - formData.monto_reembolsado) <= 0"
+                    [style.opacity]="(formData.total - formData.monto_reembolsado) <= 0 ? '0.5' : '1'"
+                    [style.cursor]="(formData.total - formData.monto_reembolsado) <= 0 ? 'not-allowed' : 'pointer'"
+                    style="background: #fdf2f2; border: 1px solid #f8d7da; color: #c53030; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 0.9rem;">
               💸 Dar Compensación Allsys
             </button>
           </div>
-          <p class="text-muted" style="margin-top: 10px; font-size: 0.85rem; background: #f8f9fa; padding: 10px; border-radius: 6px; border-left: 4px solid #c53030;">
+          <p class="text-muted" style="margin-top: 10px; font-size: 0.85rem; background: var(--bg-body); padding: 10px; border-radius: 6px; border-left: 4px solid #c53030;">
             💡 <b>¿Cuál es la diferencia?</b><br>
             - Si usas <b>✏️ Corregir Precio</b> en una prenda: Es una corrección de error y el <b>dueño de la prenda cobrará menos</b>.<br>
-            - Si usas <b>💸 Dar Compensación</b>: Allsys asume la pérdida como un gasto y el <b>dueño cobra su parte íntegra</b>.
+            - Si usas <b>💸 Dar Compensación</b>: Allsys asume la pérdida como un egreso y el <b>dueño cobra su parte íntegra</b>.
           </p>
         </div>
 
+      </div>
+
+      <!-- ✨ LISTA DE COMPENSACIONES -->
+      <div *ngIf="venta.ajustes_financieros && venta.ajustes_financieros.length > 0" style="margin-top: 20px; border-top: 2px dashed #b2dfdb; padding-top: 15px;">
+        <h4 style="font-size: 1rem; color: #004d40; margin: 0 0 10px 0; font-weight: 600;">💸Compensaciones al comprador por parte de allsy</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px;">
+          <div *ngFor="let ajuste of venta.ajustes_financieros" style="background: #e0f2f1; border: 1px solid #b2dfdb; padding: 10px; border-radius: 8px;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: bold; color: #004d40;">
+              <span>📅 {{ ajuste.fecha | date:'dd/MM/yyyy HH:mm' }}</span>
+              <span style="color: #c53030;">-{{ ajuste.monto | currency:'EUR':'symbol' }}</span>
+            </div>
+            <div style="font-size: 0.8rem; color: #00796b; margin-top: 6px; line-height: 1.3;">
+              <strong>Concepto:</strong> {{ ajuste.concepto }}
+            </div>
+            <div *ngIf="ajuste.notas" style="font-size: 0.8rem; color: #004d40; margin-top: 4px; font-style: italic; line-height: 1.3;">
+              "{{ ajuste.notas }}"
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 

@@ -121,14 +121,16 @@ export class AddProductComponent implements OnInit {
   cargarLocalizaciones(): void {
     this.localizacionesService.obtenerLocalizaciones().subscribe({
       next: (data) => {
-        let flat: Localizacion[] = [];
-        data.forEach(root => {
-          if (root.hijos && root.hijos.length > 0) {
-            root.hijos.forEach(h => flat.push(h));
-          } else {
-            flat.push(root);
-          }
-        });
+        const flat: Localizacion[] = [];
+        const flatten = (nodes: Localizacion[]) => {
+          nodes.forEach(n => {
+            flat.push(n);
+            if (n.hijos && n.hijos.length > 0) {
+              flatten(n.hijos);
+            }
+          });
+        };
+        flatten(data);
         this.listaLocalizaciones = flat;
 
         // ✨ PRE-SELECCIONAR "CASA" POR DEFECTO PARA NUEVOS LOTES
